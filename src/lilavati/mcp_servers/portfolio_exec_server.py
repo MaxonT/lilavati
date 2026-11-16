@@ -18,7 +18,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def analyze_order_book_microstructure(
     best_bid: float,
     best_ask: float,
@@ -39,7 +46,14 @@ def analyze_order_book_microstructure(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def compute_almgren_chriss_liquidation_schedule(
     total_shares: float,
     time_horizon_hours: float,
@@ -62,7 +76,14 @@ def compute_almgren_chriss_liquidation_schedule(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def optimize_portfolio_black_litterman(
     assets: list[str],
     covariance_matrix: list[list[float]],
@@ -85,7 +106,14 @@ def optimize_portfolio_black_litterman(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def optimize_portfolio_hierarchical_risk_parity(
     assets: list[str],
     returns_matrix: list[list[float]],

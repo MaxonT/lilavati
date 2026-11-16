@@ -19,7 +19,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def find_optimal_fractional_diff(
     series: list[float],
     step: float = 0.05,
@@ -37,7 +44,14 @@ def find_optimal_fractional_diff(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def apply_triple_barrier_labels(
     prices: list[float],
     holding_horizon: int,

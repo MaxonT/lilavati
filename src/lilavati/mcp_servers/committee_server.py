@@ -19,7 +19,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def evaluate_investment_committee_memo(
     symbol: str,
     fiscal_year: int,
@@ -87,7 +94,14 @@ def evaluate_investment_committee_memo(
     return memo.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def compute_forensic_beneish_m_score(
     revenue_t: float,
     revenue_t_minus_1: float,

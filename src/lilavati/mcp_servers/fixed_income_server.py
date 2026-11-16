@@ -18,7 +18,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def analyze_bond(
     face_value: float,
     coupon_rate: float,
@@ -39,7 +46,14 @@ def analyze_bond(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def fit_yield_curve(
     maturities: list[float],
     yields: list[float],
@@ -54,7 +68,14 @@ def fit_yield_curve(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def evaluate_credit_risk_merton(
     equity_value: float,
     equity_volatility: float,

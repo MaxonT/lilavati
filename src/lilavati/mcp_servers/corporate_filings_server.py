@@ -18,7 +18,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 def get_company_filing_statements(
     ticker_or_cik: str,
     fiscal_year: int,
@@ -35,7 +42,14 @@ def get_company_filing_statements(
     return sourced_model.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+)
 def extract_single_line_item(
     ticker_or_cik: str,
     metric_name: str,

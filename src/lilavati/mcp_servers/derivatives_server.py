@@ -18,7 +18,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def price_european_option(
     spot: float,
     strike: float,
@@ -41,7 +48,14 @@ def price_european_option(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def price_american_option(
     spot: float,
     strike: float,
@@ -66,7 +80,14 @@ def price_american_option(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def calculate_option_greeks(
     spot: float,
     strike: float,
@@ -89,7 +110,14 @@ def calculate_option_greeks(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def calibrate_sabr_volatility_model(
     forward: float,
     strikes: list[float],
@@ -108,7 +136,14 @@ def calibrate_sabr_volatility_model(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def check_butterfly_arbitrage(
     strikes: list[float],
     call_prices: list[float],

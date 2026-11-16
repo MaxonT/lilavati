@@ -18,7 +18,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def analyze_stationarity(
     series: list[float],
     significance_level: float = 0.05,
@@ -34,7 +41,14 @@ def analyze_stationarity(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def analyze_cointegration(
     series_a: list[float],
     series_b: list[float],
@@ -52,7 +66,14 @@ def analyze_cointegration(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def fit_garch_volatility(
     returns: list[float],
     p: int = 1,

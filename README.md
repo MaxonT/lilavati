@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![FastMCP](https://img.shields.io/badge/Protocol-FastMCP-green)](https://github.com/jlowin/fastmcp)
+[![M8ven Score](https://m8ven.ai/badge/mcp/revendrat/lilavati)](https://m8ven.ai/mcp/revendrat/lilavati?s=readme)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20Research-orange)](#academic-research--pre-prints)
 

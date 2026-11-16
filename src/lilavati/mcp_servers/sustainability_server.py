@@ -19,7 +19,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def calculate_portfolio_carbon_intensity(
     weights: list[float],
     emissions: list[float],
@@ -38,7 +45,14 @@ def calculate_portfolio_carbon_intensity(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def stress_test_carbon_tax_impact(
     revenue: float,
     ebit: float,
@@ -66,7 +80,14 @@ def stress_test_carbon_tax_impact(
     return result.model_dump()
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def evaluate_sustainability_linked_bond_covenant(
     isin: str,
     notional: float,
