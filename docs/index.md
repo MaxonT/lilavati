@@ -58,3 +58,26 @@ uv run lilavati-bench list-cases
 | **Pillar VI** | Market Microstructure & Optimal Execution | LOB Microprice, OFI, Almgren-Chriss Liquidation, Black-Litterman, HRP |
 | **Pillar VII** | Sustainable Finance & Climate Risk | Scope 1/2/3 WACI, Shadow Carbon Tax Stress Testing, SLB Step-Up Covenants |
 
+---
+
+## 📚 End-to-End Tutorials & Guides
+
+Explore complete, runnable walkthroughs demonstrating how to build, test, and serve audited agents across key institutional finance domains:
+
+1. [Tutorial 01: Credit Underwriting & SMT Proofs](tutorials/01_build_your_first_financial_agent.md)
+   - *Use Case:* Commercial loan underwriting, debt covenant satisfiability ($TotalDebt/EBITDA \le 4.0\text{x}$), equity cure calculation, and Merton distance-to-default.
+   - *Companion Code:* `examples/06_build_custom_agent_and_api.py`
+
+2. [Tutorial 02: Statistical Arbitrage & Algorithmic Execution](tutorials/02_statistical_arbitrage_and_execution_agent.md)
+   - *Use Case:* Quantitative pairs trading, Engle-Granger cointegration, OU mean-reversion half-life, memory-preserving fractional differentiation ($d^*$), LOB microstructure, and Almgren-Chriss liquidation.
+   - *Companion Code:* `examples/07_stat_arb_and_execution_agent.py`
+
+3. [Tutorial 03: Forensic Accounting & Adversarial Investment Committee](tutorials/03_forensic_accounting_and_adversarial_committee.md)
+   - *Use Case:* Fundamental equity research, 8-variable Beneish M-Score manipulation detection, Altman Z-Score distress, multi-role adversarial committee deliberation, and Z3 SMT balance sheet reconciliation.
+   - *Companion Code:* `examples/08_forensic_committee_agent.py`
+
+4. [Tutorial 04: Climate Transition Risk & Sustainable Portfolio Optimization](tutorials/04_climate_risk_and_sustainable_portfolio.md)
+   - *Use Case:* TCFD Weighted Average Carbon Intensity (WACI), carbon tax balance sheet shock stress testing, Sustainability-Linked Bond (SLB) covenants, and Hierarchical Risk Parity (HRP) allocation.
+   - *Companion Code:* `examples/09_climate_sustainable_portfolio_agent.py`
+
+
