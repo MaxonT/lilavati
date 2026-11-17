@@ -106,17 +106,20 @@ def create_agent_api(
 
 def serve_agent(
     graph: CompiledFinancialGraph[Any],
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = 8000,
     title: str = "Līlāvatī Agent Microservice",
     **kwargs: Any,
 ) -> None:
     """
-    Starts a production Uvicorn ASGI server hosting the agent REST API.
+    Starts a Uvicorn ASGI server hosting the agent REST API.
+
+    Binds to localhost by default. The API has no built-in authentication;
+    put it behind an authenticating reverse proxy before exposing it publicly.
 
     Args:
         graph: The compiled FinancialStateGraph instance to serve.
-        host: Host IP binding.
+        host: Host IP binding (default localhost; use 0.0.0.0 only behind auth).
         port: Port number.
         title: API service title.
         **kwargs: Additional options passed to uvicorn.run().

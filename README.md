@@ -2,7 +2,7 @@
 
 # 🪷 Līlāvatī (लीलावती)
 
-### The Open-Source, Audited & Verifiable Agentic Stack for Institutional Finance
+### An Open-Source Verifiable Agentic Toolkit for Quantitative Finance
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
@@ -14,6 +14,15 @@
 *A domain-specific runtime, standardized FastMCP tool bus, and benchmark suite for autonomous financial reasoning, econometrics, credit risk, and algorithmic execution.*
 
 </div>
+
+---
+
+> ### ⚠️ Project status: alpha / research preview
+> * **Not production software and not investment advice.** Outputs have not been independently audited. Do not use for trading, credit or compliance decisions without your own validation. Provided "AS IS" under Apache-2.0.
+> * **Default LLM is a mock.** Out of the box, agents use a `mock-evaluator` model that returns canned text, so examples exercise the deterministic tools, not a real LLM. Configure a real provider (OpenAI, Anthropic, Gemini, vLLM, Ollama) via API-key environment variables to run real agent loops.
+> * **Benchmark results:** the repo ships the Līlāvatī-Bench *harness* and a deterministic reference solver (which passes by construction). Scores for third-party LLMs in the draft papers are **illustrative placeholders, not measured results**. Community runs are welcome.
+> * **Optional deps:** QuantLib is optional (`pip install "lilavati[quantlib]"`); some fixed-income features require it.
+> * **API server** binds to `127.0.0.1` by default and has no built-in authentication. Put it behind your own auth/proxy before exposing it.
 
 ---
 
@@ -127,7 +136,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Zero LLM Arithmetic Policy:** LLMs are strictly forbidden from emitting calculated numbers directly in their responses. All mathematical values must originate from deterministic FastMCP servers.
+1. **Zero LLM Arithmetic Policy (design goal):** Agents are designed so that calculated numbers originate from deterministic FastMCP tools, and runtime gates flag numbers lacking tool provenance. This reduces, but cannot mathematically eliminate, arithmetic in model prose.
 2. **`CitationRef` Provenance:** Every extracted line item carries a cryptographic hash: `CitationRef(doc_hash, page, table_id, xbrl_tag)`.
 3. **Bi-Temporal Point-in-Time Isolation:** Using DuckDB bi-temporal semantics, queries specify `valid_time` and `as_of_timestamp` to prevent look-ahead bias and restatement contamination.
 4. **Z3 SMT Invariant Verification (`Suvarna` Engine):** Financial statement identities ($A = L + E$) and no-arbitrage bounds are encoded in first-order logic. Infeasible projections trigger automatic agent self-correction.
@@ -136,7 +145,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 
 ## 🏆 Līlāvatī-Bench: The Financial Agent Benchmark
 
-To measure progress, we are developing **Līlāvatī-Bench**, an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
+To measure progress, we are developing **Līlāvatī-Bench** (harness available; third-party model baselines are not yet published), an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
 
 * **Track 1: Three-Statement Dynamic Reconciliation:** Propagation of operational shocks across 3 statements verified via Z3 SMT solver.
 * **Track 2: Fixed Income, Credit & Debt Waterfalls:** Recovery of debt indentures, tranche seniority, covenant headroom, and Merton default probabilities.
@@ -150,11 +159,11 @@ To measure progress, we are developing **Līlāvatī-Bench**, an open benchmark 
 
 ## 🎓 Academic Research & Pre-Prints
 
-Project Līlāvatī is designed to produce open-source software and peer-reviewed research. We invite researchers and practitioners to collaborate on upcoming papers:
+Two working-draft papers live in `docs/papers/` (not peer reviewed). We invite researchers and practitioners to help with real model evaluations. Ideas for further write-ups:
 
-1. **"Līlāvatī: A Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning"** (Target: NeurIPS / ACL / FinNLP).
-2. **"Līlāvatī-Bench: Stress-Testing Financial LLMs and Autonomous Agents on Accounting Invariants and Look-Ahead Bias"** (Target: Journal of Financial Data Science / SSRN / arXiv).
-3. **"Eliminating Arithmetic Hallucinations in Financial Agents via SMT Solvers and FastMCP"** (Target: ACM ICAIF - International Conference on AI in Finance).
+1. **"Līlāvatī: A Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning"**.
+2. **"Līlāvatī-Bench: Stress-Testing Financial LLMs and Autonomous Agents on Accounting Invariants and Look-Ahead Bias"**.
+3. **"Eliminating Arithmetic Hallucinations in Financial Agents via SMT Solvers and FastMCP"**.
 
 ### Citing Project Līlāvatī
 

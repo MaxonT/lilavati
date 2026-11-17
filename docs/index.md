@@ -7,7 +7,7 @@
 
 ## What is Project Līlāvatī?
 
-**Project Līlāvatī** is an open-source, audited & verifiable agentic stack and evaluation benchmark suite exclusively engineered for institutional quantitative finance, debt/credit markets, econometrics, financial machine learning, derivatives, market microstructure, and sustainability finance. Under the hood, it pairs generative semantic perception with deterministic formal verification and theorem proving.
+**Project Līlāvatī** is an open-source, verifiable agentic stack (alpha) and evaluation benchmark suite exclusively engineered for institutional quantitative finance, debt/credit markets, econometrics, financial machine learning, derivatives, market microstructure, and sustainability finance. Under the hood, it pairs generative semantic perception with deterministic formal verification and theorem proving.
 
 Generic LLM agent frameworks fail in institutional finance because they treat numbers as text tokens, suffer from mental math hallucinations, leak future information through look-ahead bias, and lack auditable provenance.
 
@@ -62,7 +62,7 @@ uv run lilavati-bench list-cases
 
 ## 📚 End-to-End Tutorials & Guides
 
-Explore complete, runnable walkthroughs demonstrating how to build, test, and serve audited agents across key institutional finance domains:
+Explore complete, runnable walkthroughs demonstrating how to build, test, and serve verifiable agents across key institutional finance domains:
 
 1. [Tutorial 01: Credit Underwriting & SMT Proofs](tutorials/01_build_your_first_financial_agent.md)
    - *Use Case:* Commercial loan underwriting, debt covenant satisfiability ($TotalDebt/EBITDA \le 4.0\text{x}$), equity cure calculation, and Merton distance-to-default.

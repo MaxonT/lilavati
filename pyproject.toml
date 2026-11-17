@@ -1,12 +1,12 @@
 [project]
 name = "lilavati"
 version = "0.1.0"
-description = "An open-source, audited & verifiable agentic stack and evaluation benchmark for quantitative finance, credit, and capital markets."
+description = "An open-source, verifiable agentic stack and evaluation benchmark for quantitative finance, credit, and capital markets."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "Project Lilavati Contributors" }
+    { name = "Project Lilavati Contributors" }  # TODO: replace with real maintainer name(s)/email
 ]
 keywords = [
     "finance",
@@ -38,7 +38,7 @@ dependencies = [
     "pydantic>=2.7.0",
     "polars>=1.0.0",
     "duckdb>=1.0.0",
-    "fastmcp>=0.1.0",
+    "fastmcp>=2.0.0",
     "httpx>=0.27.0",
     "statsmodels>=0.14.0",
     "arch>=7.0.0",

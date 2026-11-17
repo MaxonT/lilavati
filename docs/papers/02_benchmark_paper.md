@@ -2,9 +2,11 @@
 
 **Authors:** Project Līlāvatī Contributors  
 **Classification:** Quantitative Finance, Benchmarking, Machine Learning, Multi-Agent Systems  
-**Target Venues:** NeurIPS Datasets and Benchmarks Track, Journal of Financial Data Science (JFDS), ACM International Conference on AI in Finance (ICAIF), SSRN / arXiv (cs.AI / q-fin.CP / cs.LG)  
+**Status:** Working draft, not peer reviewed. Baseline-model figures in sections 5.2 and 6 are **illustrative placeholders, not measured results** (see notice below).  
 
 ---
+
+> **Draft notice (read first).** This is a working draft. The repository currently ships the benchmark *harness* and a deterministic *reference solver* only. It does **not** yet include runs of GPT-4o, Claude, Gemini, Llama or Qwen. All third-party model scores, failure-rate statistics, and error anecdotes in sections 5.2 and 6 are **illustrative targets/hypotheses to be replaced by measured results** (with raw outputs and prompts) before any submission. The reference solver calls the same deterministic tools that the checks verify, so its 100% scores demonstrate harness correctness, **not** superiority over any model.
 
 ## Abstract
 
@@ -25,7 +27,7 @@ To evaluate performance under production capital allocation constraints, Līlāv
 * **Temporal Purity Index (TPI)**: Measures complete elimination of restatement leakage and future information under strict point-in-time boundaries ($T_{\text{cutoff}}$).
 * **Tool Math Purity Ratio (TMPR)**: Quantifies the delegation rate to certified deterministic execution sandboxes versus token-level mental math arithmetic.
 
-Evaluating leading foundation models (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Llama-3-70B, Qwen-2.5-72B) across Līlāvatī-Bench reveals alarming failure rates: standard prompting achieves an average Invariant Compliance Rate of only **34.2%** and a Proof-of-Citation Score below **12.5%**, frequently producing out-of-balance balance sheets and hallucinated statutory citations. In contrast, the Līlāvatī neuro-symbolic reference framework achieves **100.0%** across all four metrics. We open-source the benchmark suite, golden datasets, and automated CLI evaluation harness at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
+We hypothesise that unconstrained foundation-model prompting will show low Invariant Compliance and Proof-of-Citation rates on these tasks; empirical evaluation of specific models is future work. The deterministic reference solver passes all checks by construction, which validates the harness itself. We open-source the benchmark suite, golden datasets, and automated CLI evaluation harness at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
 
 ---
 
@@ -87,7 +89,7 @@ Table 1 summarizes the landscape of contemporary financial benchmarks in compari
 | **PIXIU / FLARE** [Xie et al., 2023] | NeurIPS 2023 | 5 Financial NLP Tasks | ❌ | ❌ | ❌ | ❌ |
 | **Līlāvatī-Bench** (Ours) | **2026** | **Institutional Quantitative Reasoning & Execution** | **✅** | **✅ (Z3 Solver)** | **✅ (DuckDB Dual-Time)** | **✅ (SHA-256)** |
 
-*Table 1: Comparative taxonomy of financial artificial intelligence benchmarks. Līlāvatī-Bench is the first benchmark to evaluate dynamic three-statement integrity, formal SMT invariant satisfiability, bi-temporal isolation, and cryptographic statutory grounding.*
+*Table 1: Comparative taxonomy of financial artificial intelligence benchmarks. Līlāvatī-Bench is designed to evaluate dynamic three-statement integrity, formal SMT invariant satisfiability, bi-temporal isolation, and cryptographic statutory grounding.*
 
 ---
 
@@ -203,7 +205,7 @@ An agent must achieve $\text{CLI} \ge 90.0$ to pass institutional production dep
 
 ## 5. Empirical Evaluation & Findings
 
-We conducted extensive empirical evaluations benchmarked against state-of-the-art commercial and open-source foundation models across all seven tracks.
+**Planned evaluation.** Only the reference solver has been run so far; the model configurations below describe the intended protocol.
 
 ### 5.1 Evaluated Systems & Configurations
 1. **Unconstrained Base Models (Zero-Shot & Few-Shot CoT)**: Standard prompting where the model is requested to perform financial analysis and arithmetic in text tokens.
@@ -212,7 +214,7 @@ We conducted extensive empirical evaluations benchmarked against state-of-the-ar
 
 ### 5.2 Benchmark Leaderboard Results
 
-Table 2 presents the empirical performance across evaluated models on Līlāvatī-Bench.
+Table 2 shows **ILLUSTRATIVE PLACEHOLDER values** for third-party models (not measured) alongside the reference solver (measured, passes by construction).
 
 | Model / Agent Architecture | PoCS (%) | ICR (%) | TPI (%) | TMPR (%) | Composite Līlāvatī Index (CLI) | Institutional Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -224,7 +226,7 @@ Table 2 presents the empirical performance across evaluated models on Līlāvat�
 | **Qwen-2.5-72B-Instruct (CoT)** | 6.0% | 26.5% | 43.0% | 5.0% | 19.4 / 100 | ❌ FAILED |
 | **Līlāvatī Framework (Reference Solver)** | **100.0%** | **100.0%** | **100.0%** | **100.0%** | **100.0 / 100** | **✅ PASSED** |
 
-*Table 2: Līlāvatī-Bench comprehensive evaluation leaderboard across foundation models and agent frameworks.*
+*Table 2: ILLUSTRATIVE ONLY. Third-party rows are hypothetical placeholders pending real evaluation; do not cite as results.*
 
 ```
                  COMPOSITE LĪLĀVATĪ INDEX (CLI) COMPARISON
@@ -247,7 +249,9 @@ Table 2 presents the empirical performance across evaluated models on Līlāvat�
 
 ## 6. Deep-Dive Error Analysis: How Standard LLMs Fail
 
-Detailed qualitative analysis of over $1,200$ execution traces revealed four recurrent, structural failure modes in standard foundation models:
+> **Illustrative.** The following are *hypothesised* failure modes with example numbers; they are not drawn from recorded execution traces in this repository.
+
+Four structural failure modes we expect in unconstrained foundation models:
 
 ### 6.1 The "Almost Balanced" Balance Sheet Trap
 When tasked with modeling Apple Inc.'s FY2026 statements under a revenue shock in Track 1, GPT-4o correctly adjusted accounts receivable and revenue, but failed to adjust retained earnings or deferred tax liabilities. The resulting balance sheet had:
@@ -265,7 +269,7 @@ In Track 2 (Merton Structural Default Model) and Track 3 (GARCH Volatility), mod
 In Track 3, when asked to assess historical macroeconomic stationarity as of **January 2024**, standard RAG systems queried the web or static vector databases and retrieved revised non-farm payroll figures published by the Bureau of Labor Statistics (BLS) in **August 2024**. The model generated trading recommendations based on revisions that were physically unknowable to the market at the as-of date ($TPI = 48.0\%$).
 
 ### 6.4 Hallucinated Citation Coordinates
-While commercial models frequently cited statutory filings (e.g., claiming `"According to Apple's 10-K, Item 8, page 48..."`), verification against the ground truth PDF revealed that the cited number was on **page 37**, and the cited text string did not exist in the official SEC filing. Over **$85\%$** of citations generated by standard models failed cryptographic hash verification ($\text{PoCS} < 15\%$).
+While commercial models frequently cited statutory filings (e.g., claiming `"According to Apple's 10-K, Item 8, page 48..."`), verification against the ground truth PDF revealed that the cited number was on **page 37**, and the cited text string did not exist in the official SEC filing. In the illustrative scenario, most citations generated by standard models would fail cryptographic hash verification ($\text{PoCS} < 15\%$).
 
 ---
 

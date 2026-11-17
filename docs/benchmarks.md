@@ -1,6 +1,6 @@
 # Līlāvatī-Bench: Financial AI Agent Benchmark Suite
 
-**Līlāvatī-Bench** is the first comprehensive quantitative benchmark evaluating financial foundation models and agents across seven tracks.
+**Līlāvatī-Bench** is a quantitative benchmark (harness and reference solver available; third-party baselines pending) for evaluating financial foundation models and agents across seven tracks.
 
 ---
 
@@ -34,7 +34,7 @@
 | **Track 1** | Three-Statement Reconciliation | Dynamic working capital shocks, SMT balance proofs |
 | **Track 2** | Fixed Income & Credit | Bond pricing, duration, Merton structural default probability |
 | **Track 3** | Econometrics | ADF unit roots, Engle-Granger cointegration, OU half-life |
-| **Track 4** | Financial ML | Fractional differentiation order $d^*$, memory retention ($r \ge 0.70$) |
+| **Track 4** | Financial ML | Fractional differentiation order $d^*$, memory retention ($r \ge 0.25$ on the synthetic random-walk case) |
 | **Track 5** | Derivatives | BSM Greeks, SABR volatility smile, Z3 butterfly spread arbitrage |
 | **Track 6** | Microstructure & Execution | LOB Microprice, OFI, Almgren-Chriss liquidation schedule |
 | **Track 7** | Sustainability Finance | Portfolio WACI, carbon tax sensitivity, SLB step-up covenants |

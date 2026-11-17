@@ -46,7 +46,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ## 🗺️ Phased Roadmap & To-Do List
 
-### Phase 0: Foundations, Invariants & Core Engines (Status: COMPLETED ✅)
+### Phase 0: Foundations, Invariants & Core Engines (Status: IMPLEMENTED — ALPHA)
 - [x] **0.1 Project Scaffolding:** `pyproject.toml` with `uv`, Apache 2.0 License, `CITATION.cff`.
 - [x] **0.2 Contributor & PR Guidelines:** `CONTRIBUTING.md` with Conventional Commits and PR checklist.
 - [x] **0.3 AI Coding Agent Skill:** `.agents/skills/lilavati-dev/SKILL.md` enforcing zero math hallucinations.
@@ -65,7 +65,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 1: Real-World Ingestion & Bi-Temporal Connectors (Status: COMPLETED ✅)
+### Phase 1: Real-World Ingestion & Bi-Temporal Connectors (Status: IMPLEMENTED — ALPHA)
 *Goal: Connect the engine to live, real-world corporate filings and macroeconomic data feeds without look-ahead bias.*
 
 - [x] **1.1 SEC EDGAR XBRL / Company Facts Connector:**
@@ -88,7 +88,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 2: Derivatives, Volatility Surfaces & Risk Engine (Status: COMPLETED ✅)
+### Phase 2: Derivatives, Volatility Surfaces & Risk Engine (Status: IMPLEMENTED — ALPHA)
 *Goal: Institutional derivatives pricing, volatility surface modeling, and multi-asset Greeks risk.*
 
 - [x] **2.1 Option Pricing Suite:**
@@ -106,7 +106,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 3: Trading Microstructure, Execution & Portfolio Optimization (Status: COMPLETED ✅)
+### Phase 3: Trading Microstructure, Execution & Portfolio Optimization (Status: IMPLEMENTED — ALPHA)
 *Goal: Order book dynamics, optimal execution scheduling, and robust portfolio allocation.*
 
 - [x] **3.1 Limit Order Book (LOB) Reconstruction:**
@@ -124,7 +124,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 4: Multi-Agent Orchestration & The Adversarial Committee (Status: COMPLETED ✅)
+### Phase 4: Multi-Agent Orchestration & The Adversarial Committee (Status: IMPLEMENTED — ALPHA)
 *Goal: Role-bound agent loops debating investment theses under formal verification guardrails.*
 
 - [x] **4.1 Role-Bound Financial Agents & Forensics:**
@@ -158,7 +158,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 5: Līlāvatī-Bench (The Financial Agent Benchmark Suite) (Status: COMPLETED ✅)
+### Phase 5: Līlāvatī-Bench (The Financial Agent Benchmark Suite) (Status: IMPLEMENTED — ALPHA)
 *Goal: The definitive evaluation suite testing autonomous financial agents and domain LLMs.*
 
 - [x] **5.1 Golden Benchmark Dataset Curation:**
@@ -185,7 +185,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 ---
 
-### Phase 6: Academic Pre-Prints, Open-Source Launch & Community (Status: COMPLETED ✅)
+### Phase 6: Academic Pre-Prints, Open-Source Launch & Community (Status: IMPLEMENTED — ALPHA)
 *Goal: Academic recognition, peer-reviewed pre-prints, and viral open-source adoption.*
 
 - [x] **6.1 Academic Pre-Print 1 (Framework Paper):**
