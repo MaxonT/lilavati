@@ -6,7 +6,7 @@
 
 ---
 
-> **Draft notice.** Case studies in section 6 are demonstrations on sample/simulated inputs, and statements about commercial LLM behaviour (e.g. error rates) are illustrative, not measured. Latency figures in section 7 were not produced by a published, reproducible script; treat them as indicative until one is added. The 100% metrics in section 7 reflect the deterministic reference pipeline passing its own checks by construction. Verify any filing-derived figures against the primary source before relying on them.
+> **Draft notice.** Apple 10-K headline figures (net sales, total assets, operating cash flow, page numbers, file SHA-256) were checked against the filing PDF on 2026-11-17 (total assets also against SEC XBRL). Case studies in section 6 are demonstrations on sample/simulated inputs, and statements about commercial LLM behaviour (e.g. error rates) are illustrative, not measured. Latency figures in section 7 come from `scripts/benchmark_latency.py`. The 100% metrics in section 7 reflect the deterministic reference pipeline passing its own checks by construction. Verify filing-derived figures against the primary source before relying on them.
 
 ## Abstract
 
@@ -344,17 +344,16 @@ proving that an equity injection below this amount left the covenant unsatisfied
 
 ## 7. Performance & Verification Benchmarks
 
-We measured latency, throughput, and verification rates across Līlāvatī's core engines and FastMCP services:
+Latency was measured with the reproducible script [`scripts/benchmark_latency.py`](https://github.com/revendrat/lilavati/blob/main/scripts/benchmark_latency.py) (30 runs after warm-up; 3 for the PDF). Environment: Python 3.11.14, macOS 15.5 arm64, Z3 5.4.1. Numbers are machine-dependent; rerun on your hardware.
 
-| Component | Operation | Hardware / Engine | Mean Latency | Verification Rate |
-| :--- | :--- | :--- | :---: | :---: |
-| **Suvarṇa Invariant Engine** | 3-Statement SMT Equilibrium Proof | Z3 v4.13 (x86_64 / arm64) | 4.8 ms | 100.0% SAT/UNSAT |
-| **Suvarṇa Covenant Solver** | Multi-Tranche Debt Waterfall & Cure | Z3 SMT Optimization | 12.3 ms | 100.0% SAT/UNSAT |
-| **Fixed Income Engine** | Nelson-Siegel 30Y Curve Fitting | SciPy L-BFGS-B | 18.2 ms | Residual RMSE < 2 bps |
-| **Financial ML Engine** | Optimal Fractional Diff ($d^*$) | Polars / NumPy (100k bars) | 84.1 ms | ADF $p < 0.05$ |
-| **Derivatives Engine** | SABR Volatility Surface Calibration | Levenberg-Marquardt | 22.4 ms | No-Arbitrage Convexity |
-| **10-K PDF Decomposer** | 120+ Page SEC Decomposition & Hash | PyPDF / Polars | 3.2 s | 100.0% Citation Anchored |
-| **DuckDB Bi-Temporal Warehouse**| Dual-Time Point-in-Time Slice | DuckDB Columnar | 6.5 ms | Zero Look-Ahead |
+| Operation | Engine | Median (ms) | p95 (ms) |
+| :--- | :--- | ---: | ---: |
+| Balance-sheet equation proof | Z3 | 2.49 | 11.36 |
+| Nelson-Siegel fit (10 points) | SciPy | 11.58 | 17.97 |
+| Optimal fractional differentiation d* (1,000 obs) | NumPy / statsmodels | 173.36 | 355.76 |
+| SABR calibration (9 strikes) | SciPy | 6.09 | 12.07 |
+| Bi-temporal as-of query | DuckDB (in-memory) | 3.09 | 4.95 |
+| 10-K full extraction (123 pages) | pypdf | 14,430 | 14,527 |
 
 ### Compliance with Līlāvatī-Bench Metrics
 Under the **Līlāvatī-Bench** evaluation standard:
