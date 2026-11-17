@@ -1,6 +1,6 @@
 # Līlāvatī-Bench: Stress-Testing Financial LLMs and Multi-Agent Systems on Accounting Invariants, Look-Ahead Bias, and Verifiable Provenance
 
-**Authors:** Project Līlāvatī Contributors  
+**Authors:** The Līlāvatī Team  
 **Classification:** Quantitative Finance, Benchmarking, Machine Learning, Multi-Agent Systems  
 **Status:** Working draft, not peer reviewed. Baseline-model figures in sections 5.2 and 6 are **illustrative placeholders, not measured results** (see notice below).  
 

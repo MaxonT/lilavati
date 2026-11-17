@@ -1,6 +1,6 @@
 # Līlāvatī: An Audited & Verifiable Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning
 
-**Authors:** Project Līlāvatī Contributors  
+**Authors:** The Līlāvatī Team  
 **Classification:** Quantitative Finance, Artificial Intelligence, Multi-Agent Systems, Formal Verification  
 **Status:** Working draft, not peer reviewed. Performance numbers and case studies come from internal/simulated runs; see notice below.  
 

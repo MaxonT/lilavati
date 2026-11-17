@@ -171,7 +171,7 @@ If you use Līlāvatī in your research or applications, please cite:
 
 ```bibtex
 @software{lilavati2026,
-  author = {Project Lilavati Contributors},
+  author = {The Lilavati Team},
   title = {Līlāvatī: An Open-Source, Neuro-Symbolic Agentic Operating System for Finance},
   year = {2026},
   publisher = {GitHub},

@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use Project Līlāvatī in academic research, benchmark evaluations, or financial software, please cite it as below."
 authors:
-  - name: "Project Lilavati Contributors"
+  - name: "The Lilavati Team"
 title: "Līlāvatī: An Open-Source, Neuro-Symbolic Agentic Operating System and Benchmark Suite for Institutional Finance"
 version: 0.1.0
 date-released: 2026-11-13
