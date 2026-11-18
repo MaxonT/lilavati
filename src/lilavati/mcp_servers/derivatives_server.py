@@ -35,7 +35,12 @@ def price_european_option(
     dividend_yield: float = 0.0,
     is_call: bool = True,
 ) -> dict[str, Any]:
-    """Prices a European option via Black-Scholes-Merton and calculates all Greeks."""
+    """Prices a European option via Black-Scholes-Merton and calculates all Greeks.
+
+    Units: time_to_maturity in years; risk_free_rate, dividend_yield (continuous) and volatility as
+    decimals (0.05 = 5%). Greeks: vega per 1 vol point, theta per calendar day, rho per 1% rate move,
+    vanna = d(delta)/d(sigma), volga = d(vega)/d(sigma).
+    """
     result = DerivativesEngine.price_european_option(
         spot=spot,
         strike=strike,
@@ -66,7 +71,11 @@ def price_american_option(
     is_call: bool = True,
     steps: int = 150,
 ) -> dict[str, Any]:
-    """Prices an American option with early exercise via Cox-Ross-Rubinstein (CRR) binomial tree."""
+    """Prices an American option with early exercise via Cox-Ross-Rubinstein (CRR) binomial tree.
+
+    Same units as price_european_option. The returned greeks are European Black-Scholes-Merton
+    Greeks for the same inputs, not tree Greeks of the American option.
+    """
     result = DerivativesEngine.price_american_option_crr(
         spot=spot,
         strike=strike,
@@ -97,7 +106,11 @@ def calculate_option_greeks(
     dividend_yield: float = 0.0,
     is_call: bool = True,
 ) -> dict[str, Any]:
-    """Calculates analytical 1st & 2nd order Greeks (Delta, Gamma, Vega, Theta, Rho, Vanna, Volga)."""
+    """Calculates analytical 1st & 2nd order Greeks (Delta, Gamma, Vega, Theta, Rho, Vanna, Volga).
+
+    Units: time in years, rates and volatility as decimals. vega per 1 vol point (0.01), theta per
+    calendar day, rho per 1 percentage point, vanna = d(delta)/d(sigma), volga = d(vega)/d(sigma).
+    """
     result = DerivativesEngine.calculate_bsm_greeks(
         spot=spot,
         strike=strike,
@@ -125,7 +138,11 @@ def calibrate_sabr_volatility_model(
     time_to_maturity: float,
     beta: float = 0.5,
 ) -> dict[str, Any]:
-    """Calibrates the SABR stochastic volatility model (alpha, rho, nu) to market option smiles."""
+    """Calibrates the SABR stochastic volatility model (alpha, rho, nu) to market option smiles.
+
+    market_vols are decimal Black (lognormal) vols at strikes for one expiry; beta is held fixed.
+    is_arbitrage_free checks butterfly/call-spread arbitrage of the fitted smile's prices.
+    """
     result = DerivativesEngine.calibrate_sabr(
         forward=forward,
         strikes=strikes,
@@ -148,7 +165,10 @@ def check_butterfly_arbitrage(
     strikes: list[float],
     call_prices: list[float],
 ) -> dict[str, Any]:
-    """Formally verifies butterfly spread convexity across option strikes via Z3 SMT solver."""
+    """Formally verifies butterfly spread convexity across option strikes via Z3 SMT solver.
+
+    Points are sorted by strike; strikes must be distinct and all values finite.
+    """
     result = DerivativesEngine.verify_butterfly_arbitrage(
         strikes=strikes,
         call_prices=call_prices,

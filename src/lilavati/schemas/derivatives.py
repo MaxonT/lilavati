@@ -29,23 +29,40 @@ class OptionGreeksResult(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     delta: float = Field(
-        ..., description="dV/dS - Rate of change of option value with respect to spot price"
+        ..., description="dV/dS - Change in option value per 1 unit change in spot price"
     )
     gamma: float = Field(
-        ..., description="d^2V/dS^2 - Rate of change of delta with respect to spot price"
+        ..., description="d^2V/dS^2 - Change in delta per 1 unit change in spot price"
     )
     vega: float = Field(
-        ..., description="dV/dsigma - Sensitivity to 1% change in implied volatility"
+        ...,
+        description=(
+            "0.01 * dV/dsigma - Change in option value for a 1 vol-point (0.01) rise in volatility"
+        ),
     )
-    theta: float = Field(..., description="dV/dt - Sensitivity to time decay per calendar day")
+    theta: float = Field(
+        ...,
+        description=(
+            "-(dV/dT) / 365 - Change in option value per calendar day passing (per-year theta / 365)"
+        ),
+    )
     rho: float = Field(
-        ..., description="dV/dr - Sensitivity to 1% change in risk-free interest rate"
+        ...,
+        description=(
+            "0.01 * dV/dr - Change in option value for a 1 percentage-point (0.01) rise in the rate"
+        ),
     )
     vanna: float = Field(
-        ..., description="d^2V/(dS dsigma) - Cross-derivative of delta with respect to volatility"
+        ...,
+        description=(
+            "d(delta)/dsigma = d^2V/(dS dsigma) with sigma in decimal, unscaled (per 1.0 of vol)"
+        ),
     )
     volga: float = Field(
-        ..., description="d^2V/dsigma^2 - Sensitivity of vega to changes in volatility (vomma)"
+        ...,
+        description=(
+            "d(vega)/dsigma for the reported per-vol-point vega, i.e. 0.01 * d^2V/dsigma^2 (vomma)"
+        ),
     )
 
 
@@ -77,10 +94,15 @@ class SABRCalibrationResult(BaseModel):
     )
     nu: float = Field(..., description="Volatility of volatility parameter")
     rmse: float = Field(
-        ..., description="Root Mean Squared Error of fitted volatilities against market quotes"
+        ...,
+        description="Root Mean Squared Error of fitted vs market volatilities (decimal vol units)",
     )
     is_arbitrage_free: bool = Field(
-        ..., description="True if no butterfly or calendar arbitrage is present"
+        ...,
+        description=(
+            "True if Black-76 call prices from the fitted smile show no butterfly or call-spread "
+            "arbitrage across the quoted strike range (calendar arbitrage is not checked)"
+        ),
     )
 
 
