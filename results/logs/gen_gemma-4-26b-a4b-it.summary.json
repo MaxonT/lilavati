@@ -1,0 +1,15 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "samples": 1,
+  "temperature": 0.0,
+  "errors": 1,
+  "unparsable": 10,
+  "overall_mean_accuracy": 0.45,
+  "per_track": {
+    "track1_three_statement": 1.0,
+    "track2_fixed_income": 0.0,
+    "track5_derivatives": 0.0,
+    "track6_microstructure": 0.25,
+    "track7_sustainability": 1.0
+  }
+}

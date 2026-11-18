@@ -168,7 +168,7 @@ class UniversalLLMClient(BaseLLMClient):
         if tools:
             payload["tools"] = tools
 
-        with httpx.Client(timeout=60.0) as client:
+        with httpx.Client(timeout=self.spec.timeout_seconds) as client:
             resp = client.post(url, headers=headers, json=payload)
             resp.raise_for_status()
             data = resp.json()
@@ -203,9 +203,10 @@ class UniversalLLMClient(BaseLLMClient):
         # Standard Gemini generateContent REST endpoint
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{self.spec.model_name}:generateContent?key={self.api_key}"
+            f"{self.spec.model_name}:generateContent"
         )
-        headers = {"Content-Type": "application/json"}
+        # Key goes in a header (not the URL) so it can never leak via logs/tracebacks.
+        headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
 
         contents: list[dict[str, Any]] = []
         for m in messages:
@@ -220,7 +221,7 @@ class UniversalLLMClient(BaseLLMClient):
             },
         }
 
-        with httpx.Client(timeout=60.0) as client:
+        with httpx.Client(timeout=self.spec.timeout_seconds) as client:
             resp = client.post(url, headers=headers, json=payload)
             resp.raise_for_status()
             data = resp.json()
@@ -230,7 +231,7 @@ class UniversalLLMClient(BaseLLMClient):
             return LLMResponse(content="", raw_response=data)
 
         parts = candidates[0].get("content", {}).get("parts", [])
-        text_content = "".join(p.get("text", "") for p in parts)
+        text_content = "".join(p.get("text", "") for p in parts if not p.get("thought"))
         usage_md = data.get("usageMetadata", {})
 
         usage = LLMUsage(
@@ -268,7 +269,7 @@ class UniversalLLMClient(BaseLLMClient):
         if system_prompts:
             payload["system"] = "\n\n".join(system_prompts)
 
-        with httpx.Client(timeout=60.0) as client:
+        with httpx.Client(timeout=self.spec.timeout_seconds) as client:
             resp = client.post(url, headers=headers, json=payload)
             resp.raise_for_status()
             data = resp.json()

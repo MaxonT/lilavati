@@ -1,0 +1,17 @@
+{
+  "model": "gemini-3.8-flash",
+  "samples": 1,
+  "temperature": 0.0,
+  "errors": 2,
+  "unparsable": 0,
+  "overall_mean_accuracy": 0.7143,
+  "per_track": {
+    "track1_three_statement": 1.0,
+    "track2_fixed_income": 1.0,
+    "track3_econometrics": 1.0,
+    "track4_financial_ml": 1.0,
+    "track5_derivatives": 0.0,
+    "track6_microstructure": 1.0,
+    "track7_sustainability": 0.0
+  }
+}

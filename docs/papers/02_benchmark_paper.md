@@ -2,11 +2,11 @@
 
 **Authors:** The Līlāvatī Team  
 **Classification:** Quantitative Finance, Benchmarking, Machine Learning, Multi-Agent Systems  
-**Status:** Working draft, not peer reviewed. Baseline-model figures in sections 5.2 and 6 are **illustrative placeholders, not measured results** (see notice below).  
+**Status:** Working draft, not peer reviewed. Section 5.2 reports measured results for four Google models; section 6 is illustrative (see notice below).  
 
 ---
 
-> **Draft notice (read first).** This is a working draft. The repository currently ships the benchmark *harness* and a deterministic *reference solver* only. It does **not** yet include runs of GPT-4o, Claude, Gemini, Llama or Qwen. All third-party model scores, failure-rate statistics, and error anecdotes in sections 5.2 and 6 are **illustrative targets/hypotheses to be replaced by measured results** (with raw outputs and prompts) before any submission. The reference solver calls the same deterministic tools that the checks verify, so its 100% scores demonstrate harness correctness, **not** superiority over any model.
+> **Draft notice (read first).** This is a working draft. The repository currently ships the benchmark *harness* and a deterministic *reference solver* only. Section 5.2 now contains measured results for four Google models only (no OpenAI, Anthropic, Llama or Qwen runs). The error anecdotes and failure-rate statistics in section 6 remain **illustrative hypotheses, not measurements**. The reference solver calls the same deterministic tools that the checks verify, so its 100% scores demonstrate harness correctness, **not** superiority over any model.
 
 ## Abstract
 
@@ -27,7 +27,7 @@ To evaluate performance under production capital allocation constraints, Līlāv
 * **Temporal Purity Index (TPI)**: Measures complete elimination of restatement leakage and future information under strict point-in-time boundaries ($T_{\text{cutoff}}$).
 * **Tool Math Purity Ratio (TMPR)**: Quantifies the delegation rate to certified deterministic execution sandboxes versus token-level mental math arithmetic.
 
-We hypothesise that unconstrained foundation-model prompting will show low Invariant Compliance and Proof-of-Citation rates on these tasks; empirical evaluation of specific models is future work. The deterministic reference solver passes all checks by construction, which validates the harness itself. We open-source the benchmark suite, golden datasets, and automated CLI evaluation harness at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
+In a first measurement, four Google models (Gemini 4 Hydrogen, Gemini 3.8 Flash, Gemma 4 31B and 26B) answered nearly all single-step numeric items correctly under direct prompting, so the current cases are largely saturated; the harder tracks (citation grounding, look-ahead, multi-step modelling) remain future work. The deterministic reference solver passes all checks by construction, which validates the harness itself. We open-source the benchmark suite, golden datasets, and automated CLI evaluation harness at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
 
 ---
 
@@ -205,47 +205,35 @@ An agent must achieve $\text{CLI} \ge 90.0$ to pass institutional production dep
 
 ## 5. Empirical Evaluation & Findings
 
-**Planned evaluation.** Only the reference solver has been run so far; the model configurations below describe the intended protocol.
+**Evaluation status.** The reference solver and four Google models have been run (section 5.2); other model families and tool-augmented agents are planned.
 
 ### 5.1 Evaluated Systems & Configurations
 1. **Unconstrained Base Models (Zero-Shot & Few-Shot CoT)**: Standard prompting where the model is requested to perform financial analysis and arithmetic in text tokens.
 2. **Standard RAG Agents**: Models connected to a naive vector retrieval pipeline over raw SEC 10-K filings without bi-temporal gating.
 3. **Līlāvatī Neuro-Symbolic Reference Solver**: The full Līlāvatī framework with FastMCP deterministic tool execution, Suvarṇa Z3 SMT gating, and DuckDB bi-temporal indexing.
 
-### 5.2 Benchmark Leaderboard Results
+### 5.2 Measured Baseline Results (direct prompting, no tools)
 
-Table 2 shows **ILLUSTRATIVE PLACEHOLDER values** for third-party models (not measured) alongside the reference solver (measured, passes by construction).
+We ran four Google models through the harness on 2026-11-17/18 with a single direct prompt per case (no tools, no retrieval; `scripts/run_llm_baseline.py`, raw outputs in `results/`). Only numeric/boolean answer fields are scored, using the same tolerance rule as the reference solver. PoCS, TPI, TMPR and the composite index are **not** reported for these runs: a no-tool, no-document prompt cannot meaningfully produce them. Free-tier API limits constrained sample sizes, and many calls failed for provider reasons (overload 503, quota 429, timeouts, empty replies). Those are reported separately from wrong answers.
 
-| Model / Agent Architecture | PoCS (%) | ICR (%) | TPI (%) | TMPR (%) | Composite Līlāvatī Index (CLI) | Institutional Status |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **GPT-4o (Zero-Shot Prompt)** | 4.2% | 28.5% | 45.0% | 0.0% | 18.8 / 100 | ❌ FAILED |
-| **GPT-4o (Few-Shot CoT)** | 8.5% | 38.0% | 52.0% | 12.0% | 26.8 / 100 | ❌ FAILED |
-| **Claude 3.5 Sonnet (Standard RAG)** | 14.5% | 41.2% | 48.0% | 18.5% | 30.0 / 100 | ❌ FAILED |
-| **Gemini 1.5 Pro (Standard RAG)** | 12.0% | 34.5% | 51.0% | 15.0% | 27.2 / 100 | ❌ FAILED |
-| **Llama-3-70B-Instruct (CoT)** | 3.5% | 22.0% | 41.0% | 0.0% | 15.8 / 100 | ❌ FAILED |
-| **Qwen-2.5-72B-Instruct (CoT)** | 6.0% | 26.5% | 43.0% | 5.0% | 19.4 / 100 | ❌ FAILED |
-| **Līlāvatī Framework (Reference Solver)** | **100.0%** | **100.0%** | **100.0%** | **100.0%** | **100.0 / 100** | **✅ PASSED** |
+| Model | Cases | Answered | Accuracy on answered items | Notes |
+| :--- | :--- | :---: | :---: | :--- |
+| Gemini 4 Hydrogen | 7 golden | 7 / 7 | 100% | 1 pass, temp 0 |
+| Gemini 3.8 Flash | 7 golden | 5 / 7 | 100% | 2 failures: HTTP 503 |
+| Gemma 4 31B | 7 golden x 3 passes | 21 / 21 | 100% | temp 0.7 |
+| Gemma 4 26B A4B | 7 golden x 3 passes | 18 / 21 | 100% | 3 empty replies |
+| Gemini 4 Hydrogen | 10 generated | 6 / 10 | 100% | 4 failures: HTTP 429 (quota) |
+| Gemma 4 31B | 20 generated | 13 / 20 | 98.1% | 1 partial miss (Track 5, 3 of 4 fields); 7 failures (503/timeout) |
+| Gemma 4 26B A4B | 20 generated | 9 / 20 | 100% | 10 empty replies, 1 HTTP 503 |
+| *Reference solver* | 7 golden | 7 / 7 | 100% | by construction |
+| *Content-free baseline (all True / 0)* | 7 golden | n/a | 63.6% | calibration |
+| *Content-free baseline (all True / 0)* | 20 generated | n/a | 15.7% | calibration |
 
-*Table 2: ILLUSTRATIVE ONLY. Third-party rows are hypothetical placeholders pending real evaluation; do not cite as results.*
-
-```
-                 COMPOSITE LĪLĀVATĪ INDEX (CLI) COMPARISON
-  100 ┌───────────────────────────────────────────────────────────┐ 100.0
-      │                                                           │ (Lilavati)
-   80 │                                                           │
-      │                                                           │
-   60 │                                                           │
-      │                                                           │
-   40 │                    30.0     27.2                          │
-      │          26.8     ┌────┐   ┌────┐                         │
-   20 │  18.8   ┌────┐    │    │   │    │    15.8     19.4        │
-      │ ┌────┐  │    │    │    │   │    │   ┌────┐   ┌────┐       │
-    0 └─┴────┴──┴────┴────┴────┴───┴────┴───┴────┴───┴────┴───────┘
-       GPT-4o   GPT-4o   Claude   Gemini   Llama3   Qwen2.5  Lilavati
-       (Zero)   (CoT)    (RAG)    (RAG)    (70B)    (72B)    (Ours)
-```
-
----
+**What this does and does not show.**
+1. When these models answered, they were almost always correct on these textbook-style numeric tasks (bond price, Black-Scholes Greeks, microprice, WACI, accounting identities). We therefore **do not reproduce the large failure rates hypothesised earlier in this draft**; the placeholder leaderboard that appeared here previously has been removed.
+2. The benchmark in its current form **does not separate these models**: scores are saturated on answered items, the sample is small (7 golden + 10-20 generated cases per model), and most observed loss came from API reliability, not reasoning.
+3. The 7 golden cases are easily guessable (a content-free answerer scores 63.6%); the generated set was introduced to fix this (15.7%).
+4. Not yet evaluated: tool-augmented agents, multi-step three-statement modelling on real filings, citation grounding against real documents, and look-ahead resistance with a poisoned corpus. These are where we expect differences to appear and are the priority for benchmark v2.
 
 ## 6. Deep-Dive Error Analysis: How Standard LLMs Fail
 

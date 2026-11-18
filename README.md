@@ -20,7 +20,7 @@
 > ### ⚠️ Project status: alpha / research preview
 > * **Not production software and not investment advice.** Outputs have not been independently audited. Do not use for trading, credit or compliance decisions without your own validation. Provided "AS IS" under Apache-2.0.
 > * **Default LLM is a mock.** Out of the box, agents use a `mock-evaluator` model that returns canned text, so examples exercise the deterministic tools, not a real LLM. Configure a real provider (OpenAI, Anthropic, Gemini, vLLM, Ollama) via API-key environment variables to run real agent loops.
-> * **Benchmark results:** the repo ships the Līlāvatī-Bench *harness* and a deterministic reference solver (which passes by construction). Scores for third-party LLMs in the draft papers are **illustrative placeholders, not measured results**. Community runs are welcome.
+> * **Benchmark results:** the repo ships the Līlāvatī-Bench *harness*, a deterministic reference solver (passes by construction), a templated case generator, and a first no-tool baseline of four Google models (`results/`). Those models answered nearly all single-step numeric items correctly, so the current cases are largely saturated; harder tracks are future work. Earlier placeholder leaderboard numbers have been removed.
 > * **Optional deps:** QuantLib is optional (`pip install "lilavati[quantlib]"`); some fixed-income features require it.
 > * **API server** binds to `127.0.0.1` by default and has no built-in authentication. Put it behind your own auth/proxy before exposing it.
 
