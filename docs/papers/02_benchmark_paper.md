@@ -155,7 +155,7 @@ class BenchmarkTestCase(BaseModel):
 * **Evaluated Primitives**:
   1. Level 2 / Level 3 Limit Order Book Microprice and Order Flow Imbalance (OFI).
   2. Almgren-Chriss Optimal Liquidation Framework: Deriving the discrete liquidation trajectory $n_j$ minimizing risk-adjusted execution shortfall:
-     $$\min_{\{n_j\}} \mathbb{E}[x] + \lambda \mathbb{V}[x], \quad x = \sum_{j=1}^N \left( \tau \gamma_j + \eta \frac{n_j}{\tau} \right) n_j + \frac{1}{2} \gamma X^2$$
+     $$\min_{\{n_j\}} \mathbb{E}[x] + \lambda \mathbb{V}[x], \quad \mathbb{E}[x] = \tfrac{1}{2}\gamma X^2 + \epsilon \sum_{j=1}^N |n_j| + \frac{\tilde\eta}{\tau} \sum_{j=1}^N n_j^2, \quad \tilde\eta = \eta - \tfrac{1}{2}\gamma\tau$$
 
 ### Track 7: Sustainable Finance, Carbon Accounting, and Transition Risk
 * **Institutional Objective**: Standardized climate transition auditing and green covenant monitoring.

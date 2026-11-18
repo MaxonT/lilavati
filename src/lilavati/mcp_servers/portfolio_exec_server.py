@@ -59,19 +59,31 @@ def compute_almgren_chriss_liquidation_schedule(
     time_horizon_hours: float,
     n_intervals: int,
     daily_volatility: float,
+    arrival_price: float,
     permanent_impact_gamma: float = 2.5e-7,
     temporary_impact_eta: float = 2.5e-6,
     risk_aversion_lambda: float = 1e-6,
+    hours_per_day: float = 6.5,
+    fixed_cost_epsilon: float = 0.0,
 ) -> dict[str, Any]:
-    """Computes the Almgren-Chriss optimal trade execution trajectory minimizing market impact."""
+    """Computes the discrete Almgren-Chriss (2000) optimal liquidation trajectory.
+
+    daily_volatility is a fraction (0.02 = 2%/day) and is scaled by arrival_price ($/share)
+    to price units. Impact parameters use the paper's units with the trading day as time unit:
+    gamma in $/share^2, eta in ($/share)/(share/day), epsilon in $/share, lambda in 1/$.
+    Returns holdings, trade sizes, expected cost E[x] ($) and variance V[x] ($^2).
+    """
     result = ExecutionEngine.compute_almgren_chriss_schedule(
         total_shares=total_shares,
         time_horizon_hours=time_horizon_hours,
         n_intervals=n_intervals,
         daily_volatility=daily_volatility,
+        arrival_price=arrival_price,
         permanent_impact_gamma=permanent_impact_gamma,
         temporary_impact_eta=temporary_impact_eta,
         risk_aversion_lambda=risk_aversion_lambda,
+        hours_per_day=hours_per_day,
+        fixed_cost_epsilon=fixed_cost_epsilon,
     )
     return result.model_dump()
 
@@ -126,5 +138,10 @@ def optimize_portfolio_hierarchical_risk_parity(
     return result.model_dump()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run this MCP server over stdio."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

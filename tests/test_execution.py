@@ -40,6 +40,7 @@ def test_almgren_chriss_schedule() -> None:
         time_horizon_hours=4.0,
         n_intervals=8,
         daily_volatility=0.02,
+        arrival_price=100.0,
     )
 
     assert res.trading_trajectory[0] == total_shares

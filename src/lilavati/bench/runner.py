@@ -265,6 +265,7 @@ class ReferenceAgentSolver:
                 time_horizon_hours=1.0,
                 n_intervals=ctx["periods"],
                 daily_volatility=0.02,
+                arrival_price=lob.mid_price,
                 permanent_impact_gamma=2.5e-7,
                 temporary_impact_eta=2.5e-6,
                 risk_aversion_lambda=1e-5,

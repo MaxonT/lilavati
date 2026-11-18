@@ -151,6 +151,7 @@ def optimal_execution_node(state: StatArbExecutionState) -> StatArbExecutionStat
         time_horizon_hours=state.execution_horizon_hours,
         n_intervals=6,
         daily_volatility=state.daily_volatility,
+        arrival_price=0.5 * (state.best_bid + state.best_ask),
         permanent_impact_gamma=2.5e-7,
         temporary_impact_eta=2.5e-6,
         risk_aversion_lambda=1e-6,

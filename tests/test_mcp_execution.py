@@ -23,6 +23,7 @@ def test_mcp_almgren_chriss_tool() -> None:
         time_horizon_hours=2.0,
         n_intervals=4,
         daily_volatility=0.015,
+        arrival_price=100.0,
     )
     assert "trading_trajectory" in res
     assert "expected_shortfall" in res

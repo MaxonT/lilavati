@@ -77,53 +77,101 @@ class ExecutionEngine:
         time_horizon_hours: float,
         n_intervals: int,
         daily_volatility: float,
+        *,
+        arrival_price: float,
         permanent_impact_gamma: float = 2.5e-7,
         temporary_impact_eta: float = 2.5e-6,
         risk_aversion_lambda: float = 1e-6,
         hours_per_day: float = 6.5,
+        fixed_cost_epsilon: float = 0.0,
     ) -> AlmgrenChrissResult:
         """
-        Computes the Almgren-Chriss optimal trade liquidation trajectory:
-        Balances market impact against price volatility risk.
-        x_j = sinh(kappa * (T - t_j)) / sinh(kappa * T) * X_0
+        Discrete-time Almgren-Chriss optimal liquidation trajectory.
+
+        Reference: Almgren, R. and Chriss, N. (2000), "Optimal Execution of Portfolio
+        Transactions", Journal of Risk 3(2), 5-39. Equation numbers below are from the
+        December 2000 version of the paper.
+
+        Units follow the paper (Table 1), with the trading day as the time unit:
+
+        * ``daily_volatility`` is a fraction (e.g. 0.019). It is converted to price units,
+          sigma = daily_volatility * arrival_price, in ($/share)/day^(1/2).
+        * ``permanent_impact_gamma`` is in $/share^2.
+        * ``temporary_impact_eta`` is in ($/share)/(share/day).
+        * ``fixed_cost_epsilon`` is in $/share (e.g. half the bid-ask spread).
+        * ``risk_aversion_lambda`` is in 1/$.
+        * ``time_horizon_hours`` is converted to days with ``hours_per_day``.
+
+        With tau = T/N and eta_tilde = eta - gamma*tau/2 (eq. 8), kappa solves
+        (2/tau^2)(cosh(kappa*tau) - 1) = lambda*sigma^2/eta_tilde (eq. 16), and the holdings are
+        x_j = sinh(kappa(T - t_j)) / sinh(kappa*T) * X (eq. 17).
+
+        The returned cost and variance are evaluated on the trajectory:
+        E = gamma*X^2/2 + epsilon*sum|n_k| + (eta_tilde/tau)*sum n_k^2 (eq. 8) and
+        V = sigma^2 * sum tau*x_k^2 (eq. 5), both in dollars (V in $^2).
         """
-        x0 = total_shares
-        t_total = time_horizon_hours
-        n = n_intervals
-        dt = t_total / n
+        if n_intervals < 1:
+            raise ValueError("n_intervals must be at least 1.")
+        if time_horizon_hours <= 0.0 or hours_per_day <= 0.0:
+            raise ValueError("time_horizon_hours and hours_per_day must be positive.")
+        if arrival_price <= 0.0:
+            raise ValueError("arrival_price must be positive.")
+        if daily_volatility < 0.0:
+            raise ValueError("daily_volatility must be non-negative.")
+        if risk_aversion_lambda < 0.0:
+            raise ValueError("risk_aversion_lambda must be non-negative.")
+        if temporary_impact_eta <= 0.0:
+            raise ValueError("temporary_impact_eta must be positive.")
 
-        # Scale volatility to hourly terms
-        hourly_vol = daily_volatility / math.sqrt(hours_per_day)
-        sigma2 = hourly_vol**2
+        x0 = float(total_shares)
+        n = int(n_intervals)
+        t_days = time_horizon_hours / hours_per_day
+        tau = t_days / n
 
+        sigma = daily_volatility * arrival_price  # ($/share)/day^(1/2)
+        sigma2 = sigma * sigma
         gamma = permanent_impact_gamma
         eta = temporary_impact_eta
         lam = risk_aversion_lambda
 
-        # Characteristic decay parameter: kappa^2 = (lambda * sigma^2) / eta
-        kappa = math.sqrt((lam * sigma2) / max(eta, 1e-9))
-        half_life = 1.0 / kappa if kappa > 0 else float("inf")
+        eta_tilde = eta - 0.5 * gamma * tau
+        if eta_tilde <= 0.0:
+            raise ValueError(
+                f"eta_tilde = eta - gamma*tau/2 = {eta_tilde:.6g} <= 0: the expected cost is not "
+                "strictly convex (Almgren-Chriss 2000, eq. 8). Use more intervals or a smaller "
+                "permanent impact gamma."
+            )
 
-        # Trajectory calculation
-        sinh_kappa_t = math.sinh(min(kappa * t_total, 50.0))  # Avoid float overflow
+        # (2/tau^2)(cosh(kappa*tau) - 1) = kappa_tilde^2. Since cosh(y) - 1 = 2 sinh^2(y/2),
+        # kappa = (2/tau) * asinh(kappa_tilde*tau/2), which is accurate for small and large kappa.
+        kappa_tilde = math.sqrt(lam * sigma2 / eta_tilde)
+        kappa = (2.0 / tau) * math.asinh(0.5 * kappa_tilde * tau)
 
+        # x_j / X = sinh(kappa(T - t_j)) / sinh(kappa T), evaluated without overflow as
+        # exp(-kappa t_j) * (1 - exp(-2 kappa (T - t_j))) / (1 - exp(-2 kappa T)).
         trajectory: list[float] = [x0]
-        trade_sizes: list[float] = []
+        if kappa * t_days == 0.0:
+            # lambda = 0 (or sigma = 0): the limit kappa -> 0 is the linear (TWAP) schedule.
+            trajectory.extend(x0 * (n - j) / n for j in range(1, n + 1))
+        else:
+            denom = -math.expm1(-2.0 * kappa * t_days)
+            for j in range(1, n + 1):
+                t_j = j * tau
+                t_rem = (n - j) * tau
+                ratio = math.exp(-kappa * t_j) * (-math.expm1(-2.0 * kappa * t_rem)) / denom
+                trajectory.append(x0 * ratio)
+        trajectory[-1] = 0.0
 
-        for j in range(1, n + 1):
-            t_rem = t_total - j * dt
-            if sinh_kappa_t > 0:
-                xj = (math.sinh(min(kappa * t_rem, 50.0)) / sinh_kappa_t) * x0
-            else:
-                xj = (t_rem / t_total) * x0
-            xj = max(0.0, float(xj))
-            trajectory.append(xj)
-            trade_sizes.append(trajectory[-2] - trajectory[-1])
+        trade_sizes = [trajectory[j - 1] - trajectory[j] for j in range(1, n + 1)]
 
-        # Expected execution shortfall and variance
-        # E[x] = 0.5 * gamma * X0^2 + eta * sum(nj^2 / dt)
-        exp_impact = 0.5 * gamma * (x0**2) + eta * sum((nj**2) / dt for nj in trade_sizes)
-        variance = 0.5 * sigma2 * sum((trajectory[j] ** 2) * dt for j in range(len(trajectory) - 1))
+        expected_cost = (
+            0.5 * gamma * x0 * x0
+            + fixed_cost_epsilon * sum(abs(nk) for nk in trade_sizes)
+            + (eta_tilde / tau) * sum(nk * nk for nk in trade_sizes)
+        )
+        variance = sigma2 * tau * sum(xk * xk for xk in trajectory[1:])
+
+        half_life_hours = hours_per_day / kappa if kappa > 0.0 else float("inf")
 
         return AlmgrenChrissResult(
             total_shares=total_shares,
@@ -131,9 +179,9 @@ class ExecutionEngine:
             n_intervals=n_intervals,
             trading_trajectory=trajectory,
             trade_sizes=trade_sizes,
-            expected_shortfall=float(exp_impact),
+            expected_shortfall=float(expected_cost),
             shortfall_variance=float(variance),
-            half_life_hours=float(half_life),
+            half_life_hours=float(half_life_hours),
         )
 
     @staticmethod
