@@ -16,7 +16,7 @@ In this paper, we introduce **Līlāvatī**, an open-source, audited, and verifi
 
 Līlāvatī incorporates four foundational innovations:
 1. **The Zero LLM Arithmetic Protocol**: Enforced via the Model Context Protocol (FastMCP), barring language models from performing internal mental math and delegating all quantitative computations to verified, sandboxed numerical routines.
-2. **The Suvarṇa Invariant Engine**: A first-order formal logic solver powered by Z3 Satisfiability Modulo Theories (SMT) that mathematically proves three-statement equilibrium, debt covenant satisfaction, and no-arbitrage conditions, equipped with an *unsatisfiable core reflection loop* for autonomous agent self-correction.
+2. **The Suvarṇa Invariant Engine**: Z3-based checks of three-statement identities (balance sheet and cash reconciliation) in exact decimal arithmetic on the given values, plus covenant and butterfly no-arbitrage checks. Violations are fed back to the agent as a reflection prompt.
 3. **Cryptographic Provenance Fabric (`CitationRef`)**: Anchors every extracted financial metric to an immutable SHA-256 document hash, physical page coordinate, and verbatim statutory text snippet.
 4. **Bi-Temporal State Isolation**: Implemented natively in DuckDB, enforcing dual-time semantics (Valid Time $T_v$ vs. System Time $T_s$) to formally eliminate restatement leakage and look-ahead bias.
 
@@ -63,7 +63,7 @@ The integration of artificial intelligence into quantitative asset management, c
                          │ SAT                     │ UNSAT
                          ▼                         ▼
                 ┌──────────────────┐      ┌─────────────────────────┐
-                │ Proven Execution │      │ Unsat-Core Reflection   │
+                │ Checked Execution│      │ Violation Reflection    │
                 │ & Audited Dossier│      │ (Autonomous Correction) │
                 └──────────────────┘      └─────────────────────────┘
 ```
@@ -165,9 +165,7 @@ for var, val in empirical_bindings.items():
 status = solver.check()
 ```
 
-If $\Sigma \models \text{SAT}$, the extraction is proven mathematically consistent and execution proceeds. If $\Sigma \models \text{UNSAT}$, the solver computes the **Unsatisfiable Core** $\mathcal{U} \subseteq \Sigma$:
-$$\mathcal{U} = \text{UnsatCore}(\Sigma)$$
-The unsatisfiable core isolates the exact subset of conflicting line items (e.g., unrecognized Accumulated Other Comprehensive Income, lease liabilities, or non-cash financing items). Līlāvatī passes $\mathcal{U}$ back into the agent reasoning loop as an **SMT Reflection Prompt**, triggering targeted re-examination of the primary filing footnotes.
+If $\Sigma \models \text{SAT}$, the given numbers satisfy the identities and execution proceeds. Because every variable is bound to a concrete value, this check is equivalent to exact rational arithmetic on the decimal inputs; it verifies the numbers supplied, not a model over ranges of inputs. If $\Sigma \models \text{UNSAT}$, the current implementation reports which identity failed and by how much (e.g. a balance-sheet or cash mismatch) and passes that back to the agent as an **SMT Reflection Prompt**, prompting re-examination of the source filing. Extracting a minimal unsatisfiable core over individual line items is future work.
 
 ### 3.3 Cryptographic Provenance Model (`CitationRef`)
 Every empirical metric $\hat{x}_i \in \mathbf{x}$ extracted by Līlāvatī is encapsulated in a formal `CitationRef` tuple:
@@ -258,7 +256,7 @@ sequenceDiagram
     B->>R: Submits Reconciled Three-Statement Model
     Note over R: Executes Suvarna Z3 SMT Proof
     alt SMT Solver == UNSAT
-        R-->>B: REJECTED (Unsat Core: Cash Mismatch)
+        R-->>B: REJECTED (Violation: Cash Mismatch)
         Note over B: Self-Correction via SMT Reflection
     else SMT Solver == SAT
         R->>C: Certified Mathematical Equilibrium
@@ -336,24 +334,24 @@ In a simulated corporate acquisition scenario, an agent evaluated an acquisition
 * The Adversarial Committee issued a binding `REJECTED_ACCOUNTING_ANOMALY` verdict, safeguarding capital against fraudulent reporting.
 
 ### 6.3 Private Credit Covenant & Distressed Equity Cure
-In private credit monitoring, Līlāvatī evaluated a portfolio borrower undergoing an EBITDA contraction. The `CovenantGate` proved via SMT that the borrower's Total Leverage ($5.45\text{x}$) breached the maximum leverage covenant ($4.50\text{x}$). Rather than hallucinating a remediation amount, Līlāvatī's SMT solver derived the exact minimum required sponsor equity cure:
+In private credit monitoring, Līlāvatī evaluated a portfolio borrower undergoing an EBITDA contraction. The covenant check (plain deterministic arithmetic) found that the borrower's Total Leverage ($5.45\text{x}$) breached the maximum leverage covenant ($4.50\text{x}$). The minimum sponsor equity cure follows deterministically from the covenant definition (illustrative figures):
 $$\Delta E_{cure} = \text{TotalDebt} - (4.50 \times \text{EBITDA}) = \$104.50\text{M}$$
-proving that an equity injection below this amount left the covenant unsatisfied (`UNSAT`).
+An equity injection below this amount leaves the covenant breached.
 
 ---
 
 ## 7. Performance & Verification Benchmarks
 
-Latency was measured with the reproducible script [`scripts/benchmark_latency.py`](https://github.com/revendrat/lilavati/blob/main/scripts/benchmark_latency.py) (30 runs after warm-up; 3 for the PDF). Environment: Python 3.11.14, macOS 15.5 arm64, Z3 5.4.1. Numbers are machine-dependent; rerun on your hardware.
+Latency was measured with the reproducible script [`scripts/benchmark_latency.py`](https://github.com/revendrat/lilavati/blob/main/scripts/benchmark_latency.py) (30 runs after warm-up; 3 for the PDF; re-measured 2026-11-19 after the engine audit). Environment: Python 3.11.14, macOS 15.5 arm64, Z3 5.4.1. Numbers are machine-dependent; rerun on your hardware.
 
 | Operation | Engine | Median (ms) | p95 (ms) |
 | :--- | :--- | ---: | ---: |
-| Balance-sheet equation proof | Z3 | 2.49 | 11.36 |
-| Nelson-Siegel fit (10 points) | SciPy | 11.58 | 17.97 |
-| Optimal fractional differentiation d* (1,000 obs) | NumPy / statsmodels | 173.36 | 355.76 |
-| SABR calibration (9 strikes) | SciPy | 6.09 | 12.07 |
-| Bi-temporal as-of query | DuckDB (in-memory) | 3.09 | 4.95 |
-| 10-K full extraction (123 pages) | pypdf | 14,430 | 14,527 |
+| Balance-sheet equation check | Z3 | 1.04 | 1.16 |
+| Nelson-Siegel fit (10 points) | SciPy | 3.60 | 3.82 |
+| Optimal fractional differentiation d* (1,000 obs) | NumPy / statsmodels | 52.92 | 54.23 |
+| SABR calibration (9 strikes, incl. arbitrage check) | SciPy | 2.53 | 2.70 |
+| Bi-temporal as-of query | DuckDB (in-memory) | 1.75 | 2.41 |
+| 10-K full extraction (123 pages) | pypdf | 5,402 | 5,447 |
 
 ### Compliance with Līlāvatī-Bench Metrics
 Under the **Līlāvatī-Bench** evaluation standard:

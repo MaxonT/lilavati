@@ -54,6 +54,13 @@ nav:
       - "03. Forensic Accounting & Adversarial Committee": tutorials/03_forensic_accounting_and_adversarial_committee.md
       - "04. Climate Risk & Sustainable Portfolio": tutorials/04_climate_risk_and_sustainable_portfolio.md
   - Using the MCP Servers: mcp-setup.md
+  - Numerical Validation:
+      - Overview: validation/index.md
+      - Fixed Income: validation/fixed_income.md
+      - Derivatives: validation/derivatives.md
+      - Invariants: validation/invariants.md
+      - Sustainability: validation/sustainability.md
+      - Forensics: validation/forensics.md
   - Līlāvatī-Bench: benchmarks.md
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md

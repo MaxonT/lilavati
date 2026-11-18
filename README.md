@@ -65,14 +65,14 @@ General-purpose LLM agent frameworks do not by themselves enforce where numbers 
 
 ## 🏛️ What is implemented today
 
-Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (see [ROADMAP.md](ROADMAP.md)). Numerical validation against independent references is in progress; treat results as unaudited.
+Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (see [ROADMAP.md](ROADMAP.md)). Numerical validation against independent references is in progress ([docs/validation](docs/validation/index.md)); engines not yet audited should be treated as unvalidated.
 
 | Area | Capability | Status | Module |
 | :--- | :--- | :---: | :--- |
 | **Fixed income & credit** | Bond price, Macaulay/modified duration, convexity, DV01 | ✅ | `core/fixed_income.py` |
 | | Nelson-Siegel curve fit | ✅ | `core/fixed_income.py` |
 | | Merton structural default model | ✅ | `core/fixed_income.py` |
-| | Covenant checks (leverage, coverage) via Z3 | ✅ | `core/invariants.py` |
+| | Covenant checks (net leverage, interest coverage) | ✅ | `core/invariants.py` |
 | | Nelson-Siegel-Svensson, key-rate durations, CDS hazard rates, tranche waterfalls | 🗺️ | n/a |
 | **Econometrics** | ADF stationarity test | ✅ | `core/econometrics.py` |
 | | Engle-Granger cointegration + OU half-life | ✅ | `core/econometrics.py` |

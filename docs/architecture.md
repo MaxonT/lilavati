@@ -19,7 +19,7 @@ flowchart TD
     
     subgraph InvariantLayer["3. Formal Verification Gate (SMT Solver)"]
         SuvarnaEngine["Suvarṇa Engine (Z3 Solver)\nAssets = Liab + Equity\nNo-Arbitrage Spreads"]
-        SMTReflection["SMT Reflection Loop\n(Unsatisfiable Core Feedback)"]
+        SMTReflection["SMT Reflection Loop\n(Violation Feedback)"]
     end
     
     subgraph AuditLayer["4. Telemetry & Provenance (Audit Trail)"]

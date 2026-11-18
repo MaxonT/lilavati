@@ -211,7 +211,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 **7A. Correctness (blocking)**
 - [x] 7.1 Fix Beneish M-score coefficients (TATA 4.679, LVGI −0.327) with tests against Beneish (1999).
 - [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
-- [ ] 7.3 Reference-value audit of every engine (fixed income, derivatives, econometrics, financial ML, execution, sustainability, invariants, forensics, statement graph), published as `docs/validation.md`.
+- [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss (15 bugs fixed). Pending: econometrics, financial ML, LOB / Black-Litterman / HRP, statement graph, connectors.
 - [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
 - [ ] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report.
 
