@@ -62,6 +62,7 @@ dev = [
     "pytest-cov>=5.0.0",
     "ruff>=0.5.0",
     "mypy>=1.10.0",
+    "QuantLib>=1.35",  # test-only: independent reference values
 ]
 docs = [
     "mkdocs>=1.6.0",

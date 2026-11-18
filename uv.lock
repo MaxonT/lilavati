@@ -1465,6 +1465,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "quantlib" },
     { name = "ruff" },
 ]
 docs = [
@@ -1496,6 +1497,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
+    { name = "quantlib", marker = "extra == 'dev'", specifier = ">=1.35" },
     { name = "quantlib", marker = "extra == 'quantlib'", specifier = ">=1.35" },
     { name = "rich", specifier = ">=13.7.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5.0" },
