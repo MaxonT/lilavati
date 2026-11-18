@@ -229,7 +229,7 @@ The Līlāvatī FastMCP tool registry implements seven core quantitative engines
 * **Order Flow Imbalance (OFI) & Microprice**:
   $$OFI_t = \Delta q_t^b \cdot \mathbb{I}(\Delta p_t^b \ge 0) - \Delta q_t^a \cdot \mathbb{I}(\Delta p_t^a \le 0)$$
 * **Almgren-Chriss Optimal Liquidation**: Minimizing expected execution shortfall and variance:
-  $$\min_{\{n_k\}} \mathbb{E}[x] + \lambda \mathbb{V}[x], \quad \tau_j = \frac{\sinh(\kappa (T - t_j))}{\sinh(\kappa T)}$$
+  $$\min_{\{n_k\}} \mathbb{E}[x] + \lambda \mathbb{V}[x], \quad \frac{x_j}{X} = \frac{\sinh(\kappa (T - t_j))}{\sinh(\kappa T)}$$
 * **Portfolio Optimization**: Black-Litterman Bayesian view integration and López de Prado's Hierarchical Risk Parity (HRP) via quasi-diagonalization and inverse-variance tree clustering.
 
 ### 4.6 Sustainable Finance & Climate Risk
@@ -274,7 +274,7 @@ sequenceDiagram
      $$\begin{aligned}
      M = &-4.84 + 0.920 \cdot \text{DSRI} + 0.528 \cdot \text{GMI} + 0.404 \cdot \text{AQI} \\
          &+ 0.892 \cdot \text{SGI} + 0.115 \cdot \text{DEPI} - 0.172 \cdot \text{SGAI} \\
-         &+ 4.037 \cdot \text{TATA} + 0.0327 \cdot \text{LVGI}
+         &+ 4.679 \cdot \text{TATA} - 0.327 \cdot \text{LVGI}
      \end{aligned}$$
      If $M > -1.78$, the company is formally flagged as exhibiting high probability of earnings manipulation.
    * **Altman Z-Score**:
@@ -315,7 +315,7 @@ Document Provenance: 123 pages | SHA-256: f9a3e5b32cb7cbf2c44dc2faadc0edc9...
     • Shareholder Cash Return:$102,111M (Buybacks $86.4B + Dividends $15.7B)
 
 [4] Deterministic Diagnostics:
-    • Beneish M-Score:        -2.20 (Safe / Non-Manipulator, Threshold -1.78)
+    • Beneish M-Score:        -2.54 (Safe / Non-Manipulator, Threshold -1.78)
     • Altman Z-Score:         12.02 (Safe Zone, Threshold 2.99)
     • Climate Carbon Tax:     1.57 bps EBIT reduction at $100/t tax
 
@@ -331,8 +331,8 @@ In contrast, when standard LLMs (GPT-4o, Claude 3.5 Sonnet) were prompted direct
 
 ### 6.2 Forensic Accounting M&A Due Diligence
 In a simulated corporate acquisition scenario, an agent evaluated an acquisition target claiming 35% revenue growth. While a generic LLM agent issued an unconstrained "BUY" recommendation based on top-line momentum, Līlāvatī's `ForensicEngine` caught:
-* Days Sales in Receivables Index ($\text{DSRI} = 1.34 > 1.0$), flagging aggressive channel stuffing.
-* Beneish M-Score: $-1.45 > -1.78$, triggering an automated manipulation alert.
+* Days Sales in Receivables Index ($\text{DSRI} = 1.48 > 1.0$), flagging aggressive channel stuffing.
+* Beneish M-Score: $-1.34 > -1.78$, triggering an automated manipulation alert.
 * The Adversarial Committee issued a binding `REJECTED_ACCOUNTING_ANOMALY` verdict, safeguarding capital against fraudulent reporting.
 
 ### 6.3 Private Credit Covenant & Distressed Equity Cure

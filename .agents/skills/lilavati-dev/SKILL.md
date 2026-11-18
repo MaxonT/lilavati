@@ -49,7 +49,7 @@ When working on this repository, you are not writing a generic web application o
 
 ### Rule 5: Marcos López de Prado Financial ML Standards
 * **Never** use naive integer differencing ($d=1$) on price series without testing fractional differentiation ($d^*$).
-* **Never** use standard k-fold cross-validation on time series. Always use **Purged & Embargoed Cross-Validation**.
+* **Never** use standard k-fold cross-validation on time series. Use **Purged & Embargoed Cross-Validation** (the repo does not implement it yet; if you need it, implement it per López de Prado 2018 ch. 7 rather than falling back to plain k-fold or pretending it exists).
 * **Never** use naive next-day price signs for labels. Use the **Triple-Barrier Method** (take-profit, stop-loss, max holding horizon).
 
 ---
@@ -60,7 +60,7 @@ When working on this repository, you are not writing a generic web application o
 | :--- | :--- | :--- |
 | **Provenance** | `src/lilavati/core/provenance.py` | `CitationRef`, `SourcedValue`, SHA-256 document hashing. |
 | **Invariants (Z3)** | `src/lilavati/core/invariants.py` | `SuvarnaEngine`: 3-statement balance check, cash flow delta, debt covenants. |
-| **Econometrics** | `src/lilavati/core/econometrics.py` | `EconometricEngine`: ADF stationarity, Johansen cointegration, OU half-life, GARCH(1,1). |
+| **Econometrics** | `src/lilavati/core/econometrics.py` | `EconometricEngine`: ADF stationarity, Engle-Granger cointegration, OU half-life, GARCH(p,q). (Johansen, KPSS, EGARCH, DCC are planned, not implemented.) |
 | **Financial ML** | `src/lilavati/core/financial_ml.py` | `FinancialMLEngine`: Fractional differentiation ($d^*$), Triple-Barrier labeling. |
 | **Fixed Income** | `src/lilavati/core/fixed_income.py` | `FixedIncomeEngine`: Bond pricing, Nelson-Siegel curves, Merton default model. |
 | **Statement DAG** | `src/lilavati/core/graph.py` | `StatementGraph`: Reactive 3-statement DAG with driver shocks and Z3 verification. |

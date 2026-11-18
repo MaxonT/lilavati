@@ -52,8 +52,8 @@ uv run lilavati-bench list-cases
 | :--- | :--- | :--- |
 | **Pillar I** | Dynamic Three-Statement Modeling & Valuation | Reactive DAG, Polars, Z3 SMT Solver |
 | **Pillar II** | Fixed Income, Credit & Debt Indentures | Bond Analytics (DV01, Convexity), Nelson-Siegel, Merton Structural Model |
-| **Pillar III** | Financial Econometrics & Stationarity | ADF Unit Root, Johansen Cointegration, OU Half-Life, GARCH(1,1) |
-| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional Differentiation ($d^*$), Triple-Barrier Labeling, Purged CV |
+| **Pillar III** | Financial Econometrics & Stationarity | ADF Unit Root, Engle-Granger Cointegration, OU Half-Life, GARCH(p,q) |
+| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional Differentiation ($d^*$), Triple-Barrier Labeling (purged CV planned) |
 | **Pillar V** | Derivatives, Volatility Surfaces & Greeks | Black-Scholes-Merton, CRR Binomial Trees, SABR Calibration, Arbitrage Invariants |
 | **Pillar VI** | Market Microstructure & Optimal Execution | LOB Microprice, OFI, Almgren-Chriss Liquidation, Black-Litterman, HRP |
 | **Pillar VII** | Sustainable Finance & Climate Risk | Scope 1/2/3 WACI, Shadow Carbon Tax Stress Testing, SLB Step-Up Covenants |

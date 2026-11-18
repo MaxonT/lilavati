@@ -21,8 +21,20 @@
 > * **Not production software and not investment advice.** Outputs have not been independently audited. Do not use for trading, credit or compliance decisions without your own validation. Provided "AS IS" under Apache-2.0.
 > * **Default LLM is a mock.** Out of the box, agents use a `mock-evaluator` model that returns canned text, so examples exercise the deterministic tools, not a real LLM. Configure a real provider (OpenAI, Anthropic, Gemini, vLLM, Ollama) via API-key environment variables to run real agent loops.
 > * **Benchmark results:** the repo ships the Līlāvatī-Bench *harness*, a deterministic reference solver (passes by construction), a templated case generator, and a first no-tool baseline of four Google models (`results/`). Those models answered nearly all single-step numeric items correctly, so the current cases are largely saturated; harder tracks are future work. Earlier placeholder leaderboard numbers have been removed.
-> * **Optional deps:** QuantLib is optional (`pip install "lilavati[quantlib]"`); some fixed-income features require it.
+> * **Install from source for now** (see below). The PyPI name `lilavati` belongs to an unrelated project; this package will be published as `lilavati-finance` (import name stays `lilavati`). The optional `quantlib` extra is currently unused by the code.
 > * **API server** binds to `127.0.0.1` by default and has no built-in authentication. Put it behind your own auth/proxy before exposing it.
+
+---
+
+## 🚀 Quick start
+
+```bash
+git clone https://github.com/revendrat/lilavati.git && cd lilavati
+uv sync --extra dev          # or: pip install -e ".[dev]"
+uv run pytest                # run the test suite
+uv run python examples/01_three_statement_reconciliation.py
+uv run lilavati-bench list-cases
+```
 
 ---
 
@@ -39,9 +51,9 @@ Crucially, substantial portions of the *Līlāvatī* were devoted to practical c
 
 ---
 
-## ⚡ Why Generic Agent Frameworks Fail in Institutional Finance
+## ⚡ Why Generic Agent Frameworks Can Fall Short in Finance
 
-Generic LLM agent frameworks (LangChain, AutoGen, CrewAI) treat numerical quantities as token probabilities. In institutional finance, this leads to catastrophic failures:
+General-purpose LLM agent frameworks do not by themselves enforce where numbers come from. In finance, this can lead to failures such as:
 
 1. **Mental Math Hallucinations:** LLMs attempt multi-step CAGR, DCF, or bond duration math inside token generation, producing subtly erroneous values.
 2. **Missing Cryptographic Provenance:** Summaries lack verbatim hash-linked references (`CitationRef`) to the underlying 10-K, 10-Q, or statutory footnote.
@@ -51,60 +63,41 @@ Generic LLM agent frameworks (LangChain, AutoGen, CrewAI) treat numerical quanti
 
 ---
 
-## 🏛️ The Five Pillars of Līlāvatī
+## 🏛️ What is implemented today
 
-Līlāvatī spans the full capital structure and operational lifecycle of institutional investing:
+Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (see [ROADMAP.md](ROADMAP.md)). Numerical validation against independent references is in progress; treat results as unaudited.
 
-```
-                                  PROJECT LĪLĀVATĪ
-                     Unified Institutional Agentic Architecture
-                                         │
-    ┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
-    ▼              ▼              ▼              ▼              ▼              ▼
-PILLAR I:      PILLAR II:     PILLAR III:    PILLAR IV:     PILLAR V:      PILLAR VI:
-Fixed Income   Financial      Financial ML   Derivatives &  Trading &      Sustainable
-& Credit       Econometrics   (de Prado)     Volatility     Microstructure Finance
-─────────────  ─────────────  ─────────────  ─────────────  ─────────────  ─────────────
-• Yield Curves • ADF / KPSS   • Dollar Bars  • SABR/Heston  • L2/L3 Order  • Carbon WACI
-• Duration     • Johansen     • Fractional   • Local Vol      Books (OFI)  • Carbon Tax
-• Merton Model   Cointegration  Diff (d*)    • Greeks       • Almgren-       Stress Test
-• Debt Water-  • GARCH & DCC  • Triple-        Hedging        Chriss Exec  • SLB Step-Up
-  falls          Heterosked.    Barrier      • Arbitrage    • Black-         Covenants
-• Covenants    • Markov HMM   • Purged CV      Invariance     Litterman    • NGFS Scenarios
-```
-
-### Pillar I: Fixed Income, Debt & Credit Capital Markets
-* **Yield Curves & Sensitivities:** QuantLib-powered bootstrapping of spot, forward, and par yield curves (Nelson-Siegel, Nelson-Siegel-Svensson); calculation of Modified Duration, Key Rate Durations (KRD), and DV01/PV01.
-* **Credit Risk:** Merton structural default model (equity as a call option on corporate assets); ISDA standard CDS hazard rate bootstrapping.
-* **Covenant Headroom & Waterfalls:** Parsing credit agreements to model Net Leverage ($TotalDebt / EBITDA$), Interest Coverage, and senior vs. subordinated repayment tranches.
-
-### Pillar II: Financial Econometrics
-* **Unit Root Diagnostics:** Automated Augmented Dickey-Fuller (ADF), Phillips-Perron, and KPSS tests to prevent spurious regression.
-* **Cointegration & Stat-Arb:** Engle-Granger and Johansen cointegration tests, Vector Error Correction Models (VECM), and Ornstein-Uhlenbeck mean-reversion half-life estimation.
-* **Volatility Modeling:** GARCH(1,1), EGARCH (for asymmetric leverage), and DCC-GARCH (Dynamic Conditional Correlation) for multi-asset hedging.
-* **Regime Detection:** Markov-Switching Autoregression (MS-AR) and Hidden Markov Models (HMM) for regime identification.
-
-### Pillar III: Financial Machine Learning (Marcos López de Prado Paradigm)
-* **Information-Driven Bars:** Dollar, Volume, and Tick Imbalance Bars (TIBs).
-* **Fractional Differentiation:** Minimal $d^* \in (0, 1)$ solving for stationarity while preserving maximum memory.
-* **The Triple-Barrier Method:** Path-dependent labeling (Take-Profit, Stop-Loss, Expiration).
-* **Purged & Embargoed Cross-Validation:** Elimination of serial correlation leakage across overlapping returns.
-* **Meta-Labeling:** Primary model predicts position; secondary ML model filters false positives and sizes bets.
-
-### Pillar IV: Derivatives, Volatility Surfaces & Risk
-* **Surface Calibration:** Calibration of SABR and Heston stochastic volatility models to market smiles.
-* **Arbitrage Invariance:** Autonomous verification of calendar spread and butterfly arbitrage conditions.
-* **Greeks Hedging:** Real-time computation of first- and second-order Greeks ($\Delta, \Gamma, \mathcal{V}, \Theta, \rho, \text{Vanna}, \text{Volga}$).
-
-### Pillar V: Trading, Microstructure & Algorithmic Execution
-* **Order Book Dynamics:** L2/L3 order book depth reconstruction, Order Flow Imbalance (OFI), and VPIN toxicity detection.
-* **Optimal Execution:** Almgren-Chriss market impact vs. volatility trade-off, TWAP, VWAP, and POV algorithms.
-* **Portfolio Construction:** Black-Litterman allocation (fusing equilibrium priors with agent views) and Hierarchical Risk Parity (HRP).
-
-### Pillar VI: Sustainable Finance & Climate Risk Modeling
-* **Carbon Accounting & WACI:** Standardized calculation of Weighted Average Carbon Intensity (WACI) across Scope 1, Scope 2, and Scope 3 disclosures.
-* **Climate Transition Stress Testing:** Modeling the impact of shadow/statutory carbon prices ($P_{\text{carbon}}$) on operating margins, EBIT, and debt covenant headroom under NGFS scenarios.
-* **Sustainability-Linked Bonds (SLB):** Evaluation of Sustainability Performance Targets (SPTs) and deterministic calculation of penalty coupon step-up triggers.
+| Area | Capability | Status | Module |
+| :--- | :--- | :---: | :--- |
+| **Fixed income & credit** | Bond price, Macaulay/modified duration, convexity, DV01 | ✅ | `core/fixed_income.py` |
+| | Nelson-Siegel curve fit | ✅ | `core/fixed_income.py` |
+| | Merton structural default model | ✅ | `core/fixed_income.py` |
+| | Covenant checks (leverage, coverage) via Z3 | ✅ | `core/invariants.py` |
+| | Nelson-Siegel-Svensson, key-rate durations, CDS hazard rates, tranche waterfalls | 🗺️ | n/a |
+| **Econometrics** | ADF stationarity test | ✅ | `core/econometrics.py` |
+| | Engle-Granger cointegration + OU half-life | ✅ | `core/econometrics.py` |
+| | GARCH(p,q) volatility | ✅ | `core/econometrics.py` |
+| | KPSS / Phillips-Perron, Johansen/VECM, EGARCH, DCC-GARCH, regime switching | 🗺️ | n/a |
+| **Financial ML** | Fractional differentiation + minimal-d search | ✅ | `core/financial_ml.py` |
+| | Triple-barrier labeling | ✅ | `core/financial_ml.py` |
+| | Purged/embargoed CV, meta-labeling, information-driven bars | 🗺️ | n/a |
+| **Derivatives** | Black-Scholes price and Greeks, CRR American options, implied vol | ✅ | `core/derivatives.py` |
+| | SABR smile calibration, butterfly arbitrage check (Z3) | ✅ | `core/derivatives.py` |
+| | Heston, local vol, full-surface no-arbitrage | 🗺️ | n/a |
+| **Execution & portfolio** | Order-book snapshot (spread, microprice, imbalance) | ✅ | `core/execution.py` |
+| | Almgren-Chriss schedule (discrete, Almgren & Chriss 2000) | ✅ | `core/execution.py` |
+| | Black-Litterman, hierarchical risk parity | ✅ | `core/execution.py` |
+| | VPIN, TWAP/VWAP/POV | 🗺️ | n/a |
+| **Sustainable finance** | WACI, carbon-tax stress test, SLB step-up covenant | ✅ | `core/sustainability.py` |
+| | Full NGFS scenario pathways | 🟡 enum only | `schemas/sustainability.py` |
+| **Verification & data** | Z3 three-statement invariants | ✅ | `core/invariants.py` |
+| | Statement DAG with driver shocks | ✅ | `core/graph.py` |
+| | Bi-temporal DuckDB store, `CitationRef` provenance | ✅ | `core/temporal.py`, `core/provenance.py` |
+| | SEC EDGAR XBRL, 10-K PDF parser, Ind AS crosswalk (live-data validation pending) | ✅ | `connectors/` |
+| | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
+| | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
+| **Agents** | Neuro-symbolic runtime, adversarial committee, forensics (Beneish, Altman) | ✅ | `runtime/`, `agents/` |
+| | Eight FastMCP tool servers | ✅ | `mcp_servers/` |
 
 ---
 
@@ -132,7 +125,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
                                      │ Normalizes Ingestion
 ┌────────────────────────────────────▼───────────────────────────────────┐
 │                    CANONICAL DATA & ONTOLOGY LAYER                     │
-│   DuckDB Bi-temporal Storage │ US-GAAP ↔ IFRS ↔ Ind AS Reconciliation  │
+│   DuckDB Bi-temporal Storage │ SEC XBRL & Ind AS ingestion             │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 

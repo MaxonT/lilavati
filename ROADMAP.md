@@ -3,7 +3,9 @@
 > *"As a drop of water on a lotus leaf shines like a pearl... so does true knowledge when firmly established in rigor."*
 > — **Bhāskarācārya**, *Līlāvatī*
 
-This document defines the official engineering roadmap, granular task list, and validation protocol for **Project Līlāvatī**. It serves as our shared source of truth during development.
+This document defines the engineering roadmap, task list, and validation protocol for **Project Līlāvatī**. It is our shared source of truth during development.
+
+**Current goal:** complete internal verification and validation (Phase 7) before any public announcement. Items below are marked `[x]` only when they exist in code with tests; anything weaker is marked partial (🟡) and explained.
 
 ---
 
@@ -30,7 +32,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
    * Calculations implemented in Polars, DuckDB, SciPy, Statsmodels, or QuantLib.
    * Zero stochastic LLM math in prompts or response text.
 3. **Stage 3: Automated Mathematical Verification (`pytest`):**
-   * Unit tests comparing output against audited reference values (textbooks, FRED, SEC filings).
+   * Unit tests comparing output against independent reference values (textbook worked examples, original papers, or mature libraries such as QuantLib/statsmodels), cited in the test.
    * Edge-case boundary tests (zero divisions, negative rates, extreme volatility).
    * SMT invariant satisfiability checking via `SuvarnaEngine` (Z3).
 4. **Stage 4: Code Quality Gates:**
@@ -39,8 +41,8 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
    * Type Safety: `uv run mypy src/ --strict` (zero type errors).
 5. **Stage 5: Collaborative Sign-off & Git Push:**
    * Milestone summarized with test coverage and verification output.
-   * Atomic Conventional Commit (`feat(...)`, `fix(...)`, `bench(...)`) pushed to `origin/main`.
-   * Approved by project lead.
+   * Atomic Conventional Commit (`feat(...)`, `fix(...)`, `bench(...)`).
+   * Approved by project lead before push.
 
 ---
 
@@ -52,7 +54,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] **0.3 AI Coding Agent Skill:** `.agents/skills/lilavati-dev/SKILL.md` enforcing zero math hallucinations.
 - [x] **0.4 Cryptographic Provenance Engine:** `CitationRef` and `SourcedValue` with SHA-256 document hashing.
 - [x] **0.5 Suvarṇa Z3 Formal Invariant Engine:** First-order logic verification for 3-statement balance and debt covenants.
-- [x] **0.6 Financial Econometrics Suite:** ADF unit root test, Johansen cointegration, OU half-life, and GARCH(1,1).
+- [x] **0.6 Financial Econometrics Suite:** ADF unit root test, Engle-Granger cointegration, OU half-life, and GARCH(p,q).
 - [x] **0.7 FastMCP Econometrics Server:** Exposes stationarity, cointegration, and GARCH tools over FastMCP.
 - [x] **0.8 Financial Machine Learning Suite:** Fractional differentiation ($d^*$) and Triple-Barrier path-dependent labeling.
 - [x] **0.9 FastMCP Financial ML Server:** Exposes fractional differentiation and triple-barrier tools over FastMCP.
@@ -61,7 +63,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] **0.12 Reactive Financial Computation Graph:** `StatementGraph` DAG propagating driver shocks with Z3 validation.
 - [x] **0.13 Sustainable Finance & Climate Risk Suite:** Carbon WACI, carbon tax transition stress testing, and SLB covenants.
 - [x] **0.14 FastMCP Sustainability Server:** Exposes WACI, carbon tax stress testing, and SLB covenant tools.
-- [x] **0.15 Verification:** 36 automated unit tests passing with strict mypy typing.
+- [x] **0.15 Verification:** unit tests and strict mypy typing in CI (`pytest`, `ruff`, `mypy`).
 
 ---
 
@@ -72,15 +74,14 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Pulls live company filings (10-K, 10-Q) from SEC EDGAR API with compliant User-Agent headers.
   * Parses standardized `us-gaap` taxonomy line items into canonical `ThreeStatementModel`.
   * Generates cryptographic `CitationRef` for every parsed fact.
-  * *Validation:* Parse Apple (AAPL) and Microsoft (MSFT) latest 10-K and verify $Assets = Liabilities + Equity$.
-- [x] **1.2 Market & Macro Series Connector:**
-  * Async connector for historical OHLCV data (daily and intraday bars) normalized to Polars DataFrames.
-  * Federal Reserve Economic Data (FRED) connector for SOFR, Treasury yields, CPI, and Fed Funds rate.
-  * *Validation:* Fetch 5-year Treasury constant maturity series and verify Nelson-Siegel fit.
+  * *Validation:* tested against a synthetic EDGAR payload shaped like Apple's company facts. 🟡 Live AAPL/MSFT validation is pending (Phase 7).
+- [~] **1.2 Market & Macro Series Connector (🟡 partial):**
+  * Implemented: OHLCV normalisation to Polars DataFrames and Nelson-Siegel fitting from supplied yield observations.
+  * Not implemented: data fetching (OHLCV download, FRED connector for SOFR, Treasury yields, CPI, Fed Funds).
 - [x] **1.3 India BSE/NSE Ind AS Corporate Filings Connector:**
   * Ingestion wrapper for Indian corporate disclosures and MCA Ind AS taxonomy filings.
   * Entity Taxonomy Reconciliation Engine (ETRE) mapping Ind AS terms to canonical `ChartOfAccounts`.
-  * *Validation:* Parse Reliance Industries or Infosys annual report balance sheet with 100% reconciliation.
+  * *Validation:* tested on modelled Ind AS figures. 🟡 Validation against a real Reliance/Infosys annual report is pending.
 - [x] **1.4 Bi-Temporal DuckDB Local Data Warehouse:**
   * DuckDB storage layer implementing dual-time indexing: `valid_time` (period described) vs `as_of_timestamp` (filing date).
   * Enforces temporal filters preventing look-ahead leakage in historical backtests.
@@ -102,7 +103,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Real-time calculation of Delta ($\Delta$), Gamma ($\Gamma$), Vega ($\mathcal{V}$), Theta ($\Theta$), Rho ($\rho$), Vanna ($\frac{\partial \Delta}{\partial \sigma}$), and Volga ($\frac{\partial \mathcal{V}}{\partial \sigma}$).
 - [x] **2.4 FastMCP Derivatives Server:**
   * Exposes `price_european_option`, `price_american_option`, `calculate_option_greeks`, `calibrate_sabr_volatility_model`, and `check_butterfly_arbitrage`.
-- [x] **2.5 Verification:** 54 automated unit tests passing across all pricing models, Put-Call parity, and arbitrage constraints.
+- [x] **2.5 Verification:** unit tests for pricing, put-call parity and arbitrage checks. Reference-value audit pending (Phase 7).
 
 ---
 
@@ -113,14 +114,13 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * L1/L2 order book depth processing, bid-ask spread decomposition, and Order Flow Imbalance (OFI).
   * Volume-weighted microprice calculation and crossed-book guards.
 - [x] **3.2 Optimal Execution Algorithms:**
-  * **Almgren-Chriss Optimal Liquidation:** Analytical solver balancing permanent/temporary market impact and volatility risk.
-  * Deterministic calculation of trajectory, trade slices, expected shortfall, and execution variance.
+  * **Almgren-Chriss Optimal Liquidation:** discrete-time solution of Almgren & Chriss (2000), with η̃ = η − γτ/2, prices in $ units via `arrival_price`, overflow-safe trajectory, expected cost and variance. Validated against the paper's Section 3.4 parameters and an independent numerical optimiser.
 - [x] **3.3 Institutional Portfolio Optimization:**
   * **Black-Litterman Allocation:** Bayesian blending of passive market equilibrium priors with agent subjective views ($P, Q, \Omega$) solved via `cvxpy`.
   * **Hierarchical Risk Parity (HRP):** Dendrogram clustering on correlation distance matrices, avoiding matrix inversion singularities.
 - [x] **3.4 FastMCP Portfolio & Execution Server:**
   * Exposes `analyze_order_book_microstructure`, `compute_almgren_chriss_liquidation_schedule`, `optimize_portfolio_black_litterman`, and `optimize_portfolio_hierarchical_risk_parity`.
-- [x] **3.5 Verification:** 63 automated unit tests passing across execution trajectories and allocation algorithms.
+- [x] **3.5 Verification:** unit tests across execution trajectories and allocation algorithms.
 
 ---
 
@@ -128,7 +128,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 *Goal: Role-bound agent loops debating investment theses under formal verification guardrails.*
 
 - [x] **4.1 Role-Bound Financial Agents & Forensics:**
-  * **Forensic Credit & Accounting Auditor:** Complete 8-variable Beneish M-Score manipulation detector and Altman Z-Score distress predictor.
+  * **Forensic Credit & Accounting Auditor:** 8-variable Beneish (1999) M-Score (coefficients corrected and tested against the paper) and Altman Z-Score.
   * **Thematic Bull Analyst:** Revenue growth drivers, operating income trajectories, and target models.
 - [x] **4.2 The Adversarial Investment Committee Protocol:**
   * Deliberative multi-turn protocol: Bull presents thesis; Forensic Bear stress-tests earnings quality and receivables.
@@ -147,22 +147,20 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] **4.7 Institutional Tracing & OpenTelemetry Audit Trail (`src/lilavati/tracing/`):**
   * OpenTelemetry-compatible span models capturing agent runs, model calls, tool executions, SMT verification results, and citation checks.
   * Immutable JSONL audit trail exporter and compliance summaries.
-- [x] **4.8 Institutional Tracing & OpenTelemetry Audit Trail (`src/lilavati/tracing/`):**
-  * OpenTelemetry-compatible span models capturing agent runs, model calls, tool executions, SMT verification results, and citation checks.
-  * Immutable JSONL audit trail exporter and compliance summaries.
-- [x] **4.9 Advanced Autonomous Financial Agents (Search, Deep, Research) (`src/lilavati/agents/`):**
+- [x] **4.8 Advanced Autonomous Financial Agents (Search, Deep, Research) (`src/lilavati/agents/`):**
   * **FinancialSearchAgent:** Autonomous multi-source discovery across SEC EDGAR, India BSE/NSE Ind AS, and macro feeds with SHA-256 cryptographic provenance.
   * **DeepFinancialAgent:** Deep reasoning hypothesis tree search (Bull, Base, Bear) evaluated through reactive DAGs and Z3 SMT invariant pruning.
   * **FinancialResearchAgent:** End-to-end equity and credit research dossier synthesis integrating filing retrieval, forensic audits, deep scenario trees, and carbon WACI.
-- [x] **4.10 Verification:** 88 automated unit tests passing across multi-role committee deliberation, model connectivity, tracing, runtime loops, and advanced agents.
+- [x] **4.9 Verification:** unit tests across committee deliberation, model connectivity, tracing, runtime loops, and agents. Note: the default LLM is a mock; real-model agent runs are not yet part of the test suite.
 
 ---
 
 ### Phase 5: Līlāvatī-Bench (The Financial Agent Benchmark Suite) (Status: IMPLEMENTED — ALPHA)
-*Goal: The definitive evaluation suite testing autonomous financial agents and domain LLMs.*
+*Goal: an evaluation suite for autonomous financial agents and domain LLMs.*
 
 - [x] **5.1 Golden Benchmark Dataset Curation:**
-  * 7 authoritative reference test cases across all foundational quantitative tracks with statutory SHA-256 document hashes.
+  * 7 golden test cases (one per track). Their `doc_hash` values are hashes of source labels, not of real documents.
+  * Seeded templated generator for 5 tracks with balanced True/False answers (content-free baseline: 15.7% vs 63.6% on golden cases).
   * Point-in-time cutoff dates enforced for every scenario.
 - [x] **5.2 Automated Benchmark Runners across 7 Tracks:**
   * Track 1: Three-Statement Dynamic Reconciliation under Revenue Shock (Z3 SMT verified).
@@ -173,27 +171,28 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Track 6: Market Microstructure & Optimal Execution (LOB Microprice, Spread, and Almgren-Chriss schedule).
   * Track 7: Sustainable Finance & Climate Stress Testing (Portfolio WACI & SLB coupon step-up check).
 - [x] **5.3 Quantitative Metric Evaluators:**
-  * **Proof-of-Citation Score (PoCS):** Evaluates SHA-256 statutory hash links and page/snippet verification.
+  * **Proof-of-Citation Score (PoCS):** 🟡 currently checks hash membership only; page/snippet verification against real documents is planned.
   * **Accounting Invariant Compliance Rate (ICR):** Formally evaluated via Z3 SMT solver.
-  * **Temporal Purity Index (TPI):** Detects look-ahead leakage and post-dated disclosure access.
-  * **Tool Math Purity Ratio (TMPR):** Measures percentage of computations run through deterministic sandboxes vs mental math.
+  * **Temporal Purity Index (TPI):** 🟡 compares the filing date the agent reports with the cutoff; detection from the values used is planned.
+  * **Tool Math Purity Ratio (TMPR):** 🟡 not yet measured for LLMs (hard-coded for the reference solver).
   * **Composite Līlāvatī Index:** Weighted institutional benchmark score (0-100).
-- [x] **5.4 Public Leaderboard & Reproduction CLI:**
-  * `lilavati-bench` command-line executable with `run` and `list-cases` subcommands.
-  * Generates publication-ready Markdown tables, Rich terminal graphics, and JSON artifacts.
-- [x] **5.5 Verification:** Reference solver passes 100.0% across all 7 tracks with full cryptographic citations.
+- [x] **5.4 Reproduction CLI and baselines:**
+  * `lilavati-bench` CLI (`run`, `list-cases`); `scripts/run_llm_baseline.py` direct-prompt baseline with raw outputs in `results/`.
+  * First measured baseline (4 Google models, Nov 2026): answered items were almost all correct, so current cases are saturated.
+  * No public leaderboard yet.
+- [x] **5.5 Verification:** reference solver passes all 7 golden tracks (by construction; it uses the same engines the checks use).
 
 ---
 
-### Phase 6: Academic Pre-Prints, Open-Source Launch & Community (Status: IMPLEMENTED — ALPHA)
-*Goal: Academic recognition, peer-reviewed pre-prints, and viral open-source adoption.*
+### Phase 6: Pre-Prints, Documentation & Soft Launch (Status: DRAFTS — ALPHA)
+*Goal: working-draft papers, documentation and a quiet public repository for early feedback.*
 
 - [x] **6.1 Academic Pre-Print 1 (Framework Paper):**
   * *"Līlāvatī: A Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning"*
-  * Structured pre-print draft delivered at `docs/papers/01_framework_paper.md` (Target: arXiv q-fin / NeurIPS / ACM ICAIF).
+  * Working draft at `docs/papers/01_framework_paper.md` (not peer reviewed).
 - [x] **6.2 Academic Pre-Print 2 (Benchmark Paper):**
   * *"Līlāvatī-Bench: Stress-Testing Financial LLMs and Agents on Accounting Invariants and Look-Ahead Bias"*
-  * Structured benchmark paper draft delivered at `docs/papers/02_benchmark_paper.md` (Target: Journal of Financial Data Science).
+  * Working draft at `docs/papers/02_benchmark_paper.md` with measured baselines (not peer reviewed).
 - [x] **6.3 Documentation & Interactive Tutorials:**
   * MkDocs Material documentation website (`mkdocs.yml`, `docs/index.md`, `docs/architecture.md`, `docs/benchmarks.md`).
   * 4 executable institutional tutorial scripts in `examples/`:
@@ -201,6 +200,49 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
     2. `examples/02_statistical_arbitrage_pairs.py`: Engle-Granger cointegration, OU half-life, and GARCH.
     3. `examples/03_climate_risk_stress_test.py`: Portfolio WACI, shadow carbon tax, and SLB covenants.
     4. `examples/04_autonomous_agent_tracing.py`: Full agent loop with OpenTelemetry tracing and JSONL audit export.
-- [x] **6.4 Community Launch Readiness:**
-  * Ready for public release on GitHub, Hugging Face Spaces leaderboard, Hacker News, and FINOS.
+- [x] **6.4 Soft launch:** public GitHub repository, `v0.1.0-alpha` pre-release, CI, SECURITY.md, CODE_OF_CONDUCT.md, issue/PR templates.
+- [x] **6.5 MCP usability:** `lilavati-mcp-*` launch commands for all 8 servers and `docs/mcp-setup.md` (Claude Code / Claude Desktop configuration).
 
+---
+
+### Phase 7: Verification & Validation → Public Announcement (Status: IN PROGRESS)
+*Goal: every capability we announce is independently verified. No announcement until the gate below is green.*
+
+**7A. Correctness (blocking)**
+- [x] 7.1 Fix Beneish M-score coefficients (TATA 4.679, LVGI −0.327) with tests against Beneish (1999).
+- [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
+- [ ] 7.3 Reference-value audit of every engine (fixed income, derivatives, econometrics, financial ML, execution, sustainability, invariants, forensics, statement graph), published as `docs/validation.md`.
+- [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
+- [ ] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report.
+
+**7B. Honest documentation (blocking)**
+- [x] 7.6 README, docs, dev skill and roadmap list only implemented capabilities; planned items are marked.
+- [x] 7.7 Draft papers: placeholder results removed; measured baselines and limitations stated.
+- [ ] 7.8 Final claims sweep: every number in README/docs/papers traced to code output or a primary source.
+
+**7C. Packaging & release (blocking)**
+- [x] 7.9 Distribution renamed to `lilavati-finance` (PyPI name `lilavati` belongs to an unrelated project).
+- [ ] 7.10 Reserve `lilavati-finance` on PyPI; release workflow with Trusted Publishing; install from PyPI verified in a clean environment.
+- [ ] 7.11 Docs site deployed (GitHub Pages); CI runs all examples and the docs build.
+- [ ] 7.12 Real author names in `pyproject.toml`, `CITATION.cff` and papers.
+
+**7D. Benchmark credibility (recommended before announcing the benchmark; not blocking the toolkit)**
+- [ ] 7.13 Tool-augmented baseline with measured TMPR.
+- [ ] 7.14 Citation track on real documents (real PoCS).
+- [ ] 7.15 Look-ahead track with a poisoned corpus (real TPI).
+- [ ] 7.16 Multi-step three-statement generated cases.
+
+**7E. Announcement**
+- [ ] 7.17 External review by at least one practitioner (quant/credit) and one software reviewer; issues triaged.
+- [ ] 7.18 Tag `v0.2.0`, publish to PyPI, then announce as an alpha toolkit for feedback.
+
+---
+
+## Not yet implemented (previously advertised; tracked honestly)
+
+- [ ] Purged & embargoed cross-validation, meta-labeling, information-driven bars (dollar/volume/imbalance)
+- [ ] Johansen/VECM, KPSS, Phillips-Perron, EGARCH, DCC-GARCH, Markov-switching/HMM
+- [ ] Heston, local volatility, full-surface no-arbitrage checks
+- [ ] Key-rate durations, Nelson-Siegel-Svensson, CDS hazard-rate bootstrapping, debt tranche waterfalls
+- [ ] VPIN, TWAP/VWAP/POV execution schedules
+- [ ] US-GAAP to IFRS reconciliation; full NGFS scenario pathways
