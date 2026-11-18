@@ -60,7 +60,7 @@ class CarbonTaxStressResult(BaseModel):
     net_carbon_expense: float = Field(..., description="Net unhedged expense borne by the firm ($)")
     ebit_margin_before_pct: float = Field(..., description="Operating margin before carbon shock")
     ebit_margin_after_pct: float = Field(..., description="Operating margin after carbon shock")
-    ebit_reduction_pct: float = Field(..., description="Percentage decline in operating income")
+    ebit_reduction_pct: float = Field(..., description="Decline in operating income as a fraction")
     interest_coverage_after: float = Field(
         ..., description="Adjusted interest coverage ratio (EBIT / Interest)"
     )
@@ -75,7 +75,7 @@ class SustainabilityLinkedBond(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     isin: str = Field(..., description="International Securities Identification Number")
-    notional: float = Field(..., description="Principal face value ($)")
+    notional: float = Field(..., gt=0.0, description="Principal face value ($)")
     base_coupon_rate: float = Field(
         ..., description="Base annual coupon rate (e.g. 0.045 for 4.5%)"
     )
@@ -83,10 +83,10 @@ class SustainabilityLinkedBond(BaseModel):
         ..., ge=0.0, le=1.0, description="Mandatory emission reduction % by target date"
     )
     baseline_emissions: float = Field(
-        ..., description="Baseline emissions at bond issuance (tCO2e)"
+        ..., gt=0.0, description="Baseline emissions at bond issuance (tCO2e)"
     )
     step_up_bps: float = Field(
-        ..., description="Penalty coupon step-up in basis points (e.g. 25 bps = 0.0025)"
+        ..., ge=0.0, description="Penalty coupon step-up in basis points (e.g. 25 bps = 0.0025)"
     )
     target_year: int = Field(
         ..., description="Observation year for the Sustainability Performance Target (SPT)"

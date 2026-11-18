@@ -1,11 +1,17 @@
 """
 Suvarṇa Formal Invariant Engine (named after Bhāskara II's Suvarṇa-gaṇita).
 
-Uses the Z3 Satisfiability Modulo Theories (SMT) solver to formally verify
-financial accounting identities, debt covenants, and no-arbitrage conditions.
+Uses the Z3 SMT solver to check accounting identities in exact decimal arithmetic.
+
+Scope note: every variable is bound to a concrete input value, so a Z3 check here is
+equivalent to evaluating the identity in exact rational arithmetic on the decimal
+representation of the inputs. It verifies the given numbers; it does not prove
+properties of a model over ranges of inputs. Covenant checks use plain arithmetic.
 """
 
 from __future__ import annotations
+
+import math
 
 import z3
 from pydantic import BaseModel, Field
@@ -26,6 +32,12 @@ class InvariantCheckResult(BaseModel):
     )
 
 
+def _require_finite(**values: float) -> None:
+    bad = [k for k, v in values.items() if not math.isfinite(v)]
+    if bad:
+        raise ValueError(f"Inputs must be finite numbers; got non-finite: {', '.join(bad)}")
+
+
 class SuvarnaEngine:
     """Formal verification engine for financial statements and quantitative models."""
 
@@ -38,8 +50,14 @@ class SuvarnaEngine:
     ) -> InvariantCheckResult:
         """
         Formally verifies balance sheet equilibrium using Z3 SMT solver:
-        Assets == Liabilities + Equity (within tolerance).
+        Assets == Liabilities + Equity (within absolute tolerance, in input units).
         """
+        _require_finite(
+            total_assets=total_assets,
+            total_liabilities=total_liabilities,
+            shareholders_equity=shareholders_equity,
+            tolerance=tolerance,
+        )
         solver = z3.Solver()
         a = z3.Real("total_assets")
         liab = z3.Real("total_liabilities")
@@ -96,7 +114,23 @@ class SuvarnaEngine:
         Formally verifies balance sheet equilibrium and cash flow reconciliation:
         1. Balance Sheet: Assets == Liabilities + Equity
         2. Cash Flow: CashEnd == CashStart + CFO + CFI + CFF
+
+        Tolerance is absolute, in input units. `net_income` is accepted for API stability but
+        not yet checked: a retained-earnings roll-forward (RE_end = RE_start + NI - dividends)
+        needs inputs this function does not take.
         """
+        _require_finite(
+            total_assets=total_assets,
+            total_liabilities=total_liabilities,
+            shareholders_equity=shareholders_equity,
+            net_income=net_income,
+            cash_start=cash_start,
+            cash_end=cash_end,
+            cfo=cfo,
+            cfi=cfi,
+            cff=cff,
+            tolerance=tolerance,
+        )
         solver = z3.Solver()
 
         # Symbolic real variables
@@ -179,10 +213,22 @@ class SuvarnaEngine:
         interest_expense: float,
     ) -> InvariantCheckResult:
         """
-        Formally verifies credit agreement covenants:
+        Checks credit agreement maintenance covenants (plain arithmetic, not Z3):
         1. Net Leverage = (Total Debt - Cash) / EBITDA <= max_leverage_covenant
         2. Interest Coverage = EBITDA / InterestExpense >= min_interest_coverage_covenant
+
+        A ratio exactly at its limit complies; comparisons allow a 1e-9 relative tolerance so
+        floating-point rounding (e.g. 2.1 / 0.7 = 3.0000000000000004) is not reported as a breach.
         """
+        _require_finite(
+            total_debt=total_debt,
+            cash=cash,
+            ebitda=ebitda,
+            max_leverage_covenant=max_leverage_covenant,
+            min_interest_coverage_covenant=min_interest_coverage_covenant,
+            interest_expense=interest_expense,
+        )
+        rel_tol = 1e-9
         violations: list[str] = []
 
         if ebitda <= 0:
@@ -194,7 +240,7 @@ class SuvarnaEngine:
         net_debt = total_debt - cash
         current_leverage = net_debt / ebitda
 
-        if current_leverage > max_leverage_covenant:
+        if current_leverage > max_leverage_covenant * (1.0 + rel_tol) + rel_tol:
             violations.append(
                 f"Covenant breach: Net Leverage ({current_leverage:.2f}x) exceeds maximum allowable limit "
                 f"({max_leverage_covenant:.2f}x)."
@@ -202,7 +248,7 @@ class SuvarnaEngine:
 
         if interest_expense > 0:
             coverage = ebitda / interest_expense
-            if coverage < min_interest_coverage_covenant:
+            if coverage < min_interest_coverage_covenant * (1.0 - rel_tol) - rel_tol:
                 violations.append(
                     f"Covenant breach: Interest Coverage ({coverage:.2f}x) is below minimum allowable limit "
                     f"({min_interest_coverage_covenant:.2f}x)."

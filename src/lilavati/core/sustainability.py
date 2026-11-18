@@ -5,7 +5,6 @@ Implements rigorous quantitative modeling for:
 1. Carbon Accounting & Weighted Average Carbon Intensity (WACI)
 2. Climate Transition Stress Testing (Shadow Carbon Pricing on Operating Margins & Debt Covenants)
 3. Sustainability-Linked Bond (SLB) Coupon Step-Up Covenant Evaluation
-4. Climate Value-at-Risk (Climate Transition VaR)
 """
 
 from __future__ import annotations
@@ -28,7 +27,13 @@ class PortfolioCarbonResult(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     waci: float = Field(..., description="Weighted Average Carbon Intensity (tCO2e / $M revenue)")
-    total_carbon_footprint: float = Field(..., description="Total financed emissions (tCO2e)")
+    total_carbon_footprint: float = Field(
+        ...,
+        description=(
+            "Portfolio-weight-averaged absolute emissions sum(w_i * E_i) (tCO2e). This is NOT "
+            "PCAF financed emissions, which need position value and EVIC per holding."
+        ),
+    )
     carbon_intensity_clean: bool = Field(
         ..., description="True if below Paris-aligned benchmark threshold"
     )
@@ -45,8 +50,11 @@ class SustainabilityEngine:
         paris_aligned_threshold: float = 100.0,
     ) -> PortfolioCarbonResult:
         """
-        Computes the Weighted Average Carbon Intensity (WACI):
-        WACI = sum(w_i * (Emissions_i / Revenue_i_in_millions))
+        Computes the Weighted Average Carbon Intensity (WACI), TCFD (2017, 2021 annex):
+        WACI = sum(w_i * (Emissions_i / Revenue_i_in_millions)), in tCO2e per $M revenue.
+
+        Emissions should be Scope 1 + 2 (tCO2e) per TCFD. Weights must be non-negative
+        (long-only); they are normalised to sum to 1.
         """
         w = np.asarray(portfolio_weights, dtype=np.float64)
         e = np.asarray(emissions, dtype=np.float64)
@@ -58,6 +66,11 @@ class SustainabilityEngine:
             )
         if np.any(r <= 0):
             raise ValueError("Revenues must be strictly positive to compute carbon intensity.")
+
+        if np.any(w < 0) or np.sum(w) <= 0:
+            raise ValueError("Weights must be non-negative and sum to a positive value.")
+        if np.any(e < 0):
+            raise ValueError("Emissions must be non-negative.")
 
         # Normalize weights if not summing to 1.0
         w_norm = w / np.sum(w)
@@ -85,6 +98,11 @@ class SustainabilityEngine:
         """
         Stress tests a company's operating margin, EBIT, and interest coverage under
         a shadow or statutory carbon price shock ($/tCO2e).
+
+        Model: net cost = (Scope 1 + Scope 2) * price * (1 - pass_through_rate), deducted from
+        EBIT. Including Scope 2 is a conservative modelling choice (many carbon taxes apply
+        to Scope 1 only; pass Scope 2 = 0 for that case). Returned "_pct" fields are
+        fractions (0.25 = 25%).
         """
         if revenue <= 0:
             raise ValueError("Revenue must be positive.")
@@ -124,10 +142,16 @@ class SustainabilityEngine:
     ) -> SLBCovenantResult:
         """
         Evaluates whether a Sustainability-Linked Bond (SLB) achieved its Sustainability
-        Performance Target (SPT) or triggers the penalty coupon step-up.
+        Performance Target (SPT) or triggers the penalty coupon step-up (ICMA SLB
+        Principles, 2023). The penalty is the annual extra interest: notional * step-up.
         """
+        if reported_emissions < 0:
+            raise ValueError("Reported emissions must be non-negative.")
         reduction = (bond.baseline_emissions - reported_emissions) / bond.baseline_emissions
-        spt_achieved = reduction >= bond.target_reduction_pct
+        # Compare on the emissions level, with a tiny relative tolerance, so a target that is
+        # met exactly is not missed through floating-point rounding (e.g. 3 -> 2.4 at 20%).
+        threshold = bond.baseline_emissions * (1.0 - bond.target_reduction_pct)
+        spt_achieved = reported_emissions <= threshold * (1.0 + 1e-12)
 
         if spt_achieved:
             active_coupon = bond.base_coupon_rate
