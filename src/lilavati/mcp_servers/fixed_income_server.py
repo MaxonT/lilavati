@@ -35,6 +35,10 @@ def analyze_bond(
 ) -> dict[str, Any]:
     """
     Computes clean price, Macaulay duration, modified duration, convexity, and DV01 for a bond.
+
+    Rates are annual decimals (0.05 = 5%); ytm is compounded `frequency` times per year.
+    Valuation is on a coupon date (no accrued interest; maturity rounded to whole periods).
+    Price and DV01 are in face_value units; durations in years; convexity annualised (years^2).
     """
     result = FixedIncomeEngine.analyze_bond(
         face_value=face_value,
@@ -60,6 +64,9 @@ def fit_yield_curve(
 ) -> dict[str, Any]:
     """
     Fits the Nelson-Siegel 4-parameter model to observed benchmark yields and maturities.
+
+    Maturities in years (ascending); yields are zero-coupon yields as decimals (0.045 = 4.5%).
+    lambda_decay is the time constant tau in years.
     """
     result = FixedIncomeEngine.fit_nelson_siegel(
         maturities=maturities,
@@ -86,6 +93,10 @@ def evaluate_credit_risk_merton(
     """
     Solves the Merton structural credit risk model for implied asset value,
     asset volatility, distance-to-default, default probability, and theoretical credit spread.
+
+    Volatility is annualised decimal; risk_free_rate is continuously compounded; maturity in
+    years. distance_to_default is risk-neutral d2 and default_probability = N(-d2). Raises
+    ValueError for non-positive inputs or if the solver does not converge.
     """
     result = FixedIncomeEngine.solve_merton_model(
         equity_value=equity_value,
