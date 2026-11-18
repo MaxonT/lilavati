@@ -118,5 +118,10 @@ def evaluate_sustainability_linked_bond_covenant(
     return result.model_dump()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run this MCP server over stdio."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

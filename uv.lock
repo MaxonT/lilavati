@@ -1425,7 +1425,7 @@ wheels = [
 ]
 
 [[package]]
-name = "lilavati"
+name = "lilavati-finance"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -1484,7 +1484,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.162.7" },
     { name = "fastmcp", specifier = ">=2.0.0" },
     { name = "httpx", specifier = ">=0.27.0" },
-    { name = "lilavati", extras = ["quantlib", "dev", "docs"], marker = "extra == 'all'" },
+    { name = "lilavati-finance", extras = ["quantlib", "dev", "docs"], marker = "extra == 'all'" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.0" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5.0" },
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.25.0" },

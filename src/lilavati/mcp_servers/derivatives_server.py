@@ -156,5 +156,10 @@ def check_butterfly_arbitrage(
     return result.model_dump()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run this MCP server over stdio."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

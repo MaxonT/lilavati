@@ -53,6 +53,7 @@ nav:
       - "02. Statistical Arbitrage & Optimal Execution": tutorials/02_statistical_arbitrage_and_execution_agent.md
       - "03. Forensic Accounting & Adversarial Committee": tutorials/03_forensic_accounting_and_adversarial_committee.md
       - "04. Climate Risk & Sustainable Portfolio": tutorials/04_climate_risk_and_sustainable_portfolio.md
+  - Using the MCP Servers: mcp-setup.md
   - Līlāvatī-Bench: benchmarks.md
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md

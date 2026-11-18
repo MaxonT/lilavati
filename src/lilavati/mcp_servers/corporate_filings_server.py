@@ -71,5 +71,10 @@ def extract_single_line_item(
     return item.model_dump()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run this MCP server over stdio."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

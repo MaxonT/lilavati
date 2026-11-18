@@ -1,5 +1,5 @@
 [project]
-name = "lilavati"
+name = "lilavati-finance"
 version = "0.1.0"
 description = "An open-source, verifiable agentic stack and evaluation benchmark for quantitative finance, credit, and capital markets."
 readme = "README.md"
@@ -69,11 +69,19 @@ docs = [
     "mkdocstrings[python]>=0.25.0",
 ]
 all = [
-    "lilavati[quantlib,dev,docs]",
+    "lilavati-finance[quantlib,dev,docs]",
 ]
 
 [project.scripts]
 lilavati-bench = "lilavati.bench.cli:main"
+lilavati-mcp-committee = "lilavati.mcp_servers.committee_server:main"
+lilavati-mcp-corporate-filings = "lilavati.mcp_servers.corporate_filings_server:main"
+lilavati-mcp-derivatives = "lilavati.mcp_servers.derivatives_server:main"
+lilavati-mcp-econometrics = "lilavati.mcp_servers.econometrics_server:main"
+lilavati-mcp-financial-ml = "lilavati.mcp_servers.financial_ml_server:main"
+lilavati-mcp-fixed-income = "lilavati.mcp_servers.fixed_income_server:main"
+lilavati-mcp-portfolio-exec = "lilavati.mcp_servers.portfolio_exec_server:main"
+lilavati-mcp-sustainability = "lilavati.mcp_servers.sustainability_server:main"
 
 [project.urls]
 Homepage = "https://github.com/revendrat/lilavati"

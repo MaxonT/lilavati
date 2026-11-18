@@ -71,5 +71,10 @@ def apply_triple_barrier_labels(
     return [label.model_dump() for label in labels]
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run this MCP server over stdio."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
