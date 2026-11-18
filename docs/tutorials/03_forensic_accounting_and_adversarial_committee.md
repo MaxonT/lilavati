@@ -122,7 +122,7 @@ def ingestion_and_provenance_node(state: ForensicCommitteeState) -> ForensicComm
 ### Node 2: Deterministic Forensic Analytics
 Evaluate the 8-variable Beneish M-Score and Altman Z-Score:
 
-$$\text{M-Score} = -4.84 + 0.920 \cdot \text{DSRI} + 0.528 \cdot \text{GMI} + 0.404 \cdot \text{AQI} + 0.892 \cdot \text{SGI} + 0.115 \cdot \text{DEPI} - 0.172 \cdot \text{SGAI} + 4.037 \cdot \text{TATA} + 0.0327 \cdot \text{LVGI}$$
+$$\text{M-Score} = -4.84 + 0.920 \cdot \text{DSRI} + 0.528 \cdot \text{GMI} + 0.404 \cdot \text{AQI} + 0.892 \cdot \text{SGI} + 0.115 \cdot \text{DEPI} - 0.172 \cdot \text{SGAI} + 4.679 \cdot \text{TATA} - 0.327 \cdot \text{LVGI}$$
 
 $$\text{Threshold}: \text{M-Score} > -1.78 \implies \text{High Probability of Manipulation}$$
 
@@ -307,7 +307,7 @@ state = ForensicCommitteeState(
 )
 result = agent_graph.invoke(state)
 print("PM Verdict:", result.pm_decision)
-# Output: REJECTED_MANIPULATION_RISK: Beneish M-Score (-0.83 > -1.78) indicates high probability of financial reporting manipulation.
+# Output: REJECTED_MANIPULATION_RISK: Beneish M-Score (-1.63 > -1.78) indicates high probability of financial reporting manipulation.
 ```
 
 ---

@@ -77,8 +77,14 @@ class ForensicEngine:
         cfo_t: float,
     ) -> BeneishMScoreResult:
         """
-        Calculates the complete 8-variable Beneish M-Score:
-        M = -4.84 + 0.920*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.037*TATA + 0.0327*LVGI
+        Calculates the 8-variable Beneish M-Score (Beneish 1999, "The Detection of Earnings
+        Manipulation", Financial Analysts Journal 55(5)):
+        M = -4.84 + 0.920*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI
+            - 0.172*SGAI + 4.679*TATA - 0.327*LVGI
+        A score above -1.78 flags a likely manipulator.
+
+        Note: TATA here is the common cash-flow simplification (net income - CFO) / total assets,
+        not the original balance-sheet accruals definition; scores can differ from published ones.
         """
         # DSRI: Days Sales in Receivables Index
         dsri = (receivables_t / revenue_t) / (receivables_t_minus_1 / revenue_t_minus_1)
@@ -124,8 +130,8 @@ class ForensicEngine:
             + 0.892 * sgi
             + 0.115 * depi
             - 0.172 * sgai
-            + 4.037 * tata
-            + 0.0327 * lvgi
+            + 4.679 * tata
+            - 0.327 * lvgi
         )
 
         is_manip = m_score > -1.78
