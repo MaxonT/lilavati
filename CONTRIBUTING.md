@@ -42,6 +42,8 @@ source .venv/bin/activate  # On macOS/Linux
 
 # 4. Verify installation by running tests
 uv run pytest
+# Optional, uses your API quota: live tool-calling tests against real models
+LILAVATI_LIVE_TESTS=1 GEMINI_API_KEY=... uv run pytest tests/integration -v
 ```
 
 ---
@@ -129,7 +131,7 @@ When opening a Pull Request, please copy and complete the following template:
 ## 🤖 Using AI Coding Tools (Claude Code, Cursor, Codex, Antigravity)
 
 If you are developing this project using an AI coding assistant:
-1. Ensure the agent has loaded our repo-specific skill: [`.agents/skills/lilavati-dev/SKILL.md`](.agents/skills/lilavati-dev/SKILL.md).
+1. Ensure the agent has loaded our repo-specific skill: [`.claude/skills/lilavati-dev/SKILL.md`](.claude/skills/lilavati-dev/SKILL.md).
 2. The agent must verify that any code it writes uses typed Pydantic models, strictly avoids inline mental math, and includes unit tests.
 
 ---

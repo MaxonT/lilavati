@@ -97,6 +97,8 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
 | **Agents** | Neuro-symbolic runtime, adversarial committee, forensics (Beneish, Altman) | ✅ | `runtime/`, `agents/` |
+| | LLM tool calling: OpenAI-compatible, Gemini, Anthropic, with retries on 429/5xx | ✅ live-tested on Gemini API (Gemma 4 31B, Gemini 4 Hydrogen); Anthropic format-tested only | `llm/client.py` |
+| | Checkpointing, streaming, async, human-in-the-loop | 🗺️ not planned in core: use LangGraph / Google ADK with Līlāvatī's MCP servers | n/a |
 | | Eight FastMCP tool servers | ✅ | `mcp_servers/` |
 
 ---
@@ -188,7 +190,7 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started, and e
 ### Coding with AI Tools (Claude Code, Cursor, Antigravity, Codex)
 
 If you are using AI coding agents or assistants to write code for this repository, please direct your agent to read the repository skill:
-👉 [`.agents/skills/lilavati-dev/SKILL.md`](.agents/skills/lilavati-dev/SKILL.md)
+👉 [`.claude/skills/lilavati-dev/SKILL.md`](.claude/skills/lilavati-dev/SKILL.md)
 
 This skill instructs coding agents on our **Zero LLM Arithmetic** rule, Z3 invariant verification, type annotations, and PR validation standards.
 

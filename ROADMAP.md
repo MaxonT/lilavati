@@ -51,7 +51,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 ### Phase 0: Foundations, Invariants & Core Engines (Status: IMPLEMENTED — ALPHA)
 - [x] **0.1 Project Scaffolding:** `pyproject.toml` with `uv`, Apache 2.0 License, `CITATION.cff`.
 - [x] **0.2 Contributor & PR Guidelines:** `CONTRIBUTING.md` with Conventional Commits and PR checklist.
-- [x] **0.3 AI Coding Agent Skill:** `.agents/skills/lilavati-dev/SKILL.md` enforcing zero math hallucinations.
+- [x] **0.3 AI Coding Agent Skill:** `.claude/skills/lilavati-dev/SKILL.md`: coding, testing and documentation rules for AI agents, updated as bugs reveal new patterns.
 - [x] **0.4 Cryptographic Provenance Engine:** `CitationRef` and `SourcedValue` with SHA-256 document hashing.
 - [x] **0.5 Suvarṇa Z3 Formal Invariant Engine:** First-order logic verification for 3-statement balance and debt covenants.
 - [x] **0.6 Financial Econometrics Suite:** ADF unit root test, Engle-Granger cointegration, OU half-life, and GARCH(p,q).
@@ -209,9 +209,10 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 *Goal: every capability we announce is independently verified. No announcement until the gate below is green.*
 
 **7A. Correctness (blocking)**
+- [x] 7.0 LLM tool calling for Gemini and Anthropic (previously tools were silently dropped, so agents never called tools on those providers); bounded retries on 429/5xx; tool-round limit separate from reflection limit; mocked format tests and opt-in live tests (`tests/integration/`).
 - [x] 7.1 Fix Beneish M-score coefficients (TATA 4.679, LVGI −0.327) with tests against Beneish (1999).
 - [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
-- [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss (15 bugs fixed). Pending: econometrics, financial ML, LOB / Black-Litterman / HRP, statement graph, connectors.
+- [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss, econometrics, financial ML (33 bugs fixed). Pending: LOB / Black-Litterman / HRP, statement graph, connectors.
 - [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
 - [ ] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report.
 
@@ -231,6 +232,12 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [ ] 7.14 Citation track on real documents (real PoCS).
 - [ ] 7.15 Look-ahead track with a poisoned corpus (real TPI).
 - [ ] 7.16 Multi-step three-statement generated cases.
+
+**7F. Positioning & integrations (blocking for soft release)**
+- [ ] 7.19 Position Līlāvatī as validated finance tools for agents over MCP (works with LangGraph, Google ADK, Claude), not as a competing orchestration framework; update README intro.
+- [ ] 7.20 Runnable LangGraph example using the Līlāvatī MCP servers on a real model.
+- [ ] 7.21 Runnable Google ADK example using the Līlāvatī MCP servers on a real model.
+- [ ] 7.22 Live Anthropic tool-calling run (needs an API key).
 
 **7E. Announcement**
 - [ ] 7.17 External review by at least one practitioner (quant/credit) and one software reviewer; issues triaged.

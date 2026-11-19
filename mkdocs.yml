@@ -61,6 +61,8 @@ nav:
       - Invariants: validation/invariants.md
       - Sustainability: validation/sustainability.md
       - Forensics: validation/forensics.md
+      - Econometrics: validation/econometrics.md
+      - Financial ML: validation/financial_ml.md
   - Līlāvatī-Bench: benchmarks.md
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md

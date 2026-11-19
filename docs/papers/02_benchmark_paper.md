@@ -25,7 +25,7 @@ To evaluate performance under production capital allocation constraints, Līlāv
 * **Proof-of-Citation Score (PoCS)**: Measures verifiable cryptographic linkage ($\mathcal{H}_{\text{SHA-256}}$) of extracted claims to primary statutory disclosures.
 * **Accounting Invariant Compliance Rate (ICR)**: Formally evaluates balance sheet equilibrium ($Assets = Liabilities + Equity$) and dynamic cash flow deltas via Satisfiability Modulo Theories (Z3 SMT solver).
 * **Temporal Purity Index (TPI)**: Measures complete elimination of restatement leakage and future information under strict point-in-time boundaries ($T_{\text{cutoff}}$).
-* **Tool Math Purity Ratio (TMPR)**: Quantifies the delegation rate to certified deterministic execution sandboxes versus token-level mental math arithmetic.
+* **Tool Math Purity Ratio (TMPR)**: Quantifies the delegation rate to deterministic execution sandboxes versus token-level mental math arithmetic.
 
 In a first measurement, four Google models (Gemini 4 Hydrogen, Gemini 3.8 Flash, Gemma 4 31B and 26B) answered nearly all single-step numeric items correctly under direct prompting, so the current cases are largely saturated; the harder tracks (citation grounding, look-ahead, multi-step modelling) remain future work. The deterministic reference solver passes all checks by construction, which validates the harness itself. We open-source the benchmark suite, golden datasets, and automated CLI evaluation harness at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
 
@@ -192,7 +192,7 @@ $$\text{TPI} = \frac{1}{P} \sum_{j=1}^P \mathbb{I}\left( t_{pub}(o_j) \le T_{cut
 Any query returning data published *after* $T_{cutoff}$ (e.g., an audit restatement published in 2025 used to evaluate a 2024 trade) penalizes $\text{TPI}$, guaranteeing zero look-ahead bias.
 
 ### 4.4 Tool Math Purity Ratio (TMPR)
-Let $N_{deterministic}$ be the number of quantitative calculations executed via certified external RPC tools (FastMCP sandboxes in Python/DuckDB/Z3), and let $N_{mental}$ be the number of arithmetic operations performed directly inside LLM token generation:
+Let $N_{deterministic}$ be the number of quantitative calculations executed via external RPC tools (FastMCP sandboxes in Python/DuckDB/Z3), and let $N_{mental}$ be the number of arithmetic operations performed directly inside LLM token generation:
 $$\text{TMPR} = \frac{N_{deterministic}}{N_{deterministic} + N_{mental}}$$
 $\text{TMPR} = 1.0$ confirms complete adherence to the Zero LLM Arithmetic protocol.
 

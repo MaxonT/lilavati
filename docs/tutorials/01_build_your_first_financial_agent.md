@@ -10,7 +10,7 @@ In this tutorial, you will build an **Institutional Credit Underwriting & Covena
 
 Unlike generic agent frameworks (LangChain, AutoGen, CrewAI) that let language models estimate financial ratios through stochastic token generation, your Līlāvatī agent will:
 1. **Store Immutable State (`FinancialState`)**: Maintain typed inputs, outputs, messages, and cryptographic statutory citations.
-2. **Execute Deterministic Math**: Calculate leverage ratios, interest coverage, and distance-to-default using certified Python engines.
+2. **Execute Deterministic Math**: Calculate leverage ratios, interest coverage, and distance-to-default using deterministic Python engines.
 3. **Formally Prove Invariants via Z3 SMT Solver**: Prove whether the borrower satisfies credit agreement covenants ($TotalDebt / EBITDA \le 4.0\text{x}$) and automatically calculate the exact required sponsor equity cure if breached.
 4. **Pass Automated `pytest` Verification**: Verify happy-path and distressed scenarios with unit tests.
 5. **Deploy as a Production REST API**: Convert the compiled agent graph into a high-performance FastAPI microservice with automated OpenAPI (`/docs`) in one line of code.

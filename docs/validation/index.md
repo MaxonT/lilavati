@@ -13,6 +13,8 @@ in `tests/reference/`.
 | Sustainability (WACI, carbon tax, SLB) | [sustainability](sustainability.md) | 3 (SLB at-target rounding; invalid weights; zero baseline) | none |
 | Forensics (Beneish, Altman) | [forensics](forensics.md) | 1 (Beneish coefficients, fixed earlier) | Altman zero-denominator error message |
 | Almgren-Chriss execution | see CHANGELOG | 1 (fixed earlier) | none |
-| Econometrics, financial ML, LOB / Black-Litterman / HRP, statement graph, connectors | pending | n/a | not yet audited |
+| Econometrics (ADF, Engle-Granger + OU half-life, GARCH) | [econometrics](econometrics.md) | 7 (GARCH p/q swapped; half-life used the ln2/(1−φ) shortcut; unconverged GARCH returned start values; collinear/constant/non-finite inputs; unchecked significance level) | percent-return inputs not detected; √252 daily assumption; MacKinnon tables checked via statsmodels/arch, not the paper |
+| Financial ML (fractional differencing, d* search, triple barrier) | [financial_ml](financial_ml.md) | 11 (placeholder d*=1.0 when no solution; ignored target p-value; float grid overshoot; d* rounding; exact barrier touch missed; invalid inputs) | d>0 tested on a shorter sample than d=0 (as in AFML); fixed-% barriers only |
+| LOB / Black-Litterman / HRP, statement graph, connectors | pending | n/a | not yet audited |
 
 The audit is not complete. Until every row is audited, treat unaudited engines as unvalidated.

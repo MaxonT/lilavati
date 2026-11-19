@@ -124,7 +124,7 @@ Līlāvatī is organized into a modular four-tier architecture designed around t
 
 ### 3.1 The Zero LLM Arithmetic Protocol
 We formally state the Zero LLM Arithmetic invariant:
-> **Axiom 1 (Zero LLM Arithmetic)**: *Let $\mathcal{M}$ be a generative foundation model and let $\mathcal{S}$ be the agent state space. No arithmetic operation $f: \mathbb{R}^n \to \mathbb{R}$ governing valuation, leverage, yield, duration, or accounting reconciliation may be evaluated via the auto-regressive token generation of $\mathcal{M}$. Every operation $f$ must be dispatched as a structured Remote Procedure Call (RPC) across the FastMCP bus to a certified deterministic compiler $\mathcal{C}$.*
+> **Axiom 1 (Zero LLM Arithmetic)**: *Let $\mathcal{M}$ be a generative foundation model and let $\mathcal{S}$ be the agent state space. No arithmetic operation $f: \mathbb{R}^n \to \mathbb{R}$ governing valuation, leverage, yield, duration, or accounting reconciliation may be evaluated via the auto-regressive token generation of $\mathcal{M}$. Every operation $f$ must be dispatched as a structured Remote Procedure Call (RPC) across the FastMCP bus to a deterministic compiler $\mathcal{C}$.*
 
 By enforcing Axiom 1, the LLM is restricted to semantic parameter extraction and tool coordination, eliminating numerical rounding and precision drift.
 
@@ -259,7 +259,7 @@ sequenceDiagram
         R-->>B: REJECTED (Violation: Cash Mismatch)
         Note over B: Self-Correction via SMT Reflection
     else SMT Solver == SAT
-        R->>C: Certified Mathematical Equilibrium
+        R->>C: Identities Checked (SAT)
         F->>C: Forensic Earnings Assessment
         B->>C: Strategic Growth Thesis
         Note over C: Formulates Binding Allocation Verdict
