@@ -1,6 +1,10 @@
 # Līlāvatī: guidance for AI coding agents
 
-Read `.agents/skills/lilavati-dev/SKILL.md` first (rules on provenance, SMT invariants, no LLM arithmetic).
+**Before any code, test or doc change, read `.claude/skills/lilavati-dev/SKILL.md`**. It holds the repo's coding, testing and documentation rules.
+
+**Keep the skill current.** When a bug, review or audit reveals a general pattern, or you add, remove or
+audit an engine or MCP server, update the skill in the same change (rule + concrete example, and a
+line in its change log). Outdated rules are worse than none: remove ones that no longer apply.
 
 ## Commands
 ```bash
@@ -8,12 +12,11 @@ uv sync --extra dev
 uv run ruff check src tests scripts
 uv run mypy src
 uv run pytest
+uv run --extra docs --extra dev mkdocs build --strict   # when docs change
 ```
-All three must pass before you call a change done.
 
-## Rules of thumb
-- Tests for numeric code must compare against an independent reference (textbook example, paper, QuantLib/statsmodels), not against the implementation itself.
-- Never state a number, latency, score or citation in docs/papers that you did not produce by running code or reading a primary source. The project is alpha; avoid marketing language.
-- API keys come only from environment variables. Never write them into files, tests, logs, URLs or commits.
-- Do not commit or push unless the maintainer asks. Use Conventional Commit messages.
-- Import package is `lilavati`; the PyPI distribution name is `lilavati-finance`.
+## Non-negotiables (details in the skill)
+- Numeric code is tested against independent references (papers, textbooks, QuantLib), not itself.
+- No number or capability in docs/papers that you did not produce by running code or read in a primary source.
+- API keys only via environment variables; never in files, logs, URLs or commits.
+- Do not commit or push unless the maintainer asks. Import package `lilavati`; PyPI distribution `lilavati-finance`.
