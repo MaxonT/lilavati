@@ -33,8 +33,13 @@ def find_optimal_fractional_diff(
     target_p_value: float = 0.01,
 ) -> dict[str, Any]:
     """
-    Finds the minimum degree of fractional differentiation d* in [0, 1] that makes
-    the series stationary while preserving maximum long-term memory.
+    Finds the smallest d on the grid {0, step, 2*step, ..., 1} whose fixed-width-window
+    fractionally differenced series (López de Prado 2018, ch. 5; weight threshold 1e-4) has
+    ADF p-value <= target_p_value (constant, AIC lag order). Apply it to log prices if you
+    follow López de Prado. Returns optimal_d, the ADF p-value, the Pearson correlation between
+    the differenced series and the original at the same time indices, and the differenced
+    series (aligned with the last points of the input). Raises ValueError for non-finite
+    input, too-short series, or when no d in [0, 1] reaches the target.
     """
     result = FinancialMLEngine.find_optimal_fractional_d(
         series=series,
@@ -59,8 +64,11 @@ def apply_triple_barrier_labels(
     stop_loss_pct: float,
 ) -> list[dict[str, Any]]:
     """
-    Applies the Triple-Barrier Method to asset prices to produce path-dependent
-    labels (+1 take-profit, -1 stop-loss, 0 expiration).
+    Applies the triple-barrier method (López de Prado 2018, ch. 3) to strictly positive prices:
+    +1 if the simple return first reaches +take_profit_pct, -1 if it first reaches
+    -stop_loss_pct, 0 if neither happens within holding_horizon bars (vertical barrier).
+    Barriers are decimals (0.03 = 3%), touches are inclusive, and the entry bar is not tested.
+    Entries without holding_horizon bars after them are dropped.
     """
     labels = FinancialMLEngine.apply_triple_barriers(
         prices=prices,
