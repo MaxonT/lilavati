@@ -80,7 +80,7 @@ class StatArbExecutionState(FinancialState):
 
 ## Step 2: Implement Execution Nodes
 
-Nodes are pure, deterministic Python functions `Callable[[S], S]` leveraging Līlāvatī's certified quantitative engines.
+Nodes are pure, deterministic Python functions `Callable[[S], S]` leveraging Līlāvatī's deterministic quantitative engines.
 
 ### Node 1: Cointegration & OU Half-Life Testing
 Evaluate whether the pair exhibits a stationary linear combination $S_t = P_t^A - \beta P_t^B - \alpha$ and compute the mean-reversion rate $\theta$:
@@ -242,11 +242,11 @@ print(f"Verdict: {result.trade_verdict}")
 ```text
 Pair: GLD-GDX
 Cointegrated: True (p=0.00008)
-OU Half-Life: 2.74 days
+OU Half-Life: 2.38 days
 Optimal Memory d*: 0.90
 Microprice: $175.46
 Expected Impact Cost: $825.23
-Verdict: APPROVED_PAIR_TRADE: Cointegrated (p=0.0001, half-life=2.7d). Execution cost: $825.23.
+Verdict: APPROVED_PAIR_TRADE: Cointegrated (p=0.0001, half-life=2.4d). Execution cost: $825.23.
 ```
 
 ---

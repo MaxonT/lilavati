@@ -88,7 +88,7 @@ def main() -> None:
         "Volatility clustering memory",
     )
     table.add_row(
-        "Annualized Volatility Forecast",
+        "Annualized Volatility (latest in-sample)",
         f"{garch_res.annualized_volatility * 100:.1f}%",
         "Latest conditional volatility",
     )
