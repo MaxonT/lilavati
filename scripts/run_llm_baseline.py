@@ -130,7 +130,8 @@ def main() -> None:
 
     spec = ModelSpec(provider=ModelProvider.GEMINI, model_name=args.model,
                      api_key_env_var="GEMINI_API_KEY", temperature=args.temperature,
-                     max_tokens=args.max_tokens, timeout_seconds=args.timeout)
+                     max_tokens=args.max_tokens, timeout_seconds=args.timeout,
+                     max_retries=0)  # this script retries itself (call_with_retry)
     client = UniversalLLMClient(spec)
     if not client.api_key:
         raise SystemExit("GEMINI_API_KEY not set")

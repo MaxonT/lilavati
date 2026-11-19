@@ -30,6 +30,8 @@ class ModelSpec(BaseModel):
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, ge=1)
     timeout_seconds: float = Field(default=60.0, gt=0.0)
+    max_retries: int = Field(default=3, ge=0, le=10, description="Retries on 429/5xx/timeouts")
+    retry_backoff_seconds: float = Field(default=2.0, ge=0.0, description="Base for exponential backoff")
     api_key_env_var: str | None = None
     base_url: str | None = None
 

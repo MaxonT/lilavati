@@ -40,7 +40,12 @@ class AgentConfig(BaseModel):
     model_spec: ModelSpec = Field(
         default_factory=lambda: INSTITUTIONAL_MODEL_PRESETS["mock-evaluator"]
     )
-    max_reflection_iterations: int = Field(default=3, ge=1, le=10)
+    max_reflection_iterations: int = Field(
+        default=3, ge=1, le=10, description="Max SMT-reflection retries after a final answer"
+    )
+    max_tool_rounds: int = Field(
+        default=8, ge=1, le=50, description="Max LLM turns that request tool calls"
+    )
 
 
 class AgentOutput(BaseModel):
@@ -50,6 +55,10 @@ class AgentOutput(BaseModel):
 
     agent_id: str
     response_text: str
+    completed: bool = Field(
+        default=True,
+        description="False if the run stopped at a tool-round or reflection limit without an accepted answer",
+    )
     tool_calls_executed: int
     smt_invariants_verified: bool
     iterations_used: int
@@ -117,11 +126,14 @@ class NeuroSymbolicAgent:
 
             tool_schemas = self._build_tool_schemas()
             iterations = 0
+            tool_rounds = 0
+            reflections = 0
             tool_calls_count = 0
             smt_passed = True
+            completed = False
             final_text = ""
 
-            while iterations < self.config.max_reflection_iterations:
+            while True:
                 iterations += 1
 
                 # Step 1: Call LLM
@@ -136,6 +148,10 @@ class NeuroSymbolicAgent:
 
                 # Step 2: Handle Tool Calls
                 if response.tool_calls:
+                    tool_rounds += 1
+                    if tool_rounds > self.config.max_tool_rounds:
+                        final_text = response.content
+                        break
                     assistant_msg = LLMMessage(
                         role="assistant",
                         content=response.content,
@@ -148,6 +164,7 @@ class NeuroSymbolicAgent:
                         tool_def = self.tools.get(tc.name)
                         start_time = time.perf_counter()
 
+                        is_error = False
                         if tool_def:
                             try:
                                 tool_result = tool_def.fn(**tc.arguments)
@@ -158,13 +175,17 @@ class NeuroSymbolicAgent:
                                 tool_output_str = json.dumps(tool_result, default=str)
                             except Exception as err:
                                 tool_output_str = f"Tool Error: {err}"
+                                is_error = True
                         else:
                             tool_output_str = f"Error: Tool '{tc.name}' not found."
+                            is_error = True
 
                         tool_msg = LLMMessage(
                             role="tool",
                             tool_call_id=tc.id,
+                            name=tc.name,
                             content=tool_output_str,
+                            is_error=is_error,
                         )
                         messages.append(tool_msg)
 
@@ -177,6 +198,7 @@ class NeuroSymbolicAgent:
                 if smt_check_result is not None and not smt_check_result["is_valid"]:
                     # SMT verification failed: Trigger reflection loop
                     smt_passed = False
+                    reflections += 1
                     self.tracer.record_smt_check(
                         invariant_name="three_statement_balance",
                         is_valid=False,
@@ -187,6 +209,8 @@ class NeuroSymbolicAgent:
                         violations=smt_check_result["violations"],
                         current_values=smt_check_result["values"],
                     )
+                    if reflections >= self.config.max_reflection_iterations:
+                        break
                     messages.append(LLMMessage(role="user", content=reflection_prompt))
                     continue
                 else:
@@ -196,6 +220,7 @@ class NeuroSymbolicAgent:
                             is_valid=True,
                         )
                     smt_passed = True
+                    completed = True
                     break
 
             summary = self.tracer.get_audit_summary()
@@ -203,6 +228,7 @@ class NeuroSymbolicAgent:
             return AgentOutput(
                 agent_id=self.config.agent_id,
                 response_text=final_text,
+                completed=completed,
                 tool_calls_executed=tool_calls_count,
                 smt_invariants_verified=smt_passed,
                 iterations_used=iterations,
