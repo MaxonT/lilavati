@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `lilavati.connectors.sec_filing`: filing-anchored XBRL extraction (submissions index → the filing's own facts by accession, end date and duration), missing items, identity checks, statement text window and deterministic ratios. `scripts/validate_sec_filings.py` (5-company pilot: 64 of 64 values found in the filing documents) and `scripts/run_filing_comparison.py` (LLM alone vs LLM + Līlāvatī vs Līlāvatī alone; results in `results/filings/`).
+- Tutorial 08: a real 10-K, three ways.
+### Fixed
+- `EdgarClient.extract_line_item` returned prior-year comparatives for a fiscal year (Apple FY2026 revenue 391,035, the FY2024 figure, instead of 478,834); it now takes the filing's own period.
+- 10-K PDF parser, checked against Apple's FY2026 10-K statements: the tax line matched "Income before provision for income taxes" (159,237 instead of 27,062); total debt dropped non-current term debt (11,903 instead of 80,111); common equity was read from the par value in a wrapped label (0.00001 instead of 104,815). Labels now match at the start of a line first, rows take their trailing amounts across wrapped lines, section headers are skipped, repeated rows are summed, and `ExtractedFiling10K.missing_items` lists items not found instead of passing 0.0 as reported. Validation page `docs/validation/connectors.md`.
+- `EdgarClient` sent a made-up contact (`admin@lilavati.ai`) in its User-Agent; SEC requires a real one. It now reads `LILAVATI_SEC_USER_AGENT` (or the `user_agent` argument) when a request is made.
 ### Docs
 - Getting started (four paths with run-checked code), FAQ and troubleshooting, a contributor guide with first tasks taken from the validation pages, and a generated API reference (mkdocstrings). The tutorial checker also runs the code in these pages.
 - Benchmark track descriptions in README and `docs/benchmarks.md` now say what the cases test today (they previously listed planned features such as purged cross-validation, tranche waterfalls and VWAP as tested); docs home page wording corrected.
