@@ -36,6 +36,8 @@ class ModelSpec(BaseModel):
     base_url: str | None = None
 
 
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+
 # Pre-configured institutional model profiles
 INSTITUTIONAL_MODEL_PRESETS: dict[str, ModelSpec] = {
     # Gemini Models (Google DeepMind)
@@ -48,6 +50,30 @@ INSTITUTIONAL_MODEL_PRESETS: dict[str, ModelSpec] = {
         provider=ModelProvider.GEMINI,
         model_name="gemini-2.5-flash",
         api_key_env_var="GEMINI_API_KEY",
+    ),
+    # Gemini 4 family and Gemma 4 via the Gemini API (thinking models; tool calling supported).
+    # Live tool-calling tests passed on gemma-4-31b-it and gemini-4-hydrogen (2026-11-19);
+    # gemini-4-neon not yet live-tested (free-tier quota exhausted).
+    "gemini-4-neon": ModelSpec(
+        provider=ModelProvider.GEMINI,
+        model_name="gemini-4-neon",
+        api_key_env_var="GEMINI_API_KEY",
+        max_tokens=8192,
+        timeout_seconds=180.0,
+    ),
+    "gemini-4-hydrogen": ModelSpec(
+        provider=ModelProvider.GEMINI,
+        model_name="gemini-4-hydrogen",
+        api_key_env_var="GEMINI_API_KEY",
+        max_tokens=8192,
+        timeout_seconds=180.0,
+    ),
+    "gemma-4-31b-it": ModelSpec(
+        provider=ModelProvider.GEMINI,
+        model_name="gemma-4-31b-it",
+        api_key_env_var="GEMINI_API_KEY",
+        max_tokens=8192,
+        timeout_seconds=240.0,
     ),
     # Anthropic Claude
     "claude-3-7-sonnet": ModelSpec(
@@ -66,11 +92,41 @@ INSTITUTIONAL_MODEL_PRESETS: dict[str, ModelSpec] = {
         model_name="o3-mini",
         api_key_env_var="OPENAI_API_KEY",
     ),
+    # Open-weight models on Groq (OpenAI-compatible endpoint). Key read only from GROQ_API_KEY.
+    # Model ids from GET /openai/v1/models; each made a correct tool call on 2026-11-20.
+    "groq-gpt-oss-120b": ModelSpec(
+        provider=ModelProvider.OPENAI,
+        model_name="openai/gpt-oss-120b",
+        api_key_env_var="GROQ_API_KEY",
+        base_url=GROQ_BASE_URL,
+        max_tokens=8192,
+    ),
+    "groq-gpt-oss-20b": ModelSpec(
+        provider=ModelProvider.OPENAI,
+        model_name="openai/gpt-oss-20b",
+        api_key_env_var="GROQ_API_KEY",
+        base_url=GROQ_BASE_URL,
+        max_tokens=8192,
+    ),
+    "groq-qwen3.6-27b": ModelSpec(
+        provider=ModelProvider.OPENAI,
+        model_name="qwen/qwen3.6-27b",
+        api_key_env_var="GROQ_API_KEY",
+        base_url=GROQ_BASE_URL,
+        max_tokens=8192,
+    ),
+    "groq-qwen3.8-27b": ModelSpec(
+        provider=ModelProvider.OPENAI,
+        model_name="qwen/qwen3.8-27b",
+        api_key_env_var="GROQ_API_KEY",
+        base_url=GROQ_BASE_URL,
+        max_tokens=8192,
+    ),
     # Local Open-Source Financial Foundation Models
     "llama3-fin-8b": ModelSpec(
         provider=ModelProvider.OLLAMA,
         model_name="llama3-fin:8b",
-        base_url="http://localhost:11434",
+        base_url="http://localhost:11434/v1",  # Ollama's OpenAI-compatible API
     ),
     "vllm-finance-70b": ModelSpec(
         provider=ModelProvider.VLLM,
