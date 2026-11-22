@@ -7,24 +7,24 @@ flowchart TD
     UserQuery["User / Portfolio Query"] --> AgentRuntime["Neuro-Symbolic Agent Runtime"]
     
     subgraph PerceptionLayer["1. Perception & Prompts (LLM Layer)"]
-        SystemPrompts["System Prompts & Roles\n(Zero Math Rule)"]
-        ModelAdapter["Universal LLM Client\n(Gemini / Claude / OpenAI / Local OSS)"]
+        SystemPrompts["System Prompts & Roles<br/>(Zero Math Rule)"]
+        ModelAdapter["Universal LLM Client<br/>(Gemini / Claude / OpenAI / Local OSS)"]
     end
     
     subgraph ToolLayer["2. Deterministic Sandboxes (FastMCP Bus)"]
-        FilingsMCP["Corporate Filings MCP\n(SEC EDGAR / Ind AS XBRL)"]
-        QuantMCP["Quantitative & Econometrics MCP\n(DuckDB / Polars / SciPy)"]
-        DerivativesMCP["Derivatives & Portfolio MCP\n(BSM / SABR / Execution)"]
+        FilingsMCP["Corporate Filings MCP<br/>(SEC EDGAR / Ind AS XBRL)"]
+        QuantMCP["Quantitative & Econometrics MCP<br/>(DuckDB / Polars / SciPy)"]
+        DerivativesMCP["Derivatives & Portfolio MCP<br/>(BSM / SABR / Execution)"]
     end
     
     subgraph InvariantLayer["3. Formal Verification Gate (SMT Solver)"]
-        SuvarnaEngine["Suvarṇa Engine (Z3 Solver)\nAssets = Liab + Equity\nNo-Arbitrage Spreads"]
-        SMTReflection["SMT Reflection Loop\n(Violation Feedback)"]
+        SuvarnaEngine["Suvarṇa Engine (Z3 Solver)<br/>Assets = Liab + Equity<br/>No-Arbitrage Spreads"]
+        SMTReflection["SMT Reflection Loop<br/>(Violation Feedback)"]
     end
     
     subgraph AuditLayer["4. Telemetry & Provenance (Audit Trail)"]
-        Provenance["CitationRef Engine\n(SHA-256 Hashes)"]
-        Tracer["OpenTelemetry Tracer\n(JSONL Audit Logs)"]
+        Provenance["CitationRef Engine<br/>(SHA-256 Hashes)"]
+        Tracer["OpenTelemetry Tracer<br/>(JSONL Audit Logs)"]
     end
 
     AgentRuntime --> PerceptionLayer
@@ -40,6 +40,7 @@ flowchart TD
 
 ## 1. Centralized Prompts Catalog (`src/lilavati/prompts/`)
 All prompts strictly enforce institutional constraints:
+
 - `LILAVATI_CORE_SYSTEM_PROMPT`: Prohibits mental arithmetic and demands formal tool calls.
 - `BULL_RESEARCHER_PROMPT`: Directs valuation catalyst modeling.
 - `FORENSIC_BEAR_PROMPT`: Directs earnings quality and Beneish M-Score audits.
@@ -51,17 +52,20 @@ All prompts strictly enforce institutional constraints:
 
 ## 2. Multi-Model LLM Adapter (`src/lilavati/llm/`)
 Supports seamless switching between cloud and open-source models:
+
 - Google Gemini (`gemini-2.5-pro`, `gemini-2.5-flash`)
 - Anthropic Claude (`claude-3-7-sonnet`)
 - OpenAI (`gpt-4o`, `o3-mini`)
 - Open-weight models on Groq via its OpenAI-compatible endpoint (`groq-gpt-oss-120b`, `groq-gpt-oss-20b`,
   `groq-qwen3.6-27b`, `groq-qwen3.8-27b`; key from `GROQ_API_KEY`)
-- Local Open-Source Financial Foundation Models via vLLM or Ollama (`Llama-3-Fin`, `FinMA`)
+- Local models through the OpenAI-compatible endpoints of Ollama or vLLM (presets `llama3-fin-8b` and
+  `vllm-finance-70b`; point either at whatever model you serve locally)
 
 ---
 
 ## 3. Telemetry, Tracing & Compliance (`src/lilavati/tracing/`)
 Every agent run captures:
+
 - OpenTelemetry-compatible `TraceSpan` records for each turn.
 - Tool arguments, outputs, and execution latencies.
 - SMT solver SAT/UNSAT status and violation descriptions.

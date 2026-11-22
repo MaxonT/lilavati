@@ -159,6 +159,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 - Answer parsers must handle inline reasoning: strip `<think>...</think>` before extracting JSON.
   A greedy first-`{`-to-last-`}` match failed on braces inside `qwen3.6-27b` reasoning. After a
   parser fix, re-score stored replies (`--rescore`) instead of calling the model again.
+- **Markdown lists need a blank line before them** (Python-Markdown, unlike GitHub): a list right
+  after a paragraph line renders as one run-on paragraph. Do not patch with `<br>`; add the blank
+  line. Mermaid diagrams render only through the `mermaid` custom fence in `mkdocs.yml`; use
+  `<br/>` for line breaks inside node labels, not `\n`.
 - No marketing language ("institutional-grade", "first", "definitive"). The project is alpha.
 - **Claims are linted.** `scripts/check_claims.py` fails on proof, guarantee, "audited", maturity and
   priority language in docs, docstrings and printed text unless the line negates it or carries a
@@ -281,3 +285,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-22: Onboarding docs; tested-vs-planned and third-party-script rules.
 - 2026-11-22: 10-K parser live validation rules; real fixtures; user-supplied service contacts.
 - 2026-11-23: SEC filing-anchoring, HTML text, and answer-key rules (Tutorial 08).
+- 2026-11-23: Added the Markdown list and Mermaid rendering rule (lists on the docs home and
+  architecture pages ran together; the architecture diagram showed as code).

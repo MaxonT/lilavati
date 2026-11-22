@@ -13,6 +13,7 @@
 Evaluation benchmarks for artificial intelligence in finance predominantly mirror standardized academic examinations (e.g., multiple-choice questions in FinQA, CFA Level I/II/III problem sets, and sentiment classification on synthetic snippets). While these benchmarks measure high-level domain vocabulary, they fail to evaluate the existential operational requirements of institutional finance: **first-order accounting balance sheet reconciliation, resistance to point-in-time look-ahead bias, deterministic mathematical fidelity, and immutable statutory provenance**. 
 
 We introduce **Līlāvatī-Bench**, an open-source evaluation suite with deterministic reference answers, designed to stress-test financial large language models (LLMs) and autonomous agent frameworks across seven canonical institutional disciplines:
+
 1. Three-Statement Dynamic Accounting Reconciliation
 2. Fixed Income, Yield Curves, and Structural Credit Risk
 3. Financial Econometrics and Cointegration Rigor
@@ -22,6 +23,7 @@ We introduce **Līlāvatī-Bench**, an open-source evaluation suite with determi
 7. Sustainable Finance, Carbon Accounting, and Transition Stress Testing
 
 To evaluate performance under production capital allocation constraints, Līlāvatī-Bench establishes four institutional metrics:
+
 * **Proof-of-Citation Score (PoCS)**: Measures verifiable cryptographic linkage ($\mathcal{H}_{\text{SHA-256}}$) of extracted claims to primary statutory disclosures.
 * **Accounting Invariant Compliance Rate (ICR)**: Formally evaluates balance sheet equilibrium ($Assets = Liabilities + Equity$) and dynamic cash flow deltas via Satisfiability Modulo Theories (Z3 SMT solver).
 * **Temporal Purity Index (TPI)**: Measures complete elimination of restatement leakage and future information under strict point-in-time boundaries ($T_{\text{cutoff}}$).
@@ -175,6 +177,7 @@ Līlāvatī-Bench replaces qualitative heuristics with four mathematically bound
 Let $\mathcal{A} = \{a_1, a_2, \dots, a_M\}$ be the set of factual quantitative claims asserted by the agent. Each claim $a_i$ is evaluated for cryptographic provenance:
 $$\text{PoCS} = \frac{1}{M} \sum_{i=1}^M \mathbb{I}\left( \mathcal{H}_{\text{SHA-256}}(D_{cited}) == \mathcal{H}_{ground\_truth} \land p_{cited} == p_{true} \land \sigma_{cited} \sqsubseteq D_{source} \right)$$
 A claim earns credit if and only if:
+
 1. The cited document hash matches the 64-character SHA-256 digest of the primary statutory filing.
 2. The physical 1-based page coordinate $p$ matches the ground-truth page.
 3. The verbatim snippet $\sigma_{cited}$ is a contiguous substring of the source disclosure.
@@ -240,6 +243,7 @@ We ran four Google models through the harness on 2026-11-17/18 with a single dir
 | *Content-free baseline (all True / 0)* | 20 generated | n/a | 15.7% | calibration |
 
 **What this does and does not show.**
+
 1. When the Google models, gpt-oss and Qwen3.6 answered, they were almost always correct on these textbook-style numeric tasks (bond price, Black-Scholes Greeks, microprice, WACI, accounting identities). We therefore **do not reproduce the large failure rates hypothesised earlier in this draft**; the placeholder leaderboard that appeared here previously has been removed.
 2. The **golden cases do not separate strong models** (several score 100%). The **generated cases do separate the Groq models**: accuracy on answered items ranged from 21.2% (ALLaM 2 7B) and 43.5% (Qwen3.8 27B) to 100%; Qwen3.8 missed all four Black-Scholes cases. The samples are small (7 golden + 10-20 generated cases per model, one pass), so these are indications, not rankings.
 3. Losses come from three distinct sources that must be reported separately: provider failures (most of the Google-run losses), **token-budget truncation** (6 of 20 generated replies each for gpt-oss-20b and Qwen3.6 27B at 8,192 tokens; in the prompt-v2 runs Qwen3.6's truncated replies were long-hand Black-Scholes arithmetic) and wrong answers.
@@ -264,6 +268,7 @@ has no tool arm: Groq does not support tool calling for it.
 CI: percentile bootstrap over the 20 paired differences (5,000 resamples, seed 0, pairs ordered by case id). The bounds carry Monte Carlo error of about ±0.01: over 20 bootstrap seeds, Qwen3.8's lower bound ranged from 0.10 to 0.12 and gpt-oss-20b's from −0.21 to −0.20; no conclusion depends on the seed.
 
 **What this shows.**
+
 1. For the two Qwen models, tools improved the item mean on the same questions, with paired 95% CIs
    excluding zero (+0.3000 and +0.4083). For gpt-oss-120b the difference is not distinguishable from zero
    (one question improved, none got worse): it was already accurate without tools. For gpt-oss-20b the
@@ -299,6 +304,7 @@ Standard LLMs showed zero self-awareness that the balance sheet was out of balan
 
 ### 6.2 Mental Math Cascading Failures in Non-Linear Formulae
 In Track 2 (Merton Structural Default Model) and Track 3 (GARCH Volatility), models attempting mental math exhibited catastrophic compound errors:
+
 * In computing Merton's $d_1 = \frac{\ln(V_A / D) + (r + \frac{1}{2}\sigma_A^2)T}{\sigma_A \sqrt{T}}$, models frequently rounded the natural logarithm $\ln(V_A/D)$ prematurely to one decimal place, resulting in an estimated default probability of **$18.4\%$** on an institutional borrower whose true Merton default probability was **$1.12\%$**.
 * In Track 4 (Fractional Differentiation), zero-shot models failed to expand the binomial series beyond $k=2$, producing completely non-stationary series that corrupted downstream statistical tests.
 
