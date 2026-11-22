@@ -24,6 +24,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+EXTRA_DOCS = ["getting-started.md", "faq.md", "contributing.md"]  # other pages whose code must run
 PENDING: set[str] = set()  # tutorials not yet at the tutorial standard (all retrofitted 2026-11-22)
 FENCE = re.compile(r'```python(?:\s+title="(?P<title>[^"]+)")?\n(?P<code>.*?)```', re.S)
 NEEDS_KEY = re.compile(r"\b[A-Z]+_API_KEY\b")
@@ -67,7 +68,8 @@ def check(tutorial: Path) -> list[str]:
 
 def main() -> int:
     failures: list[str] = []
-    for tutorial in sorted((ROOT / "docs" / "tutorials").glob("*.md")):
+    docs = sorted((ROOT / "docs" / "tutorials").glob("*.md")) + [ROOT / "docs" / f for f in EXTRA_DOCS]
+    for tutorial in docs:
         if tutorial.name in PENDING:
             print(f"{tutorial.name}: pending retrofit (roadmap 7.24), not checked")
             continue

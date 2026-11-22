@@ -125,13 +125,20 @@ benchmarks) give an agent the same rules as a human contributor.
 
 ## 🚀 Quick start
 
+Python 3.11 or 3.12. Install from source (the PyPI package `lilavati-finance` is being prepared):
+
 ```bash
 git clone https://github.com/revendrat/lilavati.git && cd lilavati
 uv sync --extra dev          # or: pip install -e ".[dev]"
-uv run pytest                # run the test suite
-uv run python examples/01_three_statement_reconciliation.py
-uv run lilavati-bench list-cases
+uv run python -c "from lilavati.core.fixed_income import FixedIncomeEngine as F; \
+print(F.analyze_bond(face_value=100, coupon_rate=0.05, ytm=0.06, years_to_maturity=10, frequency=2).clean_price)"
+uv run pytest                # the test suite
 ```
+
+**Next:** [Getting started](docs/getting-started.md) (first results from Python, an AI assistant
+over MCP, an agent framework, or the benchmark) · [Tutorials](docs/tutorials/01_build_your_first_financial_agent.md)
+· [FAQ and troubleshooting](docs/faq.md) · [Contributing guide](docs/contributing.md) (with first
+tasks) · [Documentation site](https://revendrat.github.io/lilavati/), including the API reference.
 
 ### Use it from your agent framework
 
@@ -262,15 +269,19 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 
 ## 🏆 Līlāvatī-Bench: The Financial Agent Benchmark
 
-To measure progress, we are developing **Līlāvatī-Bench** (harness available; first no-tool baselines for Google and Groq-hosted open-weight models in [`results/README.md`](results/README.md); no leaderboard yet), an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
+To measure progress, we are developing **Līlāvatī-Bench** (harness available; no-tool baselines for Google and Groq-hosted open-weight models and a paired tool-augmented arm, in [`results/ANALYSIS.md`](results/ANALYSIS.md); no leaderboard yet), an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
 
-* **Track 1: Three-Statement Dynamic Reconciliation:** Propagation of operational shocks across 3 statements verified via Z3 SMT solver.
-* **Track 2: Fixed Income, Credit & Debt Waterfalls:** Recovery of debt indentures, tranche seniority, covenant headroom, and Merton default probabilities.
-* **Track 3: Econometric Rigor & Spurious Correlation Resistance:** Automated detection of unit roots and cointegration testing before model fitting.
-* **Track 4: Financial ML Methodological Soundness:** Enforcement of fractional differentiation and purged cross-validation.
-* **Track 5: Derivatives & Volatility Arbitrage Invariance:** SABR calibration and arbitrage-free implied volatility surface constraints.
-* **Track 6: Market Microstructure & Optimal Execution:** Almgren-Chriss liquidation and VWAP slippage optimization on simulated order books.
-* **Track 7: Sustainable Finance & Climate Stress Testing:** Grounded extraction of Scope 1/2/3 disclosures, WACI portfolio calculation, carbon tax cash-flow impairments, and Sustainability-Linked Bond (SLB) covenant step-up verification.
+| Track | What the cases test today | Planned |
+| :--- | :--- | :--- |
+| 1. Three-statement accounting | balance sheet balances; cash flow reconciles opening to closing cash | multi-step shock propagation across statements |
+| 2. Fixed income and credit | bond price; Macaulay duration range; Merton distance to default and default probability | covenant headroom, tranche waterfalls |
+| 3. Econometrics | unit-root (ADF) judgement on a random walk; rejecting a spurious levels regression | cointegration and half-life cases |
+| 4. Financial ML | stationarity after fractional differencing; memory retained | purged and embargoed cross-validation (not yet implemented) |
+| 5. Derivatives | Black-Scholes price, delta, gamma, vega; butterfly no-arbitrage check | SABR and volatility-surface cases |
+| 6. Microstructure and execution | spread, microprice; Almgren-Chriss holdings at start and end | full schedules, VWAP |
+| 7. Sustainable finance | portfolio WACI; sustainability-linked bond target, coupon and step-up | extraction of disclosed emissions from documents |
+
+Tracks 1, 2, 5, 6 and 7 also have seeded generated cases; 3 and 4 have golden cases only.
 
 Reproduce the paired experiment, no tools versus tools on the same questions (keys are read only
 from environment variables):
