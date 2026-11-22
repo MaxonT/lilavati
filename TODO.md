@@ -67,8 +67,9 @@ researchers and AI engineers.
     - [x] CI runs the strict docs build, every example, tutorial code, claims linter and manifest check.
     - [x] Claims linter and sweep of README, docs, docstrings and examples (7.8, language part).
     - [x] Release workflow (Trusted Publishing, clean-install smoke test) and docs deploy workflow.
-    - [ ] Maintainer: register the PyPI trusted publisher and `pypi` environment; enable Pages (7.10, 7.11).
-    - [ ] Maintainer: real author names for `pyproject.toml`, `CITATION.cff` and the papers (7.12).
+    - [x] GitHub Pages enabled (source: GitHub Actions) and `pypi` environment created, tag-restricted (7.10, 7.11).
+    - [ ] Maintainer: register the PyPI trusted publisher (7.10).
+    - [x] Author name and ORCID in `pyproject.toml`, `CITATION.cff` and the papers (7.12).
     - [x] Framework paper sections 6–7 traced to scripts; Table 1 venues verified and corrected (7.8).
     - [x] All 27 unique reference entries verified against primary sources; 9 corrected or removed (7.8).
 - [x] Tutorials 02–04 retrofitted and executed in CI (7.24, 2026-11-22).
@@ -87,8 +88,10 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [x] Claims linter clean and every remaining number traced (7.8).
 - [x] Tutorials 01–07 at the tutorial standard and executed in CI (7.24).
 - [x] `results/manifest.json` current; benchmark paper numbers match `results/ANALYSIS.md`.
-- [ ] Maintainer inputs (promised 2026-11-22): author names and affiliations (7.12); PyPI trusted
-      publisher and `pypi` environment (7.10); Pages source "GitHub Actions" (7.11); approval to commit.
+- [x] Author and ORCID (7.12); Pages enabled (7.11); `pypi` environment (7.10); commits on
+      `release/v0.2.0`, PR #1 (2026-11-22).
+- [ ] PR #1 merged with CI green on `main`.
+- [ ] PyPI trusted publisher registered by the maintainer (7.10), then tag `v0.2.0`.
 - [x] Release candidate artifacts built and verified locally (2026-11-22, `dist/`, see `dist/VERIFICATION-0.2.0.md`).
 - [ ] Maintainer go-ahead for the release.
 

@@ -129,6 +129,9 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 - **Case ids are labels, content hashes are identity.** `generate_cases(2026, 2)` and `(2026, 4)` both
   produced `GEN-T2-000` with different bonds. Ids now carry seed and size (`GEN-S2026-N4-T2-000`),
   records store `case_hash`, and comparisons pair on the hash (`analysis.paired_difference`).
+- **Identities must be platform-independent.** Never hash floats produced by exp/log/erf: their last digits
+  differ between math libraries (the v1 case hash differed between macOS and Linux CI). Hash inputs, not
+  computed outputs, and pin a known hash in a test so CI on another OS catches drift.
 - **Read the prompt before blaming the model.** Prompt v2 defined `bond_price` as "price of the 5-year
   bond" for generated 2-10-year bonds; gpt-oss-120b priced a 10-year bond as 5-year and was scored
   wrong. Bump `llm_eval.PROMPT_VERSION` whenever the model-visible text changes, and never mix versions.
@@ -252,3 +255,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   workflows; sdist exclude after `.agents/tasks/` was found in a local sdist.
 - 2026-11-22: Tutorials 02–04 retrofit: assert the reason, no invented inputs or real names on synthetic data, grep tests before rewriting examples.
 - 2026-11-22: Reference-verification rule after the paper reference audit.
+- 2026-11-22: Platform-independent case hashes after Linux CI found the v1 hash differed from macOS.
