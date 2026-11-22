@@ -7,4 +7,6 @@ labels: bug
 
 **Minimal reproduction**
 
-**Environment** (OS, Python version, `pip list | grep lilavati`)
+**Environment** (OS, Python version, and the output of `python -c "import lilavati; print(lilavati.__version__)"`)
+
+Please check the [FAQ and troubleshooting](https://revendrat.github.io/lilavati/faq/) page first. Never paste API keys.

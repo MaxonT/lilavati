@@ -146,6 +146,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   priority language in docs, docstrings and printed text unless the line negates it or carries a
   reviewed `claims-ok` marker. Never reword published benchmark case text to satisfy it (that changes
   the case hash): mark it `claims-ok` with the reason.
+- **Describe what is tested, not what is planned.** README listed purged cross-validation, tranche
+  waterfalls and VWAP as benchmark content; none existed. Feature tables need a "today" and a "planned" column.
+- **No third-party scripts without need.** The docs loaded polyfill.io, whose domain served malware after a 2024
+  ownership change. Load scripts only from pinned, reputable CDNs, and only when required.
 - **Tutorial code is executed.** Titled fences (`python title="file.py"`) build files; untitled blocks
   run against them; `tests/test_*.py` titles run under pytest (`scripts/check_tutorials.py`).
 - **Every user-facing feature ships with a tutorial** in `docs/tutorials/NN_<topic>.md`, added to the
@@ -256,3 +260,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-22: Tutorials 02–04 retrofit: assert the reason, no invented inputs or real names on synthetic data, grep tests before rewriting examples.
 - 2026-11-22: Reference-verification rule after the paper reference audit.
 - 2026-11-22: Platform-independent case hashes after Linux CI found the v1 hash differed from macOS.
+- 2026-11-22: Onboarding docs; tested-vs-planned and third-party-script rules.

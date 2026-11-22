@@ -28,6 +28,21 @@ theme:
     - content.code.copy
     - content.code.annotate
 
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: false
+            show_root_heading: true
+            members_order: source
+            docstring_style: google
+            show_signature_annotations: true
+            separate_signature: true
+            filters: ["!^_"]
+
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -42,11 +57,12 @@ markdown_extensions:
       generic: true
 
 extra_javascript:
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  # polyfill.io was removed: the domain served malicious code after a 2024 ownership change.
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 nav:
   - Home: index.md
+  - Getting started: getting-started.md
   - Architecture & Runtime: architecture.md
   - Tutorials & Developer Guide:
       - "01. Credit Workflow: Covenants, Merton PD & API": tutorials/01_build_your_first_financial_agent.md
@@ -74,5 +90,12 @@ nav:
       - "Benchmark Paper (Pre-Print 2)": papers/02_benchmark_paper.md
   - Release notes:
       - "0.2.0 (alpha)": releases/v0.2.0.md
-  - Contributing: contributing.md
+  - API reference:
+      - Overview: reference/index.md
+      - Engines: reference/engines.md
+      - Provenance & point-in-time: reference/data.md
+      - LLM client: reference/llm.md
+      - Benchmark evaluation: reference/bench.md
+  - FAQ & troubleshooting: faq.md
+  - Contributing guide: contributing.md
 

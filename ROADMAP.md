@@ -225,7 +225,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 **7C. Packaging & release (blocking)**
 - [x] 7.9 Distribution renamed to `lilavati-finance` (PyPI name `lilavati` belongs to an unrelated project).
 - [~] 7.10 PyPI release. 🟡 Done: `.github/workflows/release.yml` (tag/version check, build, clean-install smoke test on 3.11 and 3.12, Trusted Publishing); local clean installs verified; sdist excludes private `.agents/tasks/`. Done 2026-11-22: GitHub `pypi` environment created, restricted to `v*` tags. Pending (maintainer): register the trusted publisher on PyPI; then tag the release.
-- [~] 7.11 Docs site and CI. 🟡 Done: CI runs the strict docs build, every example, tutorial code, claims and manifest checks; `.github/workflows/docs.yml` deploys to Pages. Done 2026-11-22: Pages enabled with source "GitHub Actions" (https://revendrat.github.io/lilavati/); the site deploys when `main` receives the docs workflow.
+- [x] 7.11 Docs site and CI. 🟡 Done: CI runs the strict docs build, every example, tutorial code, claims and manifest checks; `.github/workflows/docs.yml` deploys to Pages. Done 2026-11-22: Pages enabled (source "GitHub Actions"); the site is live at https://revendrat.github.io/lilavati/ and redeploys on every docs change to `main`.
 - [x] 7.12 Author Revendranath Tirumalsety (ORCID 0000-0003-0549-4022) in `pyproject.toml`, `CITATION.cff`, the README citation and both papers.
 
 **7D. Benchmark credibility (recommended before announcing the benchmark; not blocking the toolkit)**

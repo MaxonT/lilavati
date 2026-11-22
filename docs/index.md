@@ -1,4 +1,4 @@
-# Project Līlāvatī: The Open-Source Operating System for Institutional Finance
+# Project Līlāvatī: validated finance tools for AI agents
 
 > *"Active and graceful maiden with playful eyes, Līlāvatī! If you have learned the method of inversion, tell me what is that number which multiplied by 3, then increased by three-fourths of the product, divided by 7, diminished by one-third of the quotient, multiplied by itself, diminished by 52, the square root extracted, then 8 added, and divided by 10, gives the number 2?"*
 > — **Bhāskarācārya II**, *Līlāvatī* (c. 1150 CE)
@@ -11,12 +11,26 @@
 
 General-purpose LLM agent frameworks do not by themselves check where a number came from: models compute in text, can use information published after the as-of date, and leave no auditable provenance.
 
-Līlāvatī solves this through a **Domain-Specific Runtime & Protocol Layer**:
-1. **Zero LLM Arithmetic:** LLMs plan and reason; all calculations are executed deterministically through Python, Polars, DuckDB, and FastMCP.
+Līlāvatī addresses this with a **tool layer for agents**:
+1. **Zero LLM Arithmetic (design goal):** LLMs read and plan; calculations run in deterministic, tested code (Python, Polars, DuckDB), exposed as FastMCP tools.
 2. **First-Order Formal Invariants (Z3 SMT Solver):** Core accounting identities ($Assets = Liabilities + Equity$) are checked with the Z3 SMT solver on the given numbers (exact rational arithmetic), and debt covenants are checked arithmetically with an at-limit tolerance. These verify the numbers supplied, not a model over all inputs.
 3. **Cryptographic Provenance (`CitationRef`):** Every numerical fact extracted from SEC EDGAR or Ind AS filings carries an immutable SHA-256 document hash, page, and snippet citation.
 4. **Bi-Temporal Point-in-Time Isolation:** Disclosures are indexed with Dual-Time semantics (Valid Time $T_v$ vs System Time $T_s$) so that queries return only what was known at the as-of time; detecting look-ahead use by an agent is still partial (TPI).
-5. **OpenTelemetry-Compatible Tracing:** Full compliance audit trails capturing agent turns, LLM prompts/tokens, deterministic tool outputs, and solver check results.
+5. **OpenTelemetry-Compatible Tracing:** A trace of agent turns, LLM prompts and tokens, deterministic tool outputs and solver check results.
+
+**Alpha software for research and teaching; not investment advice.**
+
+## Start here
+
+- **New here?** [Getting started](getting-started.md): install, then a first result from Python, an
+  AI assistant (MCP), an agent framework or the benchmark, in a few minutes each.
+- **Learning?** Seven [tutorials](tutorials/01_build_your_first_financial_agent.md) and a draft
+  [course](course/index.md).
+- **Checking the numbers?** [Numerical validation](validation/index.md) and the
+  [benchmark evidence](benchmarks.md).
+- **Contributing?** [Contributing guide](contributing.md), with first tasks.
+- **Stuck?** [FAQ and troubleshooting](faq.md); full function documentation in the
+  [API reference](reference/index.md).
 
 ---
 
@@ -51,13 +65,13 @@ uv run lilavati-bench list-cases
 
 | Pillar | Capability | Key Technologies |
 | :--- | :--- | :--- |
-| **Pillar I** | Dynamic Three-Statement Modeling & Valuation | Reactive DAG, Polars, Z3 SMT Solver |
+| **Pillar I** | Three-Statement Modeling & Accounting Checks | Reactive DAG, Polars, Z3 SMT Solver |
 | **Pillar II** | Fixed Income, Credit & Debt Indentures | Bond Analytics (DV01, Convexity), Nelson-Siegel, Merton Structural Model |
 | **Pillar III** | Financial Econometrics & Stationarity | ADF Unit Root, Engle-Granger Cointegration, OU Half-Life, GARCH(p,q) |
 | **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional Differentiation ($d^*$), Triple-Barrier Labeling (purged CV planned) |
 | **Pillar V** | Derivatives, Volatility Surfaces & Greeks | Black-Scholes-Merton, CRR Binomial Trees, SABR Calibration, Arbitrage Invariants |
 | **Pillar VI** | Market Microstructure & Optimal Execution | LOB Microprice, OFI, Almgren-Chriss Liquidation, Black-Litterman, HRP |
-| **Pillar VII** | Sustainable Finance & Climate Risk | Scope 1/2/3 WACI, Shadow Carbon Tax Stress Testing, SLB Step-Up Covenants |
+| **Pillar VII** | Sustainable Finance & Climate Risk | Scope 1+2 WACI, Shadow Carbon Tax Stress Testing, SLB Step-Up Covenants |
 
 ---
 
