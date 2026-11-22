@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Docs
+- Getting started (four paths with run-checked code), FAQ and troubleshooting, a contributor guide with first tasks taken from the validation pages, and a generated API reference (mkdocstrings). The tutorial checker also runs the code in these pages.
+- Benchmark track descriptions in README and `docs/benchmarks.md` now say what the cases test today (they previously listed planned features such as purged cross-validation, tranche waterfalls and VWAP as tested); docs home page wording corrected.
+### Security
+- Removed the polyfill.io script from the docs site (the domain served malicious code after a 2024 ownership change).
 
 ## [0.2.0] - release candidate (not yet tagged; see docs/releases/v0.2.0.md)
 ### Fixed

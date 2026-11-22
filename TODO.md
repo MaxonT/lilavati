@@ -90,10 +90,32 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [x] `results/manifest.json` current; benchmark paper numbers match `results/ANALYSIS.md`.
 - [x] Author and ORCID (7.12); Pages enabled (7.11); `pypi` environment (7.10); commits on
       `release/v0.2.0`, PR #1 (2026-11-22).
-- [ ] PR #1 merged with CI green on `main`.
+- [x] PR #1 merged with CI green on `main` (b899560); docs site live.
 - [ ] PyPI trusted publisher registered by the maintainer (7.10), then tag `v0.2.0`.
 - [x] Release candidate artifacts built and verified locally (2026-11-22, `dist/`, see `dist/VERIFICATION-0.2.0.md`).
 - [ ] Maintainer go-ahead for the release.
+
+## Public announcement readiness (reviewed 2026-11-22)
+
+**Must do before announcing**
+- [ ] PyPI release: maintainer registers the pending trusted publisher; then tag `v0.2.0` (7.10, 7.18).
+- [ ] External review by one practitioner and one software reviewer (7.17), or announce explicitly as
+      "alpha, seeking review" and link the known limitations.
+- [ ] Announcement text and channels (not drafted yet); link the docs site, getting-started page and
+      known limitations.
+- [ ] Open the first-contribution tasks from `docs/contributing.md` as GitHub issues labelled
+      `good first issue`, so new contributors can find them.
+
+**Recommended at or soon after the announcement**
+- [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot.
+- [ ] Branch protection on `main` requiring CI to pass; GitHub repository description and topics.
+- [ ] Optionally enable GitHub Discussions for questions.
+
+**Disclosed limitations (follow-up work, not blockers)**
+- [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
+- [ ] Live-data validation of the connectors (7.5); purged cross-validation (7.4).
+- [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).
+- [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22).
 
 ## Phase 9 (months 1–3): contracts and evidence
 
