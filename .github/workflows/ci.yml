@@ -51,6 +51,12 @@ jobs:
         run: |
           set -e
           for f in examples/0*.py examples/problem_solving/*.py; do
+            case "$f" in
+              # Needs the Apple 10-K PDF, which is not redistributed (see the framework paper, 6.1).
+              *04_sec_10k_filing_analyzer.py)
+                echo "::notice file=$f::skipped: needs data/sample_filings/aapl_10k_2026.pdf (not redistributed)"
+                continue;;
+            esac
             echo "::group::$f"
             uv run python "$f" > /dev/null
             echo "::endgroup::"

@@ -293,10 +293,18 @@ def main() -> None:
 
     pdf_path = "data/sample_filings/aapl_10k_2026.pdf"
     if not Path(pdf_path).exists():
-        console.print(f"[yellow]Downloading 10-K filing to {pdf_path}...[/yellow]")
-        PDF10KParser(
-            "https://s2.q4cdn.com/470004039/files/doc_earnings/2026/q4/filing/10K-Q4-2026-as-filed.pdf"
-        )
+        # The filing is not redistributed in this repository. Try the issuer's copy; on failure,
+        # say how to get it rather than failing with a bare FileNotFoundError.
+        url = "https://s2.q4cdn.com/470004039/files/doc_earnings/2026/q4/filing/10K-Q4-2026-as-filed.pdf"
+        console.print(f"[yellow]{pdf_path} not found; trying to download the filing...[/yellow]")
+        try:
+            pdf_path = str(PDF10KParser(url).local_path)  # use the downloaded copy's path
+        except Exception as err:  # network, HTTP or parse errors
+            console.print(
+                f"[red]Could not obtain the 10-K ({type(err).__name__}).[/red] Download Apple Inc.'s "
+                f"FY2026 Form 10-K from SEC EDGAR and save it as {pdf_path}, then rerun."
+            )
+            raise SystemExit(2) from None
 
     # Initialize and execute graph
     graph = build_sec_10k_pipeline().compile()
