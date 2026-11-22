@@ -5,7 +5,7 @@ Demonstrates:
 1. Configuring the reactive StatementGraph DAG.
 2. Dynamically updating operational drivers (e.g. +10% revenue expansion).
 3. Recomputing the three statements reactively.
-4. Formally proving mathematical balance via SuvarnaEngine (Z3 SMT solver).
+4. Checking the balance-sheet identity on the given numbers via SuvarnaEngine (Z3 SMT solver).
 """
 
 from rich.console import Console
@@ -22,7 +22,7 @@ def main() -> None:
     console.print(
         Panel.fit(
             "[bold cyan]Project Līlāvatī: Dynamic Three-Statement Modeling & SMT Verification[/bold cyan]\n"
-            "Formally proving balance sheet identities under operational stress.",
+            "Checking balance sheet identities under operational stress.",
             title="Institutional Financial Modeling",
         )
     )

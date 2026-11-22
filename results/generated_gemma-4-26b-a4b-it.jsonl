@@ -1,0 +1,20 @@
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T1-000", "raw": "{\"is_balanced\": true, \"cash_reconciled\": true, \"assets_equal_liab_equity\": true}", "parsed": {"is_balanced": true, "cash_reconciled": true, "assets_equal_liab_equity": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T1-001", "raw": "{\"is_balanced\": false, \"cash_reconciled\": true, \"assets_equal_liab_equity\": false}", "parsed": {"is_balanced": false, "cash_reconciled": true, "assets_equal_liab_equity": false}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T1-002", "raw": "{\"is_balanced\": true, \"cash_reconciled\": false, \"assets_equal_liab_equity\": true}", "parsed": {"is_balanced": true, "cash_reconciled": false, "assets_equal_liab_equity": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T1-003", "raw": "{\"is_balanced\": false, \"cash_reconciled\": false, \"assets_equal_liab_equity\": false}", "parsed": {"is_balanced": false, "cash_reconciled": false, "assets_equal_liab_equity": false}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T2-000", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T2-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T2-002", "raw": "__ERROR__ HTTP 503", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T2-003", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T5-000", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T5-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T5-002", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T5-003", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T6-000", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T6-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T6-002", "raw": "{\"spread\": 0.1, \"microprice\": 147.95622302158273}", "parsed": {"spread": 0.1, "microprice": 147.95622302158273}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T6-003", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T7-000", "raw": "{\n  \"portfolio_waci\": 121.40952380952381,\n  \"slb_spt_achieved\": true,\n  \"slb_active_coupon\": 0.04,\n  \"slb_penalty_triggered\": false\n}", "parsed": {"portfolio_waci": 121.4095238095238, "slb_spt_achieved": true, "slb_active_coupon": 0.04, "slb_penalty_triggered": false}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T7-001", "raw": "{\n  \"portfolio_waci\": 147.33333333333334,\n  \"slb_spt_achieved\": false,\n  \"slb_active_coupon\": 0.0425,\n  \"slb_penalty_triggered\": true\n}", "parsed": {"portfolio_waci": 147.33333333333334, "slb_spt_achieved": false, "slb_active_coupon": 0.0425, "slb_penalty_triggered": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T7-002", "raw": "{\n  \"portfolio_waci\": 106.09049773755656,\n  \"slb_spt_achieved\": true,\n  \"slb_active_coupon\": 0.04,\n  \"slb_penalty_triggered\": false\n}", "parsed": {"portfolio_waci": 106.09049773755656, "slb_spt_achieved": true, "slb_active_coupon": 0.04, "slb_penalty_triggered": false}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "GEN-T7-003", "raw": "{\n  \"portfolio_waci\": 94.23529411764706,\n  \"slb_spt_achieved\": false,\n  \"slb_active_coupon\": 0.0425,\n  \"slb_penalty_triggered\": true\n}", "parsed": {"portfolio_waci": 94.23529411764706, "slb_spt_achieved": false, "slb_active_coupon": 0.0425, "slb_penalty_triggered": true}, "score": 1.0}

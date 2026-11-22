@@ -1,10 +1,12 @@
 cff-version: 1.2.0
 message: "If you use Project Līlāvatī in academic research, benchmark evaluations, or financial software, please cite it as below."
 authors:
-  - name: "The Lilavati Team"
-title: "Līlāvatī: An Open-Source, Neuro-Symbolic Agentic Operating System and Benchmark Suite for Institutional Finance"
-version: 0.1.0
-date-released: 2026-11-13
+  - family-names: "Tirumalsety"
+    given-names: "Revendranath"
+    orcid: "https://orcid.org/0000-0003-0549-4022"
+title: "Līlāvatī: Validated quantitative-finance tools for AI agents, and a benchmark for financial agents"
+version: 0.2.0
+date-released: 2026-11-22
 url: "https://github.com/revendrat/lilavati"
 repository-code: "https://github.com/revendrat/lilavati"
 keywords:

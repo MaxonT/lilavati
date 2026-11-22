@@ -33,7 +33,7 @@ flowchart TD
     InvariantLayer -- "UNSAT (Violation)" --> SMTReflection
     SMTReflection --> PerceptionLayer
     InvariantLayer -- "SAT (Verified)" --> AuditLayer
-    AuditLayer --> FinalOutput["Audited Investment Committee Memo"]
+    AuditLayer --> FinalOutput["Investment Committee Memo with audit trail"]
 ```
 
 ---
@@ -54,6 +54,8 @@ Supports seamless switching between cloud and open-source models:
 - Google Gemini (`gemini-2.5-pro`, `gemini-2.5-flash`)
 - Anthropic Claude (`claude-3-7-sonnet`)
 - OpenAI (`gpt-4o`, `o3-mini`)
+- Open-weight models on Groq via its OpenAI-compatible endpoint (`groq-gpt-oss-120b`, `groq-gpt-oss-20b`,
+  `groq-qwen3.6-27b`, `groq-qwen3.8-27b`; key from `GROQ_API_KEY`)
 - Local Open-Source Financial Foundation Models via vLLM or Ollama (`Llama-3-Fin`, `FinMA`)
 
 ---

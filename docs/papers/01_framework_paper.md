@@ -1,6 +1,6 @@
-# Līlāvatī: An Audited & Verifiable Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning
+# Līlāvatī: A Neuro-Symbolic Tool Layer with Checkable Numbers for Financial Agents
 
-**Authors:** The Līlāvatī Team  
+**Author:** Revendranath Tirumalsety ([ORCID 0000-0003-0549-4022](https://orcid.org/0000-0003-0549-4022))  
 **Classification:** Quantitative Finance, Artificial Intelligence, Multi-Agent Systems, Formal Verification  
 **Status:** Working draft, not peer reviewed. Performance numbers and case studies come from internal/simulated runs; see notice below.  
 
@@ -12,7 +12,7 @@
 
 Generic large language model (LLM) agent frameworks exhibit alarming failure rates when deployed in institutional finance. These systems routinely commit numerical hallucinations during multi-step arithmetic, generate financial statements that violate fundamental accounting equations ($\text{Assets} \neq \text{Liabilities} + \text{Shareholders' Equity}$), leak future information through look-ahead bias, and output ungrounded investment claims lacking auditability. 
 
-In this paper, we introduce **Līlāvatī**, an open-source, audited, and verifiable agentic framework designed specifically for institutional quantitative finance, credit risk, econometrics, algorithmic execution, and sustainable finance. Drawing conceptual inspiration from Bhāskara II's classical 1150 CE mathematical treatise *Līlāvatī*—which pioneered the rigorous algorithmic auditing of commercial ledgers (*Suvarṇa-gaṇita*)—our framework institutes a strict architectural dichotomy between **unstructured semantic perception** (governed by foundation models) and **deterministic quantitative proof** (governed by theorem provers, high-performance analytical engines, and vectorised numerical libraries).
+In this paper, we introduce **Līlāvatī**, an open-source, alpha-stage tool layer whose numbers can be checked, built for quantitative finance, credit risk, econometrics, algorithmic execution, and sustainable finance. Drawing conceptual inspiration from Bhāskara II's classical 1150 CE mathematical treatise *Līlāvatī*—which treated commercial ledgers and gold assaying (*Suvarṇa-gaṇita*) as exact computation—our framework institutes a strict architectural dichotomy between **unstructured semantic perception** (governed by foundation models) and **deterministic quantitative computation** (reference-tested numerical engines, with the Z3 SMT solver checking accounting identities on the given numbers).
 
 Līlāvatī incorporates four foundational innovations:
 1. **The Zero LLM Arithmetic Protocol**: Enforced via the Model Context Protocol (FastMCP), barring language models from performing internal mental math and delegating all quantitative computations to verified, sandboxed numerical routines.
@@ -28,7 +28,7 @@ We demonstrate the system across complex institutional workflows: parsing real 1
 
 The integration of artificial intelligence into quantitative asset management, credit underwriting, and corporate finance has entered a transformative era. Foundation large language models (LLMs) demonstrate remarkable proficiency in processing complex qualitative narratives, synthesizing earnings call transcripts, and parsing regulatory filings [Wu et al., 2023; Yang et al., 2023]. However, the direct application of standard LLM agent frameworks (e.g., LangChain, AutoGen, CrewAI) to institutional capital markets has revealed deep architectural vulnerabilities:
 
-1. **Stochastic Arithmetic and Token Hallucination**: Language models process numerical tokens as probabilistic sequences rather than continuous mathematical entities. Multi-step operations such as Compound Annual Growth Rate (CAGR), Discounted Cash Flow (DCF) discounting, bond convexity, and option Greeks routinely collapse into hallucinations [Schick et al., 2024; Līlāvatī Benchmark Consortium, 2026].
+1. **Stochastic Arithmetic and Token Hallucination**: Language models process numerical tokens as probabilistic sequences rather than continuous mathematical entities. Multi-step operations such as Compound Annual Growth Rate (CAGR), Discounted Cash Flow (DCF) discounting, bond convexity, and option Greeks are error-prone when computed in text [Schick et al., 2023]. In this project's own measurements, open-weight models answering without tools scored between 21% and 94% of answer fields on the same generated finance cases, and one missed all four Black-Scholes cases (companion benchmark paper, section 5; `results/ANALYSIS.md`).
 2. **Violation of Accounting Invariants**: Generic agents frequently generate or extract financial statement projections where total assets fail to equal total liabilities plus shareholders' equity, or where net cash flow does not reconcile with the cash flow statement's ending cash balance. In audited finance, an unbalanced model is not a minor approximation—it is an unacceptable, invalid model.
 3. **Look-Ahead Bias and Restatement Poisoning**: Standard Retrieval-Augmented Generation (RAG) frameworks index corporate disclosures by semantic similarity without temporal gating. As a result, historical backtests routinely retrieve subsequent restatements, revisions, or future footnotes that were not publicly known at the decision epoch $t$, inducing severe look-ahead bias [López de Prado, 2018].
 4. **Absence of Cryptographic Provenance**: Institutional allocators and regulatory bodies require full auditability. Standard agent outputs produce declarative quantitative claims without traceable, immutable links to the primary statutory document, physical page, or bounding text coordinates.
@@ -40,7 +40,7 @@ The integration of artificial intelligence into quantitative asset management, c
                                                                 Unbalanced Ledgers
                                                                 Look-Ahead Contamination
 
-                 PROJECT LĪLĀVATĪ PARADIGM (AUDITED & VERIFIABLE)
+                 PROJECT LĪLĀVATĪ PARADIGM (CHECKABLE NUMBERS)  
                                  User Query
                                      │
                                      ▼
@@ -64,18 +64,18 @@ The integration of artificial intelligence into quantitative asset management, c
                          ▼                         ▼
                 ┌──────────────────┐      ┌─────────────────────────┐
                 │ Checked Execution│      │ Violation Reflection    │
-                │ & Audited Dossier│      │ (Autonomous Correction) │
+                │ & Cited Dossier  │      │ (Autonomous Correction) │
                 └──────────────────┘      └─────────────────────────┘
 ```
 
 ### The Historic Ethos: Suvarṇa-Gaṇita and Algorithmic Auditability
 
-To resolve these structural flaws, we return to the historical origins of applied financial mathematics. In 1150 CE, the Indian mathematician and astronomer **Bhāskarācārya (Bhāskara II)** composed the classical mathematical treatise *Līlāvatī*, the opening volume of his magnum opus *Siddhānta Śiromaṇi* [Colebrooke, 1817; Patwardhan, 2001]. Unlike contemporary academic texts of antiquity, Bhāskara devoted entire chapters to practical commercial, debt, and financial engineering:
-* *Miśraka-vyavahāra*: Algorithms for joint capital partnerships, pro-rata dividend distributions, and time-value-of-money interest schedules.
-* *Kraya-vikraya*: Quantitative pricing rules, price elasticity under supply shifts, and transaction fees.
-* *Suvarṇa-gaṇita* (The Computation of Gold): History's first formal algorithmic treatise on **financial auditing, assaying, alligation, and balance verification**. Bhāskara defined rigorous equations to prove that the total intrinsic purity and weight of gold alloys across multiple accounts remained conserved under exchange and melting operations.
+To resolve these structural flaws, we return to the historical origins of applied financial mathematics. In 1150 CE, the Indian mathematician and astronomer **Bhāskarācārya (Bhāskara II)** composed the classical mathematical treatise *Līlāvatī*, the opening volume of his magnum opus *Siddhānta Śiromaṇi* [Colebrooke, 1817; Patwardhan, 2001]. Bhāskara devoted whole sections to commercial calculation:
+* *Miśraka-vyavahāra* (mixtures): interest, partnerships and the division of profits in proportion to capital shares.
+* *Kraya-vikraya* (buying and selling): rules of proportion for prices and quantities.
+* *Suvarṇa-gaṇita* (The Computation of Gold): An early systematic treatment of **assaying, alligation and balance verification**. Bhāskara gave exact rules showing that the total intrinsic purity and weight of gold alloys across multiple accounts remained conserved under exchange and melting operations.
 
-Project Līlāvatī translates this 900-year heritage of verifiable computation into modern computational finance. We replace the unconstrained, stochastic approximations of generic LLM frameworks with an **Audited & Verifiable Neuro-Symbolic Agentic Stack** that guarantees mathematical integrity, formal invariant satisfaction, and cryptographic provenance across the entire capital structure.
+Project Līlāvatī takes its name from this tradition of exact commercial computation. We replace the unconstrained, stochastic approximations of generic LLM frameworks with a **neuro-symbolic tool layer** in which numbers come from reference-tested engines, accounting identities are checked by Z3 on the given numbers, and extracted values carry hash-linked provenance.
 
 ---
 
@@ -86,10 +86,10 @@ Recent years have witnessed the introduction of domain-adapted financial languag
 
 Existing financial benchmarks, such as FinQA [Chen et al., 2021], TAT-QA [Zhu et al., 2021], and FPB [Malo et al., 2014], evaluate isolated question-answering or sentiment classification on synthetic or curated snippets. They do not test an agent's ability to maintain dynamic accounting balance sheets across time, avoid look-ahead bias during historical backtests, or satisfy real-world debt covenants.
 
-### 2.2 Neuro-Symbolic AI and Formal Theorem Proving
-Neuro-symbolic AI seeks to unite the pattern-recognition capabilities of deep neural architectures with the deductive certainty of symbolic logic [Garcez et al., 2019; Manhaeve et al., 2018]. In mathematical reasoning, systems like Lean [Moura et al., 2015] and Isabelle [Paulson, 1994] have been paired with language models to verify formal proofs. In software verification, Satisfiability Modulo Theories (SMT) solvers, most notably Z3 [De Moura and Bjørner, 2008], provide automated decision procedures for first-order logic over linear real arithmetic, bit-vectors, and uninterpreted functions. 
+### 2.2 Neuro-Symbolic AI and Formal Theorem Proving <!-- claims-ok: names the research field -->
+Neuro-symbolic AI seeks to unite the pattern-recognition capabilities of deep neural architectures with the deductive certainty of symbolic logic [Garcez et al., 2019; Manhaeve et al., 2018]. In mathematical reasoning, systems like Lean [de Moura et al., 2015] and Isabelle [Paulson, 1994] have been paired with language models to verify formal proofs. In software verification, Satisfiability Modulo Theories (SMT) solvers, most notably Z3 [De Moura and Bjørner, 2008], provide automated decision procedures for first-order logic over linear real arithmetic, bit-vectors, and uninterpreted functions. 
 
-Līlāvatī represents the first systematic integration of SMT solver technology into financial agent runtimes, formalizing accounting identities and capital structure constraints as first-order theories over real numbers ($\mathcal{T}_{\mathbb{R}}$).
+Līlāvatī integrates an SMT solver into a financial agent runtime, formalizing accounting identities and capital structure constraints as first-order theories over real numbers ($\mathcal{T}_{\mathbb{R}}$).
 
 ### 2.3 Financial Machine Learning and Econometric Rigor
 In *Advances in Financial Machine Learning*, López de Prado [2018] identified the principal methodological traps in quantitative finance: standard integer differencing ($d=1$) destroys long-range memory, standard $k$-fold cross-validation leaks information across autocorrelated time series, and static time-sampling yields non-Gaussian, leptokurtic returns. Līlāvatī directly embeds de Prado's core algorithms—including optimal fractional differentiation ($d^*$), triple-barrier event labeling, and purged cross-validation—as foundational execution tools.
@@ -129,7 +129,7 @@ We formally state the Zero LLM Arithmetic invariant:
 By enforcing Axiom 1, the LLM is restricted to semantic parameter extraction and tool coordination, eliminating numerical rounding and precision drift.
 
 ### 3.2 The Suvarṇa Invariant Engine: SMT Formulation of Financial Equilibrium
-In audited corporate reporting, a three-statement financial model must satisfy simultaneous linear identities over the real numbers $\mathbb{R}$. We formalize this in first-order logic.
+In audited corporate reporting <!-- claims-ok: audited financial statements -->, a three-statement financial model must satisfy simultaneous linear identities over the real numbers $\mathbb{R}$. We formalize this in first-order logic.
 
 Let $\mathbf{x} \in \mathbb{R}^k$ represent the state vector of canonical financial statement metrics:
 $$\mathbf{x} = \begin{bmatrix} A_t & L_t & E_t & C_t & C_{t-1} & CFO_t & CFI_t & CFF_t & NI_t \end{bmatrix}^T$$
@@ -187,7 +187,7 @@ where Valid Time $[T_v^{start}, T_v^{end})$ specifies the real-world operational
 
 For any analytical query executed by an agent at simulated trading epoch $t$, the `TemporalPurityGate` injects an immutable boundary predicate:
 $$\mathcal{Q}_{PIT}(t) \iff \sigma_{(T_s^{start} \le t < T_s^{end}) \land (T_v^{end} \le t)}(\text{Warehouse})$$
-This guarantees that revisions published after $t$ (e.g., a restatement filed six months later) are physically inaccessible to the agent, eliminating look-ahead leakage in quantitative backtesting.
+Queries through this interface therefore exclude revisions published after $t$ (e.g., a restatement filed six months later). This limits look-ahead leakage through the store; it does not by itself stop an agent from using information obtained elsewhere, which the benchmark's TPI is designed to measure (currently partial).
 
 ---
 
@@ -285,13 +285,13 @@ sequenceDiagram
 
 We demonstrate Līlāvatī on example institutional problem sets, showing deterministic execution and formal invariant checking.
 
-### 6.1 Production SEC Form 10-K Parsing: Apple Inc. FY2026 Audit
-We deployed Līlāvatī on the official Apple Inc. FY2026 Form 10-K filing (123-page PDF document, `SHA-256: f9a3e5b32cb7cbf2...`). 
+### 6.1 SEC Form 10-K Parsing: Apple Inc. FY2026
+We ran Līlāvatī on the Apple Inc. FY2026 Form 10-K filing (123-page PDF document, `SHA-256: f9a3e5b32cb7cbf2...`) with `examples/problem_solving/04_sec_10k_filing_analyzer.py` (re-run 2026-11-22). The PDF is not redistributed in this repository: download it from SEC EDGAR to `data/sample_filings/aapl_10k_2026.pdf` to reproduce. 
 
 The `PDF10KParser` decomposed the document, located statutory section boundaries (Item 1, 1A, 7, 8), extracted multi-year three-statement canonical models, and anchored every metric with physical page coordinates:
 
 ```
-=== LĪLĀVATĪ EXECUTIVE AUDIT DOSSIER: APPLE INC. (FY2026) ===
+=== LĪLĀVATĪ FILING DOSSIER: APPLE INC. (FY2026) ===
 Document Provenance: 123 pages | SHA-256: f9a3e5b32cb7cbf2c44dc2faadc0edc9...
 
 [1] Income Statement (Page 35):
@@ -304,7 +304,7 @@ Document Provenance: 123 pages | SHA-256: f9a3e5b32cb7cbf2c44dc2faadc0edc9...
     • Total Assets:           $404,548M
     • Total Liabilities:      $292,455M
     • Shareholders' Equity:   $112,093M
-    • Suvarṇa Z3 SMT Proof:   SATISFIABLE (Assets == Liab + Equity)
+    • Suvarṇa Z3 check:       SAT (Assets == Liab + Equity for the reported numbers)
 
 [3] Statement of Cash Flows (Page 39):
     • Operating Cash Flow:    $145,097M (FCF Conversion: 1.10x Net Income)
@@ -315,9 +315,9 @@ Document Provenance: 123 pages | SHA-256: f9a3e5b32cb7cbf2c44dc2faadc0edc9...
 [4] Deterministic Diagnostics:
     • Beneish M-Score:        -2.54 (Safe / Non-Manipulator, Threshold -1.78)
     • Altman Z-Score:         12.02 (Safe Zone, Threshold 2.99)
-    • Climate Carbon Tax:     1.57 bps EBIT reduction at $100/t tax
+    • Climate Carbon Tax:     1.57 bps EBIT-margin reduction at $100/t (illustrative emissions)
 
-[5] Committee Verdict:        APPROVED_BUY (Formally Verified & Audited)
+[5] Committee Verdict:        APPROVED_BUY (identities checked; illustrative output)
 ```
 
 All 12 extracted metrics were anchored to exact primary snippets:
@@ -325,46 +325,42 @@ All 12 extracted metrics were anchored to exact primary snippets:
 * `curr_total_assets`: Page 37 $\to$ `"Total assets $ 404,548 $ 359,241"`
 * `curr_cfo`: Page 39 $\to$ `"Cash generated by operating activities  145,097  111,482  118,254"`
 
-In contrast, when standard LLMs (GPT-4o, Claude 3.5 Sonnet) were prompted directly on raw 10-K text chunks, they would be expected to show elevated error rates (illustrative, unmeasured) in distinguishing current marketable securities (\$20,417M) from non-current marketable securities (\$80,213M), leading to out-of-balance balance sheet constructions.
+The Beneish and Altman scores are computed from the extracted figures. The carbon-tax line uses illustrative inputs that are not taken from Apple's disclosures (Scope 1 of 350,000 t, Scope 2 of 1,150,000 t, interest expense of USD 3.0 billion); it demonstrates the calculation, not Apple's exposure. How LLMs perform on this extraction task without tools has not been measured here.
 
 ### 6.2 Forensic Accounting M&A Due Diligence
-In a simulated corporate acquisition scenario, an agent evaluated an acquisition target claiming 35% revenue growth. While a generic LLM agent issued an unconstrained "BUY" recommendation based on top-line momentum, Līlāvatī's `ForensicEngine` caught:
-* Days Sales in Receivables Index ($\text{DSRI} = 1.48 > 1.0$), flagging aggressive channel stuffing.
+In a simulated acquisition scenario (`examples/problem_solving/01_forensic_ma_due_diligence.py`, synthetic target claiming 35% revenue growth), Līlāvatī's `ForensicEngine` reported:
+* Days Sales in Receivables Index ($\text{DSRI} = 1.48 > 1.0$): receivables grew faster than sales, one sign of aggressive revenue recognition.
 * Beneish M-Score: $-1.34 > -1.78$, triggering an automated manipulation alert.
-* The Adversarial Committee issued a binding `REJECTED_ACCOUNTING_ANOMALY` verdict, safeguarding capital against fraudulent reporting.
+* The committee's rule-based decision was `REJECT ACQUISITION`. A Beneish flag is a reason to investigate, not a finding of fraud.
 
-### 6.3 Private Credit Covenant & Distressed Equity Cure
-In private credit monitoring, Līlāvatī evaluated a portfolio borrower undergoing an EBITDA contraction. The covenant check (plain deterministic arithmetic) found that the borrower's Total Leverage ($5.45\text{x}$) breached the maximum leverage covenant ($4.50\text{x}$). The minimum sponsor equity cure follows deterministically from the covenant definition (illustrative figures):
-$$\Delta E_{cure} = \text{TotalDebt} - (4.50 \times \text{EBITDA}) = \$104.50\text{M}$$
-An equity injection below this amount leaves the covenant breached.
+### 6.3 Private Credit Covenant Monitoring
+In a simulated private-credit case (`examples/problem_solving/02_credit_covenant_and_distress_monitor.py`), the covenant check (plain arithmetic with an at-limit tolerance) found net leverage of 4.00x against a 3.50x maximum and interest coverage of 2.33x against a 3.00x minimum; the two-year Merton default probability was 9.93%. The net debt reduction needed to restore the leverage test follows from the covenant definition:
+$$\Delta D = (\text{TotalDebt} - \text{Cash}) - 3.50 \times \text{EBITDA} = \$17.5\text{M}$$
+How a sponsor equity cure counts towards this (added to EBITDA, or applied to repay debt) is set by each credit agreement.
 
 ---
 
 ## 7. Performance & Verification Benchmarks
 
-Latency was measured with the reproducible script [`scripts/benchmark_latency.py`](https://github.com/revendrat/lilavati/blob/main/scripts/benchmark_latency.py) (30 runs after warm-up; 3 for the PDF; re-measured 2026-11-19 after the engine audit). Environment: Python 3.11.14, macOS 15.5 arm64, Z3 5.4.1. Numbers are machine-dependent; rerun on your hardware.
+Latency was measured with the reproducible script [`scripts/benchmark_latency.py`](https://github.com/revendrat/lilavati/blob/main/scripts/benchmark_latency.py) (30 runs after warm-up; 3 for the PDF; re-measured 2026-11-22). Environment: Python 3.11.14, macOS 15.5 arm64, Z3 5.4.1. Numbers are machine-dependent; rerun on your hardware.
 
 | Operation | Engine | Median (ms) | p95 (ms) |
 | :--- | :--- | ---: | ---: |
-| Balance-sheet equation check | Z3 | 1.04 | 1.16 |
-| Nelson-Siegel fit (10 points) | SciPy | 3.60 | 3.82 |
-| Optimal fractional differentiation d* (1,000 obs) | NumPy / statsmodels | 52.92 | 54.23 |
-| SABR calibration (9 strikes, incl. arbitrage check) | SciPy | 2.53 | 2.70 |
-| Bi-temporal as-of query | DuckDB (in-memory) | 1.75 | 2.41 |
-| 10-K full extraction (123 pages) | pypdf | 5,402 | 5,447 |
+| Balance-sheet equation check | Z3 | 1.10 | 1.39 |
+| Nelson-Siegel fit (10 points) | SciPy | 3.75 | 5.54 |
+| Optimal fractional differentiation d* (1,000 obs) | NumPy / statsmodels | 53.19 | 60.92 |
+| SABR calibration (9 strikes, incl. arbitrage check) | SciPy | 2.53 | 2.75 |
+| Bi-temporal as-of query | DuckDB (in-memory) | 1.70 | 1.98 |
+| 10-K full extraction (123 pages) | pypdf | 5,081 | 5,281 |
 
-### Compliance with Līlāvatī-Bench Metrics
-Under the **Līlāvatī-Bench** evaluation standard:
-* **Tool Math Purity Ratio (TMPR)**: **100.0%** (0 mental math operations performed by LLM tokens).
-* **Accounting Invariant Compliance Rate (ICR)**: **100.0%** (100% of generated models satisfy SMT equilibrium).
-* **Proof-of-Citation Score (PoCS)**: **100.0%** (every metric verified against SHA-256 source hash).
-* **Temporal Purity Index (TPI)**: **100.0%** (complete absence of look-ahead leakage under dual-time predicates).
+### Līlāvatī-Bench metrics for the reference pipeline
+The deterministic reference solver scores 100% on TMPR, ICR, PoCS and TPI **by construction**: it uses the same engines the checks use, so these figures confirm the harness runs, not that any model or agent is reliable. Measured model results, including a tool-augmented arm with a measured tool-grounding rate (a version of TMPR), are in section 5 of the companion benchmark paper and in `results/ANALYSIS.md`.
 
 ---
 
 ## 8. Discussion & Future Roadmap
 
-Project Līlāvatī establishes that the path to reliable autonomous agents in capital markets does not lie in training larger, monolithic generative models to "learn" arithmetic through token prediction. Rather, it requires **neuro-symbolic orchestration**: combining the pattern recognition, summarization, and hypothesis-generation capabilities of frontier language models with the deterministic precision of formal theorem provers, domain-specific numerical libraries, and bi-temporal databases.
+Project Līlāvatī establishes that the path to reliable autonomous agents in capital markets does not lie in training larger, monolithic generative models to "learn" arithmetic through token prediction. Rather, it requires **neuro-symbolic orchestration**: combining the pattern recognition, summarization, and hypothesis-generation capabilities of frontier language models with deterministic, reference-tested numerical libraries, SMT checks of accounting identities, and bi-temporal databases.
 
 ### Active Engineering Roadmap
 1. **Open-Source Fine-Tuned Financial Reasoning Models**: Curating a dataset of 500,000 verified SMT reasoning traces to train specialized, compact foundation models (8B–70B) optimized for parameter extraction and tool dispatching.
@@ -375,7 +371,7 @@ Project Līlāvatī establishes that the path to reliable autonomous agents in c
 
 ## 9. Conclusion
 
-We have introduced **Līlāvatī**, an open-source, audited, and verifiable agentic framework for institutional quantitative finance. By enforcing the Zero LLM Arithmetic protocol, proving financial equilibrium via the Suvarṇa Z3 SMT solver, guaranteeing cryptographic provenance with `CitationRef`, and eliminating look-ahead bias through bi-temporal DuckDB warehousing, Līlāvatī resolves the critical failure modes of generic generative AI in high-stakes capital markets. 
+We have introduced **Līlāvatī**, an open-source, alpha-stage tool layer for quantitative finance. It routes arithmetic to reference-tested engines (Zero LLM Arithmetic as a design goal), checks accounting identities on the given numbers with the Suvarṇa Z3 engine, attaches hash-linked provenance with `CitationRef`, and limits look-ahead leakage through bi-temporal DuckDB queries. Section 5 of the companion benchmark paper measures how much this changes model accuracy, and which failure modes remain. 
 
 The complete codebase, documentation, FastMCP microservices, and interactive problem-solving pipelines are open-sourced under the Apache License 2.0 at [https://github.com/revendrat/lilavati](https://github.com/revendrat/lilavati).
 
@@ -383,16 +379,17 @@ The complete codebase, documentation, FastMCP microservices, and interactive pro
 
 ## References
 
-* **Almgren, R., and Chriss, N.** (2000). Optimal execution of portfolio transactions. *Journal of Risk*, 3(2), 5–39.
+* **Almgren, R., and Chriss, N.** (2000/2001). Optimal execution of portfolio transactions. *Journal of Risk*, 3(2), 5–39. doi:10.21314/JOR.2001.041.
 * **Altman, E. I.** (1968). Financial ratios, discriminant analysis and the prediction of corporate bankruptcy. *The Journal of Finance*, 23(4), 589–609.
 * **Araci, D.** (2019). FinBERT: Financial sentiment analysis with pre-trained language models. *arXiv preprint arXiv:1908.10063*.
 * **Beneish, M. D.** (1999). The detection of earnings manipulation. *Financial Analysts Journal*, 55(5), 24–36.
 * **Bhāskarācārya (Bhāskara II)** (1150). *Līlāvatī* (*Siddhānta Śiromaṇi*). Translated by H. T. Colebrooke (1817), *Algebra with Arithmetic and Mensuration from the Sanscrit of Brahmegupta and Bhascara*, John Murray, London.
 * **Black, F., and Litterman, R.** (1992). Global portfolio optimization. *Financial Analysts Journal*, 48(5), 28–43.
 * **Chen, Z., Chen, W., Smiley, C., Shah, S., Borova, I., Langdon, D., ... and Wang, W. Y.** (2021). FinQA: A dataset of numerical reasoning over financial data. *Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 3697–3711.
+* **de Moura, L., Kong, S., Avigad, J., van Doorn, F., and von Raumer, J.** (2015). The Lean theorem prover (system description). *Automated Deduction – CADE-25*, Lecture Notes in Computer Science 9195. Springer, Cham. doi:10.1007/978-3-319-21401-6_26.
 * **De Moura, L., and Bjørner, N.** (2008). Z3: An efficient SMT solver. *International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS)*, 337–340. Springer, Berlin, Heidelberg.
 * **Engle, R. F., and Granger, C. W.** (1987). Co-integration and error correction: representation, estimation, and testing. *Econometrica*, 55(2), 251–276.
-* **Garcez, A. D., Gori, M., Lamb, L. C., Serafini, L., Spranger, M., and Tran, S. N.** (2019). Neural-symbolic computing: An effective methodology for principled AI. *Language and Statistics*, 2019.
+* **Garcez, A. D., Gori, M., Lamb, L. C., Serafini, L., Spranger, M., and Tran, S. N.** (2019). Neural-symbolic computing: An effective methodology for principled integration of machine learning and reasoning. *Journal of Applied Logics*, 6(4), 611–631.
 * **Hagan, P. S., Kumar, D., Lesniewski, A. S., and Woodward, D. E.** (2002). Managing smile risk. *Wilmott Magazine*, September, 84–108.
 * **Johansen, S.** (1991). Estimation and hypothesis testing of cointegration vectors in Gaussian vector autoregressive models. *Econometrica*, 59(6), 1551–1580.
 * **López de Prado, M.** (2018). *Advances in Financial Machine Learning*. John Wiley & Sons, Hoboken, NJ.
@@ -401,9 +398,10 @@ The complete codebase, documentation, FastMCP microservices, and interactive pro
 * **Manhaeve, R., Dumancic, S., Kimmig, A., Demeester, T., and De Raedt, L.** (2018). DeepProbLog: Neural probabilistic logic programming. *Advances in Neural Information Processing Systems (NeurIPS)*, 31, 3749–3759.
 * **Merton, R. C.** (1974). On the pricing of corporate debt: The risk structure of interest rates. *The Journal of Finance*, 29(2), 449–470.
 * **Nelson, C. R., and Siegel, A. F.** (1987). Parsimonious modeling of yield curves. *Journal of Business*, 60(4), 473–489.
+* **Paulson, L. C.** (1994). *Isabelle: A Generic Theorem Prover*. Lecture Notes in Computer Science 828. Springer, Berlin, Heidelberg.
 * **Patwardhan, K. S., Naimpally, S. A., and Singh, S. L.** (2001). *Līlāvatī of Bhāskarācārya: A Treatise of Mathematics of Vedic Tradition*. Motilal Banarsidass Publishers, Delhi.
-* **Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., ... and Scialom, T.** (2024). Toolformer: Language models can teach themselves to use tools. *Advances in Neural Information Processing Systems (NeurIPS)*, 36.
+* **Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., ... and Scialom, T.** (2023). Toolformer: Language models can teach themselves to use tools. *Advances in Neural Information Processing Systems (NeurIPS)*, 36.
 * **Wu, S., Irsoy, O., Lu, S., Dabravolski, V., Dredze, M., Gehrmann, S., ... and Mann, G.** (2023). BloombergGPT: A large language model for finance. *arXiv preprint arXiv:2303.17564*.
-* **Yang, H., Liu, X. Y., and Wang, C. D.** (2023). FinGPT: Open-source financial large language models. *FinLLM Symposium at IJCAI 2023*.
-* **Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., and Cao, Y.** (2022). ReAct: Synergizing reasoning and acting in language models. *International Conference on Learning Representations (ICLR)*.
-* **Zhu, F., Lei, C., Wang, C., Wang, J., Lu, H., and Du, M.** (2021). TAT-QA: A question answering benchmark on a hybrid of tabular and textual content in financial reports. *Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics (ACL)*, 3277–3287.
+* **Yang, H., Liu, X. Y., and Wang, C. D.** (2023). FinGPT: Open-source financial large language models. *FinLLM Symposium at IJCAI 2023*. arXiv:2306.06031.
+* **Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., and Cao, Y.** (2023). ReAct: Synergizing reasoning and acting in language models. *International Conference on Learning Representations (ICLR 2023)*.
+* **Zhu, F., Lei, W., et al.** (2021). TAT-QA: A question answering benchmark on a hybrid of tabular and textual content in finance. *Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (ACL-IJCNLP), Volume 1: Long Papers*, 3277–3287.

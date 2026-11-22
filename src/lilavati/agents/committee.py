@@ -33,7 +33,7 @@ class CommitteeRecommendation(StrEnum):
 
 
 class InvestmentCommitteeMemo(BaseModel):
-    """Audited, formally verified Investment Committee Memorandum."""
+    """Investment Committee Memorandum with its tool outputs and identity checks attached."""
 
     model_config = ConfigDict(frozen=True)
 

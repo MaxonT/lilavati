@@ -2,7 +2,7 @@
 Autonomous Institutional Financial Research Agent for Project Līlāvatī.
 
 Synthesizes filing discovery, deep hypothesis scenario search, forensic audits,
-and climate risk modeling into an audited Investment Research Dossier.
+and climate risk modeling into an Investment Research Dossier with citations and tool outputs.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from lilavati.llm.providers import INSTITUTIONAL_MODEL_PRESETS, ModelSpec
 
 
 class ResearchDossier(BaseModel):
-    """Institutional-grade financial research memorandum and investment dossier."""
+    """Financial research memorandum and investment dossier."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -67,7 +67,7 @@ class FinancialResearchAgent:
         2. Execute forensic accounting audit (Beneish M-Score).
         3. Run Deep Financial Agent scenario trees across Bull, Base, and Bear trajectories.
         4. Run ESG & Climate Transition Risk stress tests (Scope 1/2 WACI).
-        5. Synthesize findings into an audited ResearchDossier.
+        5. Synthesize findings into a ResearchDossier (with citations and tool outputs).
         """
         # Step 1: Autonomous Filing Search
         search_rep: SearchReport = self.search_agent.search_entity(

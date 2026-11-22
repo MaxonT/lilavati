@@ -14,6 +14,7 @@ Track 7: Sustainable Finance & Climate Stress Testing
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import date
 from typing import Any
 
@@ -39,6 +40,29 @@ class BenchmarkTestCase(BaseModel):
     tolerance: float = Field(
         default=1e-3, description="Acceptable numerical relative error tolerance"
     )
+
+
+def case_content_hash(case: BenchmarkTestCase) -> str:
+    """SHA-256 of the question: track, prompt, input data, tolerance and the names of the answer keys.
+
+    Case ids are labels; this hash is the identity. Store it with every result so that answers are
+    only ever compared on identical questions.
+
+    Expected *values* are deliberately excluded: they are computed with exp, log and the normal
+    CDF, whose last digits differ between platform math libraries, so including them made the hash
+    differ between macOS and Linux (scheme v1, replaced 2026-11-22). Inputs come from a seeded
+    generator and basic arithmetic, which are identical on every platform. The answers follow from
+    the question through the engines, whose version is recorded by the git commit in each run's
+    metadata.
+    """
+    payload = {
+        "track": case.track,
+        "prompt": case.prompt,
+        "context_data": case.context_data,
+        "answer_keys": sorted(case.expected_values),
+        "tolerance": case.tolerance,
+    }
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
 
 
 def _gen_doc_hash(text: str) -> str:
@@ -166,7 +190,7 @@ GOLDEN_BENCHMARK_CASES: list[BenchmarkTestCase] = [
         title="BSM Greek Neutrality and SMT Butterfly Spread Arbitrage Verification",
         prompt=(
             "Price a 1-year European call option with S=100, K=100, r=5%, sigma=20%. Calculate Delta, "
-            "Gamma, Vega. Then formally verify with Z3 that a butterfly spread with strikes K1=90, K2=100, "
+            "Gamma, Vega. Then formally verify with Z3 that a butterfly spread with strikes K1=90, K2=100, "  # claims-ok: published golden case text (changing it changes the case hash)
             "K3=110 satisfies non-negative risk-neutral density condition (C(K1) - 2C(K2) + C(K3) >= 0)."
         ),
         as_of_date=date(2024, 10, 1),

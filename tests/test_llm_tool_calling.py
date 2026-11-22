@@ -16,8 +16,13 @@ from typing import Any
 import httpx
 import pytest
 
-from lilavati.llm.client import UniversalLLMClient
-from lilavati.llm.providers import ModelProvider, ModelSpec
+from lilavati.llm.client import LLMMessage, UniversalLLMClient
+from lilavati.llm.providers import (
+    GROQ_BASE_URL,
+    INSTITUTIONAL_MODEL_PRESETS,
+    ModelProvider,
+    ModelSpec,
+)
 from lilavati.runtime.agent import AgentConfig, NeuroSymbolicAgent
 
 SCHEMA = {
@@ -283,8 +288,6 @@ def test_transient_errors_are_retried_then_succeed() -> None:
 
     spec = ModelSpec(provider=ModelProvider.ANTHROPIC, model_name="m", retry_backoff_seconds=0.0)
     client = UniversalLLMClient(spec, api_key="k", transport=httpx.MockTransport(handler))
-    from lilavati.llm.client import LLMMessage
-
     resp = client.generate([LLMMessage(role="user", content="hi")])
     assert resp.content == "New rate is 0.0525." and calls["n"] == 3
 
@@ -298,8 +301,6 @@ def test_non_retryable_error_raises_immediately() -> None:
 
     spec = ModelSpec(provider=ModelProvider.ANTHROPIC, model_name="m", retry_backoff_seconds=0.0)
     client = UniversalLLMClient(spec, api_key="k", transport=httpx.MockTransport(handler))
-    from lilavati.llm.client import LLMMessage
-
     with pytest.raises(httpx.HTTPStatusError):
         client.generate([LLMMessage(role="user", content="hi")])
     assert calls["n"] == 1
@@ -316,8 +317,49 @@ def test_retries_are_bounded() -> None:
         provider=ModelProvider.ANTHROPIC, model_name="m", max_retries=2, retry_backoff_seconds=0.0
     )
     client = UniversalLLMClient(spec, api_key="k", transport=httpx.MockTransport(handler))
-    from lilavati.llm.client import LLMMessage
-
     with pytest.raises(httpx.HTTPStatusError):
         client.generate([LLMMessage(role="user", content="hi")])
     assert calls["n"] == 3
+
+
+@pytest.mark.parametrize(
+    "preset",
+    ["groq-gpt-oss-120b", "groq-gpt-oss-20b", "groq-qwen3.6-27b", "groq-qwen3.8-27b"],
+)
+def test_groq_presets_use_env_key_in_header_only(
+    preset: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    secret = "gsk_test_secret_value_0123456789"
+    monkeypatch.setenv("GROQ_API_KEY", secret)
+    sent: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(request)
+        return httpx.Response(200, json=_openai_replies()[0])
+
+    spec = INSTITUTIONAL_MODEL_PRESETS[preset]
+    client = UniversalLLMClient(spec, transport=httpx.MockTransport(handler))
+    resp = client.generate([LLMMessage(role="user", content="Add 25bp to 5%.")])
+    assert resp.tool_calls[0].name == "add_bps"
+    req = sent[0]
+    assert str(req.url) == f"{GROQ_BASE_URL}/chat/completions"
+    assert req.headers["Authorization"] == f"Bearer {secret}"
+    assert secret not in str(req.url)
+    assert secret not in req.content.decode()
+    assert json.loads(req.content)["model"] == spec.model_name
+
+
+def test_ollama_preset_targets_openai_compatible_endpoint() -> None:
+    # Ollama serves the OpenAI-compatible API under /v1; the preset once pointed at the root,
+    # so requests went to /chat/completions and could not work.
+    sent: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(request)
+        return httpx.Response(200, json=_openai_replies()[1])
+
+    spec = INSTITUTIONAL_MODEL_PRESETS["llama3-fin-8b"]
+    UniversalLLMClient(spec, transport=httpx.MockTransport(handler)).generate(
+        [LLMMessage(role="user", content="hi")]
+    )
+    assert str(sent[0].url) == "http://localhost:11434/v1/chat/completions"

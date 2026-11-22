@@ -1,7 +1,7 @@
 """
 Līlāvatī (लीलावती)
 ==================
-An open-source, audited & verifiable agentic stack and benchmark suite
+An open-source tool layer (alpha) with checkable numbers, and a benchmark suite,
 for institutional quantitative finance, credit, econometrics, and algorithmic execution.
 """
 
@@ -21,7 +21,7 @@ from lilavati.framework.graph import END, CompiledFinancialGraph, FinancialState
 from lilavati.framework.state import FinancialState
 from lilavati.tracing.tracer import Tracer
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "FinancialAgent",

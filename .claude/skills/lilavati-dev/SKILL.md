@@ -16,11 +16,14 @@ right and every claim being true. These rules come from real bugs found in this 
 2. For a bug: write a test that fails on the current code, then fix, then show it passes.
 3. Run and paste the tails in your final message:
    ```bash
-   uv run ruff check src tests scripts
+   uv run ruff check src tests scripts examples
    uv run mypy src
    uv run pytest
    ```
    If you touched docs: `uv run --extra docs --extra dev mkdocs build --strict`.
+   If you touched docs, docstrings or printed text: `uv run python scripts/check_claims.py`.
+   If you touched a tutorial or an API a tutorial uses: `uv run python scripts/check_tutorials.py`.
+   CI (`.github/workflows/ci.yml`) runs all of these plus every example and the manifest check.
    If you touched an engine used by examples: run the affected `examples/*.py`.
 4. Grep docs, papers, tutorials and examples for numbers your change affects; refresh them by
    re-running code. Never edit a quoted number by hand-calculation.
@@ -80,6 +83,14 @@ right and every claim being true. These rules come from real bugs found in this 
   where they differ: OU half-life is −ln2/ln φ, not ln2/(1−φ) (27% high at φ = e^−0.5).
 - **Use published coefficients exactly** and cite them (the Beneish TATA/LVGI coefficients were
   wrong, including a sign). A test should pin the constant (e.g. all indices = 1 ⇒ known value).
+- **Assert the reason, not just the outcome.** `assert "REJECTED" in result.pm_decision` passed for a
+  firm meant to show manipulation, but it was rejected because its cash flow statement did not
+  reconcile. Assert the specific verdict (`startswith("REJECT: manipulation")`) and the inputs'
+  consistency, so a test cannot pass for the wrong reason.
+- **No invented inputs in examples.** Proxies such as retained earnings = 0.5 × equity, a fixed 70/30
+  Scope 1/2 split, or unsourced "~350k tCO2e" for a real company produce plausible numbers that mean
+  nothing. Use reported figures, or label inputs as illustrative where they are printed and quoted.
+  Never put a real company's name on synthetic data.
 - **Required inputs over magic defaults** when a default would silently mean the wrong units
   (e.g. `arrival_price` is keyword-only and required).
 
@@ -98,17 +109,74 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   results, latencies, scores or citations.
 - The README capability table marks each feature ✅ implemented / 🟡 partial / 🗺️ planned. Do
   not advertise planned work as done; keep README, `docs/`, `ROADMAP.md` and this skill consistent.
+- **Verify every reference against a primary source** (publisher, ACL Anthology, DBLP, NeurIPS/ICLR proceedings, RePEc).
+  The papers carried a non-existent "FinBench" (arXiv:2311.12345, a placeholder id), a citation to a fictional
+  "Līlāvatī Benchmark Consortium", wrong years (Toolformer, ReAct) and a wrong author list (TAT-QA). Never cite a
+  source you have not looked up; if a detail (e.g. page range) cannot be confirmed, give the DOI instead.
 - Record audit results in `docs/validation/<engine>.md` (check, reference, measured tolerance,
   status pass / fixed / open) and update `docs/validation/index.md`.
 - Benchmark results: report provider failures (429/503/timeouts/empty replies) separately from
   wrong answers; include a content-free baseline; publish raw outputs in `results/`.
+- Never re-roll model failures. `--resume` once re-ran unparsable answers along with provider errors,
+  lifting a score from 0.4417 to 0.4667. Re-run only errors and empty replies; record
+  `finish_reason` so truncation is distinguishable from a wrong answer.
+- **Results are evidence: publish and never edit them.** `results/**/*.jsonl` are tracked; each run
+  script writes `<out>.meta.json` (settings, prompt version, git commit); older runs are described
+  in `results/legacy_metadata.json` (`null` when unknown, never a guess);
+  `scripts/build_results_manifest.py` writes `results/manifest.json` and
+  `tests/test_results_manifest.py` fails if it is stale. Quote numbers from `results/ANALYSIS.md`
+  (`scripts/analyse_results.py`). Keep superseded runs, labelled, rather than deleting them.
+- **Case ids are labels, content hashes are identity.** `generate_cases(2026, 2)` and `(2026, 4)` both
+  produced `GEN-T2-000` with different bonds. Ids now carry seed and size (`GEN-S2026-N4-T2-000`),
+  records store `case_hash`, and comparisons pair on the hash (`analysis.paired_difference`).
+- **Identities must be platform-independent.** Never hash floats produced by exp/log/erf: their last digits
+  differ between math libraries (the v1 case hash differed between macOS and Linux CI). Hash inputs, not
+  computed outputs, and pin a known hash in a test so CI on another OS catches drift.
+- **Read the prompt before blaming the model.** Prompt v2 defined `bond_price` as "price of the 5-year
+  bond" for generated 2-10-year bonds; gpt-oss-120b priced a 10-year bond as 5-year and was scored
+  wrong. Bump `llm_eval.PROMPT_VERSION` whenever the model-visible text changes, and never mix versions.
+- **Tool-arm results measure dispatch, not engines.** Expected values come from the engines the tools
+  call; say so wherever tool-arm accuracy is reported. A provider rejecting a malformed tool call
+  (Groq HTTP 400 `tool_use_failed`) is `model_error`, not a provider failure.
+- Answer parsers must handle inline reasoning: strip `<think>...</think>` before extracting JSON.
+  A greedy first-`{`-to-last-`}` match failed on braces inside `qwen3.6-27b` reasoning. After a
+  parser fix, re-score stored replies (`--rescore`) instead of calling the model again.
 - No marketing language ("institutional-grade", "first", "definitive"). The project is alpha.
+- **Claims are linted.** `scripts/check_claims.py` fails on proof, guarantee, "audited", maturity and
+  priority language in docs, docstrings and printed text unless the line negates it or carries a
+  reviewed `claims-ok` marker. Never reword published benchmark case text to satisfy it (that changes
+  the case hash): mark it `claims-ok` with the reason.
+- **Tutorial code is executed.** Titled fences (`python title="file.py"`) build files; untitled blocks
+  run against them; `tests/test_*.py` titles run under pytest (`scripts/check_tutorials.py`).
+- **Every user-facing feature ships with a tutorial** in `docs/tutorials/NN_<topic>.md`, added to the
+  `mkdocs.yml` nav and, if relevant, to the course schedule (`docs/course/index.md`). Structure:
+  who it is for and time/cost; learning objectives; runnable steps (commands and code you ran);
+  "what can go wrong", tied to real failures found in this repo; "Using this with Claude Code"
+  (which skill); exercises; notes for instructors. Link measured numbers to `results/ANALYSIS.md`
+  or a validation page instead of copying them, so they cannot drift. Run every code block that
+  needs no API key before publishing the tutorial.
+- **Before rewriting an example, grep `tests/` for importers** (`tests/test_tutorial_agents.py` imports examples 07–09).
+- **When you correct a claim, grep tutorials and examples too.** "Z3 proves covenants", an "equity
+  cure" that was really debt paydown, and `serve_agent(host="0.0.0.0")` were corrected in the docs and
+  code but survived in Tutorial 01 and `examples/06` until 2026-11-22. Search `docs/tutorials/`,
+  `examples/` and `docs/index.md` for the retired wording in the same change.
+- User-facing workflows also get a skill (`.claude/skills/<name>/SKILL.md`) so AI agents follow
+  the same rules as the tutorial (example: `lilavati-bench` for running and analysing benchmarks).
 
 ## 5. Secrets, network and LLM clients
 
+- **Packaging: check what ships.** Hatch honours `.gitignore` but not `.git/info/exclude`, so a local
+  `uv build` put the private `.agents/tasks/` briefs into the sdist. Exclusions live in
+  `[tool.hatch.build.targets.sdist]`; list `tar tzf dist/*.tar.gz` before any release. Releases go
+  through `.github/workflows/release.yml` (Trusted Publishing, clean-install smoke test), never a
+  token on a laptop.
+
 - API keys only from environment variables. Never put a key in a file, test, fixture, log, commit
   or URL query string; send it in a header (`x-goog-api-key`, `x-api-key`, `Authorization`).
-  Before committing: `git diff --cached | grep -E "AIza[0-9A-Za-z_-]{30}|sk-[A-Za-z0-9]{20}"` must be empty.
+  Before committing: `git diff --cached | grep -E "AIza[0-9A-Za-z_-]{30}|sk-[A-Za-z0-9_-]{20}|gsk_[A-Za-z0-9]{20}"`
+  must be empty (Gemini, OpenAI/Anthropic, Groq key shapes). If a key is pasted into chat, pass it
+  only as an environment variable on the command (`GROQ_API_KEY=... uv run ...`), never write it to
+  `.env` or a script, and tell the maintainer to rotate it.
 - Error handling must not echo request URLs or headers.
 - SEC EDGAR requests need a compliant User-Agent; use a generic project contact, never a personal email.
 - Respect provider rate limits (bounded `--max-requests`, resumable runs). The client retries
@@ -117,6 +185,17 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   documented format (`tests/test_llm_tool_calling.py`, `httpx.MockTransport` via the client's
   `transport=` argument) **and an opt-in live test** (`tests/integration/`, `LILAVATI_LIVE_TESTS=1`).
   Gemini and Anthropic silently dropped `tools` because only the mock LLM was ever exercised.
+- **Framework integrations go through MCP, in the framework's own environment if needed.**
+  `langchain-mcp-adapters` requires `mcp<2` but fastmcp 4 needs `mcp>=2.3`, so the LangGraph
+  example runs with `uv run --no-project --with ...` and starts the servers as subprocesses. Do
+  not pin around such conflicts inside the project; check `uv tree --invert --package <pkg>`.
+- **Integration examples must prove tool use**: assert the final answer quotes the tool-returned
+  numbers (`examples/integrations/_task.py::check_answer`), and report flaky runs honestly.
+- Free-tier Gemini endpoints return 503 "high demand" often: use generous backoff
+  (ADK: `GenerateContentConfig(http_options=HttpOptions(retry_options=HttpRetryOptions(...)))`).
+- Groq (OpenAI-compatible, `GROQ_BASE_URL`): it validates tool-call arguments server side and returns
+  HTTP 400 `tool_use_failed` for a malformed call (`qwen3.8-27b` failed the live tool test 2 of 3 runs);
+  that is a model failure, not a client bug. Temp 0 is not deterministic there, so report run-to-run spread.
 - Gemini: put system prompts in `systemInstruction`, sanitise JSON Schema to its OpenAPI subset
   (no `title`, `default`, `additionalProperties`), and echo `thoughtSignature` on function-call
   parts. Anthropic: roles must alternate, so merge parallel `tool_result` blocks into one user turn.
@@ -135,7 +214,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 | Sustainability | `core/sustainability.py` | WACI, carbon-tax stress, SLB step-up |
 | Forensics | `agents/forensics.py` | Beneish (1999), Altman (1968) |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
-| Benchmark | `bench/` | golden cases, seeded generator, runner, evaluators; `scripts/run_llm_baseline.py` |
+| Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
+| Benchmark | `bench/` | golden cases, seeded generator (`case_content_hash`, `legacy_case_id`), runner, evaluators. `lilavati-bench run` only runs the reference solver (`--model` is a label) |
+| LLM evaluation | `bench/llm_eval.py`, `bench/tool_eval.py`, `bench/analysis.py` | prompts (`PROMPT_VERSION`), parsing, outcome classes; tool arm with grounding; summaries, bootstrap CIs, paired differences. Scripts: `run_llm_baseline.py`, `run_tool_baseline.py`, `build_results_manifest.py`, `analyse_results.py` |
+| Tutorials and course | `docs/tutorials/`, `docs/course/index.md` | one tutorial per user-facing feature; user skill `.claude/skills/lilavati-bench/` |
 
 The PyPI distribution is `lilavati-finance` (the name `lilavati` belongs to another project); the
 import name is `lilavati`.
@@ -159,3 +241,18 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   testing old code under the repo's pytest pythonpath).
 - 2026-11-19: Added LLM-client rules after fixing Gemini/Anthropic tool calling (round-trip and live
   tests, provider format notes, retries, limits must not look like success).
+- 2026-11-20: Added integration rules (MCP-first framework examples, mcp version conflict, answer
+  checks, Gemini 503 backoff) after LangGraph/ADK/A2A examples.
+- 2026-11-20: Added Groq presets and `--provider groq`; Groq key-pattern secret check; no re-rolling
+  of unparsable answers on `--resume`; `finish_reason` recorded; Groq tool-call/determinism notes.
+- 2026-11-20: Inline-reasoning parsing rule and `--rescore` after the `<think>` brace bug.
+- 2026-11-20: Repo map notes that `lilavati-bench run` is reference-solver only (docs had implied otherwise).
+- 2026-11-21: Tutorial-per-feature rule and user skills; results-as-evidence rules (manifest, meta files,
+  no edits); content-hash case identity after the generated-id collision; prompt versioning after the
+  '5-year bond' key bug; tool-arm interpretation; Ollama preset needed `/v1`.
+- 2026-11-22: Grep tutorials/examples when correcting a claim (Tutorial 01 retrofit).
+- 2026-11-22: Claims linter, tutorial-code checker, CI docs/examples/tutorials jobs, docs and release
+  workflows; sdist exclude after `.agents/tasks/` was found in a local sdist.
+- 2026-11-22: Tutorials 02–04 retrofit: assert the reason, no invented inputs or real names on synthetic data, grep tests before rewriting examples.
+- 2026-11-22: Reference-verification rule after the paper reference audit.
+- 2026-11-22: Platform-independent case hashes after Linux CI found the v1 hash differed from macOS.

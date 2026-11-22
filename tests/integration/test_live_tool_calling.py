@@ -5,8 +5,9 @@ Each test makes about 2-3 API calls. Run with:
 
     LILAVATI_LIVE_TESTS=1 GEMINI_API_KEY=... uv run pytest tests/integration -v
     LILAVATI_LIVE_TESTS=1 ANTHROPIC_API_KEY=... uv run pytest tests/integration -v
+    LILAVATI_LIVE_TESTS=1 GROQ_API_KEY=... uv run pytest tests/integration -v
 
-Model overrides: LILAVATI_LIVE_GEMINI_MODEL, LILAVATI_LIVE_ANTHROPIC_MODEL.
+Model overrides: LILAVATI_LIVE_GEMINI_MODEL, LILAVATI_LIVE_ANTHROPIC_MODEL, LILAVATI_LIVE_GROQ_PRESET.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ import pytest
 
 from lilavati.core.fixed_income import FixedIncomeEngine
 from lilavati.llm.client import UniversalLLMClient
-from lilavati.llm.providers import ModelProvider, ModelSpec
+from lilavati.llm.providers import INSTITUTIONAL_MODEL_PRESETS, ModelProvider, ModelSpec
 from lilavati.runtime.agent import AgentConfig, NeuroSymbolicAgent
 
 LIVE = os.environ.get("LILAVATI_LIVE_TESTS") == "1"
@@ -95,3 +96,9 @@ def test_live_anthropic_calls_tool() -> None:
         timeout_seconds=180,
     )
     _assert_used_tool(*_run(spec))
+
+
+@pytest.mark.skipif(not (LIVE and os.environ.get("GROQ_API_KEY")), reason="live Groq test")
+def test_live_groq_calls_tool() -> None:
+    preset = os.environ.get("LILAVATI_LIVE_GROQ_PRESET", "groq-gpt-oss-120b")
+    _assert_used_tool(*_run(INSTITUTIONAL_MODEL_PRESETS[preset]))

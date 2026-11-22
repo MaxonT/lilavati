@@ -7,16 +7,16 @@
 
 ## What is Project Līlāvatī?
 
-**Project Līlāvatī** is an open-source, verifiable agentic stack (alpha) and evaluation benchmark suite exclusively engineered for institutional quantitative finance, debt/credit markets, econometrics, financial machine learning, derivatives, market microstructure, and sustainability finance. Under the hood, it pairs generative semantic perception with deterministic formal verification and theorem proving.
+**Project Līlāvatī** is an open-source tool layer for financial agents (alpha) and an evaluation benchmark, covering quantitative finance, debt/credit markets, econometrics, financial machine learning, derivatives, market microstructure, and sustainability finance. Under the hood, models read and plan; reference-tested engines compute; Z3 checks accounting identities on the given numbers.
 
-Generic LLM agent frameworks fail in institutional finance because they treat numbers as text tokens, suffer from mental math hallucinations, leak future information through look-ahead bias, and lack auditable provenance.
+General-purpose LLM agent frameworks do not by themselves check where a number came from: models compute in text, can use information published after the as-of date, and leave no auditable provenance.
 
 Līlāvatī solves this through a **Domain-Specific Runtime & Protocol Layer**:
 1. **Zero LLM Arithmetic:** LLMs plan and reason; all calculations are executed deterministically through Python, Polars, DuckDB, and FastMCP.
-2. **First-Order Formal Invariants (Z3 SMT Solver):** Core accounting identities ($Assets = Liabilities + Equity$) and debt covenants are formally proved via SMT solvers, enabling neuro-symbolic self-correction.
+2. **First-Order Formal Invariants (Z3 SMT Solver):** Core accounting identities ($Assets = Liabilities + Equity$) are checked with the Z3 SMT solver on the given numbers (exact rational arithmetic), and debt covenants are checked arithmetically with an at-limit tolerance. These verify the numbers supplied, not a model over all inputs.
 3. **Cryptographic Provenance (`CitationRef`):** Every numerical fact extracted from SEC EDGAR or Ind AS filings carries an immutable SHA-256 document hash, page, and snippet citation.
-4. **Bi-Temporal Point-in-Time Isolation:** Disclosures are indexed with Dual-Time semantics (Valid Time $T_v$ vs System Time $T_s$) to guarantee zero look-ahead bias in backtests and agent evaluations.
-5. **OpenTelemetry-Compatible Tracing:** Full compliance audit trails capturing agent turns, LLM prompts/tokens, deterministic tool outputs, and formal solver proofs.
+4. **Bi-Temporal Point-in-Time Isolation:** Disclosures are indexed with Dual-Time semantics (Valid Time $T_v$ vs System Time $T_s$) so that queries return only what was known at the as-of time; detecting look-ahead use by an agent is still partial (TPI).
+5. **OpenTelemetry-Compatible Tracing:** Full compliance audit trails capturing agent turns, LLM prompts/tokens, deterministic tool outputs, and solver check results.
 
 ---
 
@@ -32,10 +32,11 @@ uv sync
 
 ### Running the Līlāvatī-Bench CLI
 
-Evaluate an agent or model across all 7 quantitative tracks:
+Run the deterministic reference solver across all 7 tracks (`--model` only labels the report card;
+to score a real LLM use `scripts/run_llm_baseline.py`, see [Benchmarks](benchmarks.md)):
 
 ```bash
-uv run lilavati-bench run --model lilavati-reference-v1 --format rich
+uv run lilavati-bench run --format rich
 ```
 
 ### Inspecting Golden Test Cases
@@ -65,7 +66,7 @@ uv run lilavati-bench list-cases
 Explore complete, runnable walkthroughs demonstrating how to build, test, and serve verifiable agents across key institutional finance domains:
 
 1. [Tutorial 01: Credit Underwriting & SMT Proofs](tutorials/01_build_your_first_financial_agent.md)
-   - *Use Case:* Commercial loan underwriting, debt covenant satisfiability ($TotalDebt/EBITDA \le 4.0\text{x}$), equity cure calculation, and Merton distance-to-default.
+   - *Use Case:* Commercial loan underwriting: maintenance covenants (net leverage and interest coverage, exact at the limit), debt reduction needed to comply, and a Merton default probability.
    - *Companion Code:* `examples/06_build_custom_agent_and_api.py`
 
 2. [Tutorial 02: Statistical Arbitrage & Algorithmic Execution](tutorials/02_statistical_arbitrage_and_execution_agent.md)

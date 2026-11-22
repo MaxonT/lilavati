@@ -103,6 +103,10 @@ class SustainabilityEngine:
         EBIT. Including Scope 2 is a conservative modelling choice (many carbon taxes apply
         to Scope 1 only; pass Scope 2 = 0 for that case). Returned "_pct" fields are
         fractions (0.25 = 25%).
+
+        Units: emissions times price must be in the same money unit as revenue, EBIT and
+        interest. Emissions in tCO2e give a liability in dollars, so pass financials in dollars;
+        with financials in USD millions, pass emissions in million tCO2e.
         """
         if revenue <= 0:
             raise ValueError("Revenue must be positive.")

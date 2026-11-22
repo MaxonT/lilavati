@@ -1,0 +1,52 @@
+{
+  "_about": "Run settings for result files written before run scripts saved <file>.meta.json (before 2026-11-21). Values come from results/README.md and the session logs of 2026-11-20; null means not recorded and not recoverable. Used by scripts/build_results_manifest.py.",
+  "archive_prompt_v1/*": {
+    "status": "superseded", "prompt_version": "v1", "provider": "gemini", "arm": "no_tools",
+    "case_set": "golden", "run_date": "2026-11-17",
+    "notes": "First pass: prompt mis-stated the vega unit and a 2,048-token cap truncated reasoning models. Do not cite."
+  },
+  "baseline_gemini-3.8-flash.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "golden",
+    "samples": 1, "temperature": 0.0, "max_tokens": null, "run_date": "2026-11-17/18"
+  },
+  "baseline_gemini-4-hydrogen.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "golden",
+    "samples": 1, "temperature": 0.0, "max_tokens": null, "run_date": "2026-11-17/18"
+  },
+  "baseline_gemma-4-31b-it.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "golden",
+    "samples": 3, "temperature": 0.7, "max_tokens": null, "run_date": "2026-11-17/18"
+  },
+  "baseline_gemma-4-26b-a4b-it.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "golden",
+    "samples": 3, "temperature": 0.7, "max_tokens": null, "run_date": "2026-11-17/18"
+  },
+  "generated_gemma-4-31b-it.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "generated",
+    "seed": 2026, "per_track": 4, "samples": 1, "temperature": 0.0, "max_tokens": null, "run_date": "2026-11-17/18",
+    "notes": "Prompt v2 bond_price key said '5-year bond'; generated maturities are 2-10 years."
+  },
+  "generated_gemma-4-26b-a4b-it.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "generated",
+    "seed": 2026, "per_track": 4, "samples": 1, "temperature": 0.0, "max_tokens": null, "run_date": "2026-11-17/18",
+    "notes": "Prompt v2 bond_price key said '5-year bond'. 10 empty replies; finish_reason not recorded, so truncation cannot be told apart from provider failure."
+  },
+  "generated_gemini-4-hydrogen.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "gemini", "arm": "no_tools", "case_set": "generated",
+    "seed": 2026, "per_track": 2, "samples": 1, "temperature": 0.0, "max_tokens": null, "run_date": "2026-11-17/18",
+    "notes": "2 cases per track: different questions from the 4-per-track set despite shared legacy ids. Prompt v2 bond_price defect."
+  },
+  "baseline_groq_*.jsonl": {
+    "status": "current", "prompt_version": "v2", "provider": "groq", "arm": "no_tools", "case_set": "golden",
+    "samples": 1, "temperature": 0.0, "max_tokens": 8192, "rpm": 20, "timeout_seconds": 120,
+    "run_date": "2026-11-20", "git_commit": "68f79a6", "git_dirty": true,
+    "notes": "allam-2-7b ran with max_tokens 2048 (4,096-token context)."
+  },
+  "generated_groq_*.jsonl": {
+    "status": "superseded_by_v3", "prompt_version": "v2", "provider": "groq", "arm": "no_tools",
+    "case_set": "generated", "seed": 2026, "per_track": 4, "samples": 1, "temperature": 0.0,
+    "max_tokens": 8192, "rpm": 20, "timeout_seconds": 120, "run_date": "2026-11-20",
+    "git_commit": "68f79a6", "git_dirty": true,
+    "notes": "Prompt v2 bond_price defect (gpt-oss-120b priced a 10-year bond as 5-year). Re-run on prompt v3 as v3_generated_groq_*. allam-2-7b: max_tokens 2048."
+  }
+}

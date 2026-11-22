@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -20,8 +23,41 @@ jobs:
       - name: Install
         run: uv sync --extra dev --python ${{ matrix.python-version }}
       - name: Lint
-        run: uv run ruff check src tests
+        run: uv run ruff check src tests scripts examples
       - name: Type check
         run: uv run mypy src
-      - name: Test
+      - name: Test (includes results-manifest and secret checks)
         run: uv run pytest
+
+  docs-and-evidence:
+    # Everything a reader runs or reads: docs build, examples, tutorial code, claims, results manifest.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --extra dev --extra docs --python 3.11
+      - name: Docs build (strict)
+        run: uv run mkdocs build --strict
+      - name: Claims check (no proof, guarantee or maturity language)
+        run: uv run python scripts/check_claims.py
+      - name: Results manifest is current
+        run: uv run python scripts/build_results_manifest.py --check
+      - name: Tutorial code runs as written
+        run: uv run python scripts/check_tutorials.py
+      - name: Examples run
+        run: |
+          set -e
+          for f in examples/0*.py examples/problem_solving/*.py; do
+            case "$f" in
+              # Needs the Apple 10-K PDF, which is not redistributed (see the framework paper, 6.1).
+              *04_sec_10k_filing_analyzer.py)
+                echo "::notice file=$f::skipped: needs data/sample_filings/aapl_10k_2026.pdf (not redistributed)"
+                continue;;
+            esac
+            echo "::group::$f"
+            uv run python "$f" > /dev/null
+            echo "::endgroup::"
+          done

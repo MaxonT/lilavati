@@ -60,7 +60,7 @@ def main() -> None:
         step_up_bps=50.0,  # +50 bps penalty step-up
         target_year=2026,
     )
-    # Audited emissions reported at 100,000 tCO2e (only 16.7% reduction, missing 25% target)
+    # Reported emissions: 100,000 tCO2e (only 16.7% reduction, missing 25% target)
     slb_res = SustainabilityEngine.evaluate_slb_covenant(slb, reported_emissions=100000.0)
 
     # Display Results

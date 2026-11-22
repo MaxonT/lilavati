@@ -1,0 +1,68 @@
+name: Release
+
+# Publishes lilavati-finance to PyPI when a version tag (v0.2.0, ...) is pushed.
+# Uses PyPI Trusted Publishing: no API token is stored anywhere.
+# One-time setup by a maintainer (roadmap 7.10):
+#   1. On PyPI, add a trusted publisher for project "lilavati-finance":
+#      owner revendrat, repository lilavati, workflow release.yml, environment pypi.
+#   2. In GitHub: Settings → Environments → create "pypi" (optionally require a reviewer).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Tag must match the package version
+        run: |
+          version=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match pyproject version ${version}"; exit 1
+          fi
+      - run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  verify:
+    # Install the built wheel in a clean environment, outside the source tree, and smoke-test it.
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: astral-sh/setup-uv@v5
+      - name: Clean install and smoke test
+        run: |
+          uv venv --python ${{ matrix.python-version }} /tmp/clean
+          uv pip install --python /tmp/clean dist/*.whl
+          cd /tmp
+          /tmp/clean/bin/python -c "import lilavati, lilavati.bench.llm_eval, lilavati.mcp_servers.fixed_income_server; print('import ok')"
+          /tmp/clean/bin/lilavati-bench list-cases > /dev/null
+          /tmp/clean/bin/python -c "from lilavati.core.fixed_income import FixedIncomeEngine as F; p = F.analyze_bond(face_value=100, coupon_rate=0.05, ytm=0.05, years_to_maturity=5, frequency=1).clean_price; assert abs(p - 100) < 1e-9, p; print('par bond prices at 100')"
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,1195 @@
+{
+  "files": [
+    {
+      "path": "results/archive_prompt_v1/baseline_gemini-3.8-flash.jsonl",
+      "status": "superseded",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 4,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 3
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.5714285714285714,
+      "item_mean_ci95": [
+        0.14285714285714285,
+        0.8571428571428571
+      ],
+      "per_track": {
+        "track1_three_statement": 0.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/baseline_gemini-4-hydrogen.jsonl",
+      "status": "superseded",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 5,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 2
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.7142857142857143,
+      "item_mean_ci95": [
+        0.2857142857142857,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/baseline_gemma-4-26b-a4b-it.jsonl",
+      "status": "superseded",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 8,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 13
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.38095238095238093,
+      "item_mean_ci95": [
+        0.19047619047619047,
+        0.5714285714285714
+      ],
+      "per_track": {
+        "track1_three_statement": 0.6666666666666666,
+        "track2_fixed_income": 0.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/baseline_gemma-4-31b-it.jsonl",
+      "status": "superseded",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 12,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 9
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.5714285714285714,
+      "item_mean_ci95": [
+        0.3333333333333333,
+        0.7619047619047619
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.6666666666666666,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.6666666666666666,
+        "track7_sustainability": 0.6666666666666666
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/gemini-3.8-flash.first_pass.jsonl",
+      "status": "superseded",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 4,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 3
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.5714285714285714,
+      "item_mean_ci95": [
+        0.14285714285714285,
+        0.8571428571428571
+      ],
+      "per_track": {
+        "track1_three_statement": 0.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/gemini-4-hydrogen.first_pass.jsonl",
+      "status": "superseded",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 5,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 2
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.7142857142857143,
+      "item_mean_ci95": [
+        0.2857142857142857,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/gemma-4-26b-a4b-it.first_pass.jsonl",
+      "status": "superseded",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 8,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 13
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.38095238095238093,
+      "item_mean_ci95": [
+        0.19047619047619047,
+        0.5714285714285714
+      ],
+      "per_track": {
+        "track1_three_statement": 0.6666666666666666,
+        "track2_fixed_income": 0.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_prompt_v1/gemma-4-31b-it.first_pass.jsonl",
+      "status": "superseded",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 12,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 9
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.5714285714285714,
+      "item_mean_ci95": [
+        0.3333333333333333,
+        0.7619047619047619
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.6666666666666666,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.6666666666666666,
+        "track7_sustainability": 0.6666666666666666
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/archive_tools_pilot_t1/tools_generated_groq_openai_gpt-oss-120b.pilot.jsonl",
+      "status": "superseded",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 11,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 9,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.9545454545454546,
+      "item_mean": 0.525,
+      "item_mean_ci95": [
+        0.3125,
+        0.7375
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.0,
+        "track5_derivatives": 0.375,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.25
+      },
+      "tool_grounding": 0.8888888888888888,
+      "mean_tool_calls": 1.4,
+      "field_misses": {
+        "vega": 2
+      }
+    },
+    {
+      "path": "results/baseline_gemini-3.8-flash.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 5,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 2
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.7142857142857143,
+      "item_mean_ci95": [
+        0.42857142857142855,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_gemini-4-hydrogen.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 7,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 1.0,
+      "item_mean_ci95": [
+        1.0,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_gemma-4-26b-a4b-it.jsonl",
+      "status": "current",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 18,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 3
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.8571428571428571,
+      "item_mean_ci95": [
+        0.7142857142857143,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_gemma-4-31b-it.jsonl",
+      "status": "current",
+      "n": 21,
+      "samples": 3,
+      "outcomes": {
+        "answered": 21,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 1.0,
+      "item_mean_ci95": [
+        1.0,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_groq_allam-2-7b.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 6,
+        "unparsable": 0,
+        "truncated": 1,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.6916666666666667,
+      "item_mean": 0.5928571428571429,
+      "item_mean_ci95": [
+        0.2714285714285714,
+        0.8928571428571429
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 0.0,
+        "track5_derivatives": 0.4,
+        "track6_microstructure": 0.75,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "is_stationary_after_fracdiff": 1,
+        "memory_preserved": 1,
+        "delta": 1,
+        "gamma": 1,
+        "vega": 1,
+        "spread": 1
+      }
+    },
+    {
+      "path": "results/baseline_groq_openai_gpt-oss-120b.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 7,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 1.0,
+      "item_mean_ci95": [
+        1.0,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_groq_openai_gpt-oss-20b.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 7,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 1.0,
+      "item_mean_ci95": [
+        1.0,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_groq_qwen_qwen3.6-27b.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 6,
+        "unparsable": 0,
+        "truncated": 1,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.8571428571428571,
+      "item_mean_ci95": [
+        0.5714285714285714,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/baseline_groq_qwen_qwen3.8-27b.jsonl",
+      "status": "current",
+      "n": 7,
+      "samples": 1,
+      "outcomes": {
+        "answered": 7,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.9071428571428571,
+      "item_mean": 0.9071428571428571,
+      "item_mean_ci95": [
+        0.7785714285714286,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track3_econometrics": 1.0,
+        "track4_financial_ml": 1.0,
+        "track5_derivatives": 0.6,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.75
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "gamma": 1,
+        "vega": 1,
+        "portfolio_waci": 1
+      }
+    },
+    {
+      "path": "results/generated_gemini-4-hydrogen.jsonl",
+      "status": "current",
+      "n": 10,
+      "samples": 1,
+      "outcomes": {
+        "answered": 6,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 4
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.6,
+      "item_mean_ci95": [
+        0.3,
+        0.9
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 0.0,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/generated_gemma-4-26b-a4b-it.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 9,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 11
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.45,
+      "item_mean_ci95": [
+        0.25,
+        0.65
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.25,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/generated_gemma-4-31b-it.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 13,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 7
+      },
+      "accuracy_on_answered": 0.9807692307692307,
+      "item_mean": 0.6375,
+      "item_mean_ci95": [
+        0.425,
+        0.8375
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.25,
+        "track5_derivatives": 0.1875,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.75
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "call_price": 1
+      }
+    },
+    {
+      "path": "results/generated_groq_allam-2-7b.jsonl",
+      "status": "superseded_by_v3",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 20,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.2625,
+      "item_mean": 0.2625,
+      "item_mean_ci95": [
+        0.125,
+        0.4166666666666667
+      ],
+      "per_track": {
+        "track1_three_statement": 0.5,
+        "track2_fixed_income": 0.25,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.125,
+        "track7_sustainability": 0.4375
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "is_balanced": 2,
+        "assets_equal_liab_equity": 2,
+        "cash_reconciled": 2,
+        "bond_price": 3,
+        "call_price": 4,
+        "delta": 4,
+        "gamma": 4,
+        "vega": 4,
+        "spread": 3,
+        "microprice": 4,
+        "portfolio_waci": 4,
+        "slb_active_coupon": 3,
+        "slb_spt_achieved": 1,
+        "slb_penalty_triggered": 1
+      }
+    },
+    {
+      "path": "results/generated_groq_openai_gpt-oss-120b.jsonl",
+      "status": "superseded_by_v3",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 20,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.9375,
+      "item_mean": 0.9375,
+      "item_mean_ci95": [
+        0.825,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.75,
+        "track5_derivatives": 0.9375,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "bond_price": 1,
+        "call_price": 1
+      }
+    },
+    {
+      "path": "results/generated_groq_openai_gpt-oss-20b.jsonl",
+      "status": "superseded_by_v3",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 19,
+        "unparsable": 0,
+        "truncated": 1,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.95,
+      "item_mean_ci95": [
+        0.85,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 0.75,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/generated_groq_qwen_qwen3.6-27b.jsonl",
+      "status": "superseded_by_v3",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 16,
+        "unparsable": 0,
+        "truncated": 4,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.8,
+      "item_mean_ci95": [
+        0.6,
+        0.95
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/generated_groq_qwen_qwen3.8-27b.jsonl",
+      "status": "superseded_by_v3",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 19,
+        "unparsable": 1,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.5175438596491228,
+      "item_mean": 0.49166666666666664,
+      "item_mean_ci95": [
+        0.29583333333333334,
+        0.6916666666666667
+      ],
+      "per_track": {
+        "track1_three_statement": 0.5833333333333333,
+        "track2_fixed_income": 0.75,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.75,
+        "track7_sustainability": 0.375
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "cash_reconciled": 3,
+        "is_balanced": 1,
+        "assets_equal_liab_equity": 1,
+        "bond_price": 1,
+        "call_price": 4,
+        "delta": 4,
+        "gamma": 4,
+        "vega": 4,
+        "portfolio_waci": 4,
+        "slb_spt_achieved": 2,
+        "slb_active_coupon": 2,
+        "slb_penalty_triggered": 2
+      }
+    },
+    {
+      "path": "results/v3_generated_groq_allam-2-7b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 20,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.2125,
+      "item_mean": 0.2125,
+      "item_mean_ci95": [
+        0.09583333333333333,
+        0.35
+      ],
+      "per_track": {
+        "track1_three_statement": 0.5,
+        "track2_fixed_income": 0.0,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.125,
+        "track7_sustainability": 0.4375
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "is_balanced": 2,
+        "assets_equal_liab_equity": 2,
+        "cash_reconciled": 2,
+        "bond_price": 4,
+        "call_price": 4,
+        "delta": 4,
+        "gamma": 4,
+        "vega": 4,
+        "spread": 3,
+        "microprice": 4,
+        "portfolio_waci": 4,
+        "slb_active_coupon": 3,
+        "slb_spt_achieved": 1,
+        "slb_penalty_triggered": 1
+      }
+    },
+    {
+      "path": "results/v3_generated_groq_openai_gpt-oss-120b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 19,
+        "unparsable": 0,
+        "truncated": 1,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.9868421052631579,
+      "item_mean": 0.9375,
+      "item_mean_ci95": [
+        0.825,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.75,
+        "track5_derivatives": 0.9375,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "call_price": 1
+      }
+    },
+    {
+      "path": "results/v3_generated_groq_openai_gpt-oss-20b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 14,
+        "unparsable": 0,
+        "truncated": 6,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.7,
+      "item_mean_ci95": [
+        0.5,
+        0.9
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.5,
+        "track5_derivatives": 0.25,
+        "track6_microstructure": 0.75,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/v3_generated_groq_qwen_qwen3.6-27b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 14,
+        "unparsable": 0,
+        "truncated": 6,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.7,
+      "item_mean_ci95": [
+        0.5,
+        0.9
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 0.5,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {}
+    },
+    {
+      "path": "results/v3_generated_groq_qwen_qwen3.8-27b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 18,
+        "unparsable": 2,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.4351851851851852,
+      "item_mean": 0.39166666666666666,
+      "item_mean_ci95": [
+        0.20416666666666666,
+        0.5916666666666667
+      ],
+      "per_track": {
+        "track1_three_statement": 0.5833333333333333,
+        "track2_fixed_income": 0.5,
+        "track5_derivatives": 0.0,
+        "track6_microstructure": 0.5,
+        "track7_sustainability": 0.375
+      },
+      "tool_grounding": null,
+      "mean_tool_calls": null,
+      "field_misses": {
+        "cash_reconciled": 3,
+        "is_balanced": 1,
+        "assets_equal_liab_equity": 1,
+        "bond_price": 2,
+        "call_price": 4,
+        "delta": 4,
+        "gamma": 4,
+        "vega": 4,
+        "portfolio_waci": 4,
+        "slb_spt_achieved": 2,
+        "slb_active_coupon": 2,
+        "slb_penalty_triggered": 2
+      }
+    },
+    {
+      "path": "results/v3_tools_generated_groq_openai_gpt-oss-120b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 20,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.9875,
+      "item_mean": 0.9875,
+      "item_mean_ci95": [
+        0.9625,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 0.9375,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": 0.9444444444444444,
+      "mean_tool_calls": 1.35,
+      "field_misses": {
+        "vega": 1
+      }
+    },
+    {
+      "path": "results/v3_tools_generated_groq_openai_gpt-oss-20b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 16,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 4,
+        "error": 0
+      },
+      "accuracy_on_answered": 0.984375,
+      "item_mean": 0.7875,
+      "item_mean_ci95": [
+        0.6,
+        0.95
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 0.9375,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 0.0
+      },
+      "tool_grounding": 0.9642857142857143,
+      "mean_tool_calls": 1.1,
+      "field_misses": {
+        "vega": 1
+      }
+    },
+    {
+      "path": "results/v3_tools_generated_groq_qwen_qwen3.6-27b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 20,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 0,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 1.0,
+      "item_mean_ci95": [
+        1.0,
+        1.0
+      ],
+      "per_track": {
+        "track1_three_statement": 1.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": 1.0,
+      "mean_tool_calls": 1.6,
+      "field_misses": {}
+    },
+    {
+      "path": "results/v3_tools_generated_groq_qwen_qwen3.8-27b.jsonl",
+      "status": "current",
+      "n": 20,
+      "samples": 1,
+      "outcomes": {
+        "answered": 16,
+        "unparsable": 0,
+        "truncated": 0,
+        "model_error": 4,
+        "error": 0
+      },
+      "accuracy_on_answered": 1.0,
+      "item_mean": 0.8,
+      "item_mean_ci95": [
+        0.6,
+        0.95
+      ],
+      "per_track": {
+        "track1_three_statement": 0.0,
+        "track2_fixed_income": 1.0,
+        "track5_derivatives": 1.0,
+        "track6_microstructure": 1.0,
+        "track7_sustainability": 1.0
+      },
+      "tool_grounding": 1.0,
+      "mean_tool_calls": 3,
+      "field_misses": {}
+    }
+  ],
+  "paired": [
+    {
+      "model": "openai/gpt-oss-120b",
+      "prompt_version": "v3",
+      "n_pairs": 20,
+      "mean_a": 0.9375,
+      "mean_b": 0.9875,
+      "mean_diff": 0.05,
+      "diff_ci95": [
+        0.0,
+        0.15
+      ],
+      "improved": 1,
+      "worse": 0,
+      "same": 19
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "prompt_version": "v3",
+      "n_pairs": 20,
+      "mean_a": 0.7,
+      "mean_b": 0.7875,
+      "mean_diff": 0.0875,
+      "diff_ci95": [
+        -0.2125,
+        0.375
+      ],
+      "improved": 6,
+      "worse": 4,
+      "same": 10
+    },
+    {
+      "model": "qwen/qwen3.6-27b",
+      "prompt_version": "v3",
+      "n_pairs": 20,
+      "mean_a": 0.7,
+      "mean_b": 1.0,
+      "mean_diff": 0.3,
+      "diff_ci95": [
+        0.1,
+        0.5
+      ],
+      "improved": 6,
+      "worse": 0,
+      "same": 14
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "prompt_version": "v3",
+      "n_pairs": 20,
+      "mean_a": 0.39166666666666666,
+      "mean_b": 0.8,
+      "mean_diff": 0.4083333333333333,
+      "diff_ci95": [
+        0.11250000000000002,
+        0.6916666666666667
+      ],
+      "improved": 12,
+      "worse": 3,
+      "same": 5
+    }
+  ]
+}

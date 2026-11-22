@@ -1,12 +1,12 @@
 [project]
 name = "lilavati-finance"
-version = "0.1.0"
+version = "0.2.0"
 description = "An open-source, verifiable agentic stack and evaluation benchmark for quantitative finance, credit, and capital markets."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "The Lilavati Team" }
+    { name = "Revendranath Tirumalsety" }
 ]
 keywords = [
     "finance",
@@ -56,6 +56,12 @@ dependencies = [
 quantlib = [
     "QuantLib>=1.35",
 ]
+# Optional: Google ADK agent + A2A server examples (examples/integrations).
+# LangGraph is NOT an extra: langchain-mcp-adapters requires mcp<2 while fastmcp needs mcp>=2.3,
+# so the LangGraph example runs in its own environment (see examples/integrations/README.md).
+adk = [
+    "google-adk[mcp,a2a]>=2.14",
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
@@ -96,6 +102,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lilavati"]
+
+[tool.hatch.build.targets.sdist]
+# Hatch honours .gitignore but not .git/info/exclude; keep private agent task briefs and build
+# output out of the source distribution explicitly.
+exclude = [".agents/tasks", "site", "**/__pycache__", "*.duckdb", ".env*"]
 
 [tool.ruff]
 line-length = 100

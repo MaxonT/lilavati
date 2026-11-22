@@ -51,6 +51,8 @@ htmlcov/
 data/sample_filings/
 data/*.pdf
 *.jsonl
+# Benchmark evidence is published (see results/README.md); everything else stays ignored.
+!results/**/*.jsonl
 *.db
 *.sqlite
 data/cache/

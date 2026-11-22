@@ -1,6 +1,6 @@
 # Līlāvatī-Bench: Stress-Testing Financial LLMs and Multi-Agent Systems on Accounting Invariants, Look-Ahead Bias, and Verifiable Provenance
 
-**Authors:** The Līlāvatī Team  
+**Author:** Revendranath Tirumalsety ([ORCID 0000-0003-0549-4022](https://orcid.org/0000-0003-0549-4022))  
 **Classification:** Quantitative Finance, Benchmarking, Machine Learning, Multi-Agent Systems  
 **Status:** Working draft, not peer reviewed. Section 5.2 reports measured results for four Google models; section 6 is illustrative (see notice below).  
 
@@ -12,7 +12,7 @@
 
 Evaluation benchmarks for artificial intelligence in finance predominantly mirror standardized academic examinations (e.g., multiple-choice questions in FinQA, CFA Level I/II/III problem sets, and sentiment classification on synthetic snippets). While these benchmarks measure high-level domain vocabulary, they fail to evaluate the existential operational requirements of institutional finance: **first-order accounting balance sheet reconciliation, resistance to point-in-time look-ahead bias, deterministic mathematical fidelity, and immutable statutory provenance**. 
 
-We introduce **Līlāvatī-Bench**, the first open-source, mathematically rigorous evaluation suite designed to stress-test financial large language models (LLMs) and autonomous agent frameworks across seven canonical institutional disciplines:
+We introduce **Līlāvatī-Bench**, an open-source evaluation suite with deterministic reference answers, designed to stress-test financial large language models (LLMs) and autonomous agent frameworks across seven canonical institutional disciplines:
 1. Three-Statement Dynamic Accounting Reconciliation
 2. Fixed Income, Yield Curves, and Structural Credit Risk
 3. Financial Econometrics and Cointegration Rigor
@@ -84,10 +84,10 @@ Table 1 summarizes the landscape of contemporary financial benchmarks in compari
 | **FPB** [Malo et al., 2014] | JASI&T 2014 | Sentiment Classification | ❌ | ❌ | ❌ | ❌ |
 | **FinQA** [Chen et al., 2021] | EMNLP 2021 | Isolated Numerical QA | ❌ | ❌ | ❌ | ❌ |
 | **TAT-QA** [Zhu et al., 2021] | ACL 2021 | Hybrid Table/Text QA | ❌ | ❌ | ❌ | ❌ |
-| **ConvFinQA** [Chen et al., 2022] | ACL 2022 | Multi-Turn Conversational QA | ❌ | ❌ | ❌ | ❌ |
+| **ConvFinQA** [Chen et al., 2022] | EMNLP 2022 | Multi-Turn Conversational QA | ❌ | ❌ | ❌ | ❌ |
 | **BloombergGPT Eval** [Wu et al., 2023] | arXiv 2023 | NLP Tasks + NER + Sentiment | ❌ | ❌ | ❌ | ❌ |
-| **PIXIU / FLARE** [Xie et al., 2023] | NeurIPS 2023 | 5 Financial NLP Tasks | ❌ | ❌ | ❌ | ❌ |
-| **Līlāvatī-Bench** (Ours) | **2026** | **Institutional Quantitative Reasoning & Execution** | **✅** | **✅ (Z3 Solver)** | **✅ (DuckDB Dual-Time)** | **✅ (SHA-256)** |
+| **PIXIU / FLARE** [Xie et al., 2023] | NeurIPS 2023 (Datasets & Benchmarks) | 6 Financial NLP + 2 Prediction Tasks | ❌ | ❌ | ❌ | ❌ |
+| **Līlāvatī-Bench** (Ours) | **2026** | **Quantitative Reasoning & Tool Use** | **🟡 (generated single-step)** | **✅ (Z3, on given numbers)** | **🟡 (TPI partial)** | **🟡 (hash membership only)** |
 
 *Table 1: Comparative taxonomy of financial artificial intelligence benchmarks. Līlāvatī-Bench is designed to evaluate dynamic three-statement integrity, formal SMT invariant satisfiability, bi-temporal isolation, and cryptographic statutory grounding.*
 
@@ -95,7 +95,7 @@ Table 1 summarizes the landscape of contemporary financial benchmarks in compari
 
 ## 3. Benchmark Architecture & The Seven Quantitative Tracks
 
-Līlāvatī-Bench consists of golden, human-curated, and mathematically audited test scenarios spanning seven foundational pillars of institutional finance. Every test case is instantiated as a typed `BenchmarkTestCase` bound to an immutable source document hash:
+Līlāvatī-Bench consists of golden, human-curated test scenarios with reference answers computed by reference-tested engines, spanning seven foundational pillars of institutional finance. Every test case is instantiated as a typed `BenchmarkTestCase` bound to an immutable source document hash:
 
 ```python
 class BenchmarkTestCase(BaseModel):
@@ -107,7 +107,7 @@ class BenchmarkTestCase(BaseModel):
     doc_hash: str  # SHA-256 hash of primary regulatory filing
     source_citation: str  # Statutory citation (e.g. SEC CIK, Item, pp.)
     context_data: dict[str, Any]  # Empirical time-series and inputs
-    expected_values: dict[str, Any]  # Theorem-proven ground truths
+    expected_values: dict[str, Any]  # Reference answers from validated engines
     tolerance: float  # Relative numerical tolerance (e.g. 1e-3)
 ```
 
@@ -189,7 +189,7 @@ If a model contains even a $\$1$ discrepancy that violates arithmetic equilibriu
 ### 4.3 Temporal Purity Index (TPI)
 Let $\mathcal{O} = \{o_1, o_2, \dots, o_P\}$ be the set of historical data observations accessed by the agent to form an investment decision at epoch $T_{cutoff}$. Let $t_{pub}(o_j)$ be the official statutory publication timestamp (System Time $T_s$):
 $$\text{TPI} = \frac{1}{P} \sum_{j=1}^P \mathbb{I}\left( t_{pub}(o_j) \le T_{cutoff} \right)$$
-Any query returning data published *after* $T_{cutoff}$ (e.g., an audit restatement published in 2025 used to evaluate a 2024 trade) penalizes $\text{TPI}$, guaranteeing zero look-ahead bias.
+Any query returning data published *after* $T_{cutoff}$ (e.g., an audit restatement published in 2025 used to evaluate a 2024 trade) penalizes $\text{TPI}$. (TPI currently checks the filing dates an agent reports; detecting look-ahead use from the values themselves is planned.)
 
 ### 4.4 Tool Math Purity Ratio (TMPR)
 Let $N_{deterministic}$ be the number of quantitative calculations executed via external RPC tools (FastMCP sandboxes in Python/DuckDB/Z3), and let $N_{mental}$ be the number of arithmetic operations performed directly inside LLM token generation:
@@ -205,7 +205,7 @@ An agent must achieve $\text{CLI} \ge 90.0$ to pass institutional production dep
 
 ## 5. Empirical Evaluation & Findings
 
-**Evaluation status.** The reference solver and four Google models have been run (section 5.2); other model families and tool-augmented agents are planned.
+**Evaluation status.** The reference solver, four Google models and five open-weight models served by Groq have been run without tools (section 5.2), and four of the Groq models with tools on the same questions (section 5.3); multi-agent configurations are planned.
 
 ### 5.1 Evaluated Systems & Configurations
 1. **Unconstrained Base Models (Zero-Shot & Few-Shot CoT)**: Standard prompting where the model is requested to perform financial analysis and arithmetic in text tokens.
@@ -214,7 +214,7 @@ An agent must achieve $\text{CLI} \ge 90.0$ to pass institutional production dep
 
 ### 5.2 Measured Baseline Results (direct prompting, no tools)
 
-We ran four Google models through the harness on 2026-11-17/18 with a single direct prompt per case (no tools, no retrieval; `scripts/run_llm_baseline.py`, raw outputs in `results/`). Only numeric/boolean answer fields are scored, using the same tolerance rule as the reference solver. PoCS, TPI, TMPR and the composite index are **not** reported for these runs: a no-tool, no-document prompt cannot meaningfully produce them. Free-tier API limits constrained sample sizes, and many calls failed for provider reasons (overload 503, quota 429, timeouts, empty replies). Those are reported separately from wrong answers.
+We ran four Google models through the harness on 2026-11-17/18 with a single direct prompt per case (no tools, no retrieval; `scripts/run_llm_baseline.py`, raw outputs in `results/`). Only numeric/boolean answer fields are scored, using the same tolerance rule as the reference solver. PoCS, TPI, TMPR and the composite index are **not** reported for these runs: a no-tool, no-document prompt cannot meaningfully produce them. Free-tier API limits constrained sample sizes, and many calls failed for provider reasons (overload 503, quota 429, timeouts, empty replies). Those are reported separately from wrong answers. The Groq runs (2026-11-20, `--provider groq`, one pass at temperature 0, `--max-tokens 8192`; 2,048 for ALLaM, whose context is 4,096 tokens) had no provider errors; replies cut off by the token cap are counted as unanswered. The Groq generated rows use prompt v3 (2026-11-21). Prompt v2 defined the bond answer key as "price of the 5-year bond" although generated bonds run 2-10 years, and gpt-oss-120b priced a 10-year bond as a 5-year bond; v2 generated runs are kept in `results/` as superseded. Groq is not deterministic at temperature 0: two prompt-v2 runs of the same Qwen3.8 generated cases scored 0.4417 and 0.4917 item accuracy. Every number in this section is regenerated by `scripts/analyse_results.py` into `results/ANALYSIS.md`.
 
 | Model | Cases | Answered | Accuracy on answered items | Notes |
 | :--- | :--- | :---: | :---: | :--- |
@@ -225,15 +225,64 @@ We ran four Google models through the harness on 2026-11-17/18 with a single dir
 | Gemini 4 Hydrogen | 10 generated | 6 / 10 | 100% | 4 failures: HTTP 429 (quota) |
 | Gemma 4 31B | 20 generated | 13 / 20 | 98.1% | 1 partial miss (Track 5, 3 of 4 fields); 7 failures (503/timeout) |
 | Gemma 4 26B A4B | 20 generated | 9 / 20 | 100% | 10 empty replies, 1 HTTP 503 |
+| gpt-oss-120b (Groq) | 7 golden | 7 / 7 | 100% | 1 pass, temp 0, 2026-11-20 |
+| gpt-oss-20b (Groq) | 7 golden | 7 / 7 | 100% | |
+| Qwen3.6 27B (Groq) | 7 golden | 6 / 7 | 100% | 1 truncated at 8,192 tokens |
+| Qwen3.8 27B (Groq) | 7 golden | 7 / 7 | 90.7% | |
+| ALLaM 2 7B (Groq) | 7 golden | 6 / 7 | 69.2% | 1 truncated at 2,048 tokens |
+| gpt-oss-120b (Groq) | 20 generated | 19 / 20 | 98.7% | seed 2026, prompt v3, 2026-11-21; 1 truncated |
+| gpt-oss-20b (Groq) | 20 generated | 14 / 20 | 100% | 6 truncated at 8,192 tokens |
+| Qwen3.6 27B (Groq) | 20 generated | 14 / 20 | 100% | 6 truncated at 8,192 tokens |
+| Qwen3.8 27B (Groq) | 20 generated | 18 / 20 | 43.5% | 2 unparsable |
+| ALLaM 2 7B (Groq) | 20 generated | 20 / 20 | 21.2% | max 2,048 tokens |
 | *Reference solver* | 7 golden | 7 / 7 | 100% | by construction |
 | *Content-free baseline (all True / 0)* | 7 golden | n/a | 63.6% | calibration |
 | *Content-free baseline (all True / 0)* | 20 generated | n/a | 15.7% | calibration |
 
 **What this does and does not show.**
-1. When these models answered, they were almost always correct on these textbook-style numeric tasks (bond price, Black-Scholes Greeks, microprice, WACI, accounting identities). We therefore **do not reproduce the large failure rates hypothesised earlier in this draft**; the placeholder leaderboard that appeared here previously has been removed.
-2. The benchmark in its current form **does not separate these models**: scores are saturated on answered items, the sample is small (7 golden + 10-20 generated cases per model), and most observed loss came from API reliability, not reasoning.
-3. The 7 golden cases are easily guessable (a content-free answerer scores 63.6%); the generated set was introduced to fix this (15.7%).
-4. Not yet evaluated: tool-augmented agents, multi-step three-statement modelling on real filings, citation grounding against real documents, and look-ahead resistance with a poisoned corpus. These are where we expect differences to appear and are the priority for benchmark v2.
+1. When the Google models, gpt-oss and Qwen3.6 answered, they were almost always correct on these textbook-style numeric tasks (bond price, Black-Scholes Greeks, microprice, WACI, accounting identities). We therefore **do not reproduce the large failure rates hypothesised earlier in this draft**; the placeholder leaderboard that appeared here previously has been removed.
+2. The **golden cases do not separate strong models** (several score 100%). The **generated cases do separate the Groq models**: accuracy on answered items ranged from 21.2% (ALLaM 2 7B) and 43.5% (Qwen3.8 27B) to 100%; Qwen3.8 missed all four Black-Scholes cases. The samples are small (7 golden + 10-20 generated cases per model, one pass), so these are indications, not rankings.
+3. Losses come from three distinct sources that must be reported separately: provider failures (most of the Google-run losses), **token-budget truncation** (6 of 20 generated replies each for gpt-oss-20b and Qwen3.6 27B at 8,192 tokens; in the prompt-v2 runs Qwen3.6's truncated replies were long-hand Black-Scholes arithmetic) and wrong answers.
+4. The 7 golden cases are easily guessable (a content-free answerer scores 63.6%); the generated set was introduced to fix this (15.7%).
+5. Not yet evaluated: multi-step three-statement modelling on real filings, citation grounding against real documents, and look-ahead resistance with a poisoned corpus. These are where we expect differences to appear and are the priority for benchmark v2.
+
+### 5.3 Tool-augmented arm, paired with the no-tool baseline
+
+The same 20 generated questions (seed 2026, 4 per track) were posed to four Groq models with eight
+deterministic tools and a `submit_answer` tool (`scripts/run_tool_baseline.py`, prompt v3, tool prompt
+t2, 2026-11-21/22, temperature 0). Questions are matched to the no-tool replies by content hash.
+**Tool grounding** is the share of numeric answer fields equal to a number a tool returned. ALLaM 2 7B
+has no tool arm: Groq does not support tool calling for it.
+
+| Model | Answered (tools) | Item mean, no tools | Item mean, tools | Paired difference (95% CI) | Better / same / worse | Tool grounding |
+| :--- | :---: | ---: | ---: | :--- | :---: | ---: |
+| gpt-oss-120b | 20 / 20 | 0.9375 | 0.9875 | +0.0500 (0.0000 to +0.1500) | 1 / 19 / 0 | 94.4% |
+| gpt-oss-20b | 16 / 20 | 0.7000 | 0.7875 | +0.0875 (−0.2125 to +0.3750) | 6 / 10 / 4 | 96.4% |
+| Qwen3.6 27B | 20 / 20 | 0.7000 | 1.0000 | +0.3000 (+0.1000 to +0.5000) | 6 / 14 / 0 | 100% |
+| Qwen3.8 27B | 16 / 20 | 0.3917 | 0.8000 | +0.4083 (+0.1125 to +0.6917) | 12 / 5 / 3 | 100% |
+
+CI: percentile bootstrap over the 20 paired differences (5,000 resamples, seed 0, pairs ordered by case id). The bounds carry Monte Carlo error of about ±0.01: over 20 bootstrap seeds, Qwen3.8's lower bound ranged from 0.10 to 0.12 and gpt-oss-20b's from −0.21 to −0.20; no conclusion depends on the seed.
+
+**What this shows.**
+1. For the two Qwen models, tools improved the item mean on the same questions, with paired 95% CIs
+   excluding zero (+0.3000 and +0.4083). For gpt-oss-120b the difference is not distinguishable from zero
+   (one question improved, none got worse): it was already accurate without tools. For gpt-oss-20b the
+   interval spans zero because tool-protocol failures offset the gains.
+2. Tools remove arithmetic errors and truncation but introduce **protocol failures**, which must be
+   reported as their own class: gpt-oss-20b produced malformed first tool calls on all four
+   sustainability cases (rejected by Groq, `model_error`); Qwen3.8 27B looped, calling
+   `reconcile_cash_flow` repeatedly until the 8-round limit on all four accounting cases.
+3. **Units at the tool boundary.** Both gpt-oss models missed one vega: the price tool returned vega
+   per volatility point (0.013416), and the models divided by 100 again because the answer key reads
+   "per 1 percentage point … i.e. dPrice/dSigma divided by 100". The price tool's description did not
+   state the unit of its nested Greeks, so this is partly a harness defect (to be fixed in tool prompt t3).
+   Grounding flagged it: 3 of 4 fields were grounded and the ungrounded field was the wrong one.
+4. **Interpretation.** Expected values come from the same engines the tools call, so this arm measures
+   tool selection, parameter extraction and copying, not engine correctness, which is established
+   separately against independent references (`docs/validation/`).
+5. A pilot of this arm (tool prompt t1, final answer as text JSON) failed because gpt-oss-120b returned
+   its answer as a call to a non-existent tool named `json`; it is kept, labelled, in
+   `results/archive_tools_pilot_t1/`.
 
 ## 6. Deep-Dive Error Analysis: How Standard LLMs Fail
 
@@ -269,14 +318,16 @@ To ensure full reproducibility and enable model creators to evaluate their syste
 # Install Lilavati with evaluation harness
 uv pip install -e ".[dev]"
 
-# Execute the complete benchmark suite across all seven tracks
-uv run lilavati-bench run --model <model_identifier> --format markdown
+# Run the reference solver across all seven tracks (--model only labels the report card)
+uv run lilavati-bench run --format markdown
 
-# Output structured JSONL audit trail for verification
-uv run lilavati-bench run --model reference --output results.jsonl
+# Direct-prompt LLM baseline (key from the environment only), raw replies as JSONL
+GROQ_API_KEY=... uv run python scripts/run_llm_baseline.py --provider groq \
+    --model openai/gpt-oss-120b --generated 4 --seed 2026 --max-tokens 8192 \
+    --out results/generated_groq_gpt-oss-120b.jsonl
 ```
 
-The benchmark runner executes all test scenarios, records per-track latencies, evaluates Z3 SMT satisfiability, verifies citation document hashes, and outputs an institutional scorecard.
+The CLI runs the reference solver over all test scenarios, records per-track latencies, evaluates Z3 SMT satisfiability, checks citation document hashes and prints a scorecard. Scoring a third-party model currently goes through `scripts/run_llm_baseline.py`.
 
 ---
 
@@ -284,7 +335,7 @@ The benchmark runner executes all test scenarios, records per-track latencies, e
 
 Current evaluation paradigms for artificial intelligence in finance suffer from an evaluation gap: they test linguistic fluency and multiple-choice trivia while remaining completely blind to the catastrophic operational risks of mathematical hallucination, unbalanced balance sheets, and look-ahead bias.
 
-**Līlāvatī-Bench** bridges this gap by introducing the first mathematically grounded evaluation suite for institutional capital markets. By formalizing balance sheet equilibrium in first-order logic via the Z3 SMT solver, enforcing cryptographic statutory provenance via SHA-256 digests, and eliminating look-ahead leakage through bi-temporal state gating, Līlāvatī-Bench establishes a rigorous, uncompromising standard for production financial agents.
+**Līlāvatī-Bench** addresses this gap with deterministic reference answers, Z3 checks of balance-sheet identities, hash-linked provenance and bi-temporal gating, and with an evidence trail (every reply, a manifest, paired comparisons) that lets others check each number. Its current cases are small and partly saturated; section 5 states what the measurements do and do not show.
 
 We invite the academic and quantitative finance communities to evaluate their models, contribute golden test cases, and advance the frontier of provably sound financial artificial intelligence.
 
@@ -292,17 +343,16 @@ We invite the academic and quantitative finance communities to evaluate their mo
 
 ## References
 
-* **Almgren, R., and Chriss, N.** (2000). Optimal execution of portfolio transactions. *Journal of Risk*, 3(2), 5–39.
+* **Almgren, R., and Chriss, N.** (2000/2001). Optimal execution of portfolio transactions. *Journal of Risk*, 3(2), 5–39. doi:10.21314/JOR.2001.041.
 * **Altman, E. I.** (1968). Financial ratios, discriminant analysis and the prediction of corporate bankruptcy. *The Journal of Finance*, 23(4), 589–609.
 * **Araci, D.** (2019). FinBERT: Financial sentiment analysis with pre-trained language models. *arXiv preprint arXiv:1908.10063*.
 * **Beneish, M. D.** (1999). The detection of earnings manipulation. *Financial Analysts Journal*, 55(5), 24–36.
 * **Bhāskarācārya (Bhāskara II)** (1150). *Līlāvatī* (*Siddhānta Śiromaṇi*). Translated by H. T. Colebrooke (1817), *Algebra with Arithmetic and Mensuration from the Sanscrit of Brahmegupta and Bhascara*, John Murray, London.
 * **Chen, Z., Chen, W., Smiley, C., Shah, S., Borova, I., Langdon, D., ... and Wang, W. Y.** (2021). FinQA: A dataset of numerical reasoning over financial data. *Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 3697–3711.
-* **Chen, Z., Li, S., Smiley, C., Ma, Z., Shah, S., and Wang, W. Y.** (2022). ConvFinQA: Exploring the chain of numerical reasoning in conversational finance. *Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 5506–5521.
+* **Chen, Z., Li, S., Smiley, C., Ma, Z., Shah, S., and Wang, W. Y.** (2022). ConvFinQA: Exploring the chain of numerical reasoning in conversational finance question answering. *Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 6279–6292.
 * **De Moura, L., and Bjørner, N.** (2008). Z3: An efficient SMT solver. *International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS)*, 337–340. Springer, Berlin, Heidelberg.
 * **Engle, R. F., and Granger, C. W.** (1987). Co-integration and error correction: representation, estimation, and testing. *Econometrica*, 55(2), 251–276.
 * **Hagan, P. S., Kumar, D., Lesniewski, A. S., and Woodward, D. E.** (2002). Managing smile risk. *Wilmott Magazine*, September, 84–108.
-* **Islam, M. S., Kim, H. J., and Liu, X.** (2023). FinBench: A comprehensive benchmark for financial language models. *arXiv preprint arXiv:2311.12345*.
 * **Johansen, S.** (1991). Estimation and hypothesis testing of cointegration vectors in Gaussian vector autoregressive models. *Econometrica*, 59(6), 1551–1580.
 * **López de Prado, M.** (2018). *Advances in Financial Machine Learning*. John Wiley & Sons, Hoboken, NJ.
 * **López de Prado, M.** (2020). *Machine Learning for Asset Managers*. Cambridge University Press, Cambridge, UK.
@@ -311,6 +361,6 @@ We invite the academic and quantitative finance communities to evaluate their mo
 * **Merton, R. C.** (1974). On the pricing of corporate debt: The risk structure of interest rates. *The Journal of Finance*, 29(2), 449–470.
 * **Nelson, C. R., and Siegel, A. F.** (1987). Parsimonious modeling of yield curves. *Journal of Business*, 60(4), 473–489.
 * **Wu, S., Irsoy, O., Lu, S., Dabravolski, V., Dredze, M., Gehrmann, S., ... and Mann, G.** (2023). BloombergGPT: A large language model for finance. *arXiv preprint arXiv:2303.17564*.
-* **Xie, Q., Han, W., Zhang, X., Lai, Y., Peng, M., Lopez-Lira, A., and Huang, J.** (2023). PIXIU: A large language model, instruction data and evaluation benchmark for finance. *Advances in Neural Information Processing Systems (NeurIPS)*, 36.
-* **Yang, H., Liu, X. Y., and Wang, C. D.** (2023). FinGPT: Open-source financial large language models. *FinLLM Symposium at IJCAI 2023*.
-* **Zhu, F., Lei, C., Wang, C., Wang, J., Lu, H., and Du, M.** (2021). TAT-QA: A question answering benchmark on a hybrid of tabular and textual content in financial reports. *Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics (ACL)*, 3277–3287.
+* **Xie, Q., Han, W., Zhang, X., Lai, Y., Peng, M., Lopez-Lira, A., and Huang, J.** (2023). PIXIU: A comprehensive benchmark, instruction dataset and large language model for finance. *Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track*, 36.
+* **Yang, H., Liu, X. Y., and Wang, C. D.** (2023). FinGPT: Open-source financial large language models. *FinLLM Symposium at IJCAI 2023*. arXiv:2306.06031.
+* **Zhu, F., Lei, W., et al.** (2021). TAT-QA: A question answering benchmark on a hybrid of tabular and textual content in finance. *Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (ACL-IJCNLP), Volume 1: Long Papers*, 3277–3287.

@@ -30,11 +30,11 @@ class HealthResponse(BaseModel):
 def create_agent_api(
     graph: CompiledFinancialGraph[Any],
     title: str = "Līlāvatī Agent Microservice",
-    description: str = "Audited & Verifiable Financial Agent REST API powered by Project Līlāvatī.",
-    version: str = "0.1.0",
+    description: str = "Financial agent REST API powered by Project Līlāvatī (alpha).",
+    version: str = "0.2.0",
 ) -> FastAPI:
     """
-    Constructs a production-ready FastAPI application wrapping a CompiledFinancialGraph.
+    Constructs a FastAPI application wrapping a CompiledFinancialGraph (no built-in authentication).
 
     Args:
         graph: The compiled FinancialStateGraph instance to serve.
@@ -78,7 +78,7 @@ def create_agent_api(
 
         Validates the incoming payload against the agent's state schema,
         executes all graph nodes and invariant gates, and returns the final
-        audited state including all cryptographic citations and formal SMT proofs.
+        final state including all citations and invariant check results.
         """
         try:
             # Validate input payload against state schema

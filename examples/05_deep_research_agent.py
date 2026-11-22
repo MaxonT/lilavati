@@ -4,7 +4,7 @@ Example 05: Autonomous Financial Research Agent (Search + Deep Reasoning + Foren
 Demonstrates:
 1. FinancialSearchAgent: Autonomous filing discovery with SHA-256 cryptographic provenance.
 2. DeepFinancialAgent: Multi-branch hypothesis tree search and SMT invariant pruning.
-3. FinancialResearchAgent: End-to-end synthesis into an audited Investment Research Dossier.
+3. FinancialResearchAgent: End-to-end synthesis into an Investment Research Dossier with citations.
 """
 
 from __future__ import annotations
