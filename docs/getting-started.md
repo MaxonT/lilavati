@@ -6,8 +6,19 @@ Alpha software for research and teaching; not investment advice.
 
 ## Install
 
-Python 3.11 or 3.12. From source today (the PyPI package `lilavati-finance` is being prepared;
-the import name is `lilavati`):
+Python 3.11 or 3.12. The package is not on PyPI yet; the import name is `lilavati`.
+
+To use it, install from GitHub:
+
+```bash
+pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"
+python -c "import lilavati; print(lilavati.__version__)"
+```
+
+For a reproducible setup (a course, a paper), replace `main` with a commit hash from the
+[commit history](https://github.com/revendrat/lilavati/commits/main).
+
+To contribute, or to run the tutorials and tests, install from source:
 
 ```bash
 git clone https://github.com/revendrat/lilavati.git && cd lilavati

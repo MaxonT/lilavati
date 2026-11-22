@@ -126,9 +126,13 @@ benchmarks) give an agent the same rules as a human contributor.
 
 ## 🚀 Quick start
 
-Python 3.11 or 3.12. Install from source (the PyPI package `lilavati-finance` is being prepared):
+Python 3.11 or 3.12. Not on PyPI yet: install from GitHub to use it, or from source to contribute.
 
 ```bash
+# Use it (import name: lilavati)
+pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"
+
+# Or work on it
 git clone https://github.com/revendrat/lilavati.git && cd lilavati
 uv sync --extra dev          # or: pip install -e ".[dev]"
 uv run python -c "from lilavati.core.fixed_income import FixedIncomeEngine as F; \
