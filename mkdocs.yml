@@ -49,11 +49,16 @@ nav:
   - Home: index.md
   - Architecture & Runtime: architecture.md
   - Tutorials & Developer Guide:
-      - "01. Credit Underwriting & SMT Proofs": tutorials/01_build_your_first_financial_agent.md
-      - "02. Statistical Arbitrage & Optimal Execution": tutorials/02_statistical_arbitrage_and_execution_agent.md
-      - "03. Forensic Accounting & Adversarial Committee": tutorials/03_forensic_accounting_and_adversarial_committee.md
-      - "04. Climate Risk & Sustainable Portfolio": tutorials/04_climate_risk_and_sustainable_portfolio.md
+      - "01. Credit Workflow: Covenants, Merton PD & API": tutorials/01_build_your_first_financial_agent.md
+      - "02. Statistical Arbitrage & Execution, Checked": tutorials/02_statistical_arbitrage_and_execution_agent.md
+      - "03. Forensic Screens & Bull/Bear Committee": tutorials/03_forensic_accounting_and_adversarial_committee.md
+      - "04. Climate Risk in a Portfolio": tutorials/04_climate_risk_and_sustainable_portfolio.md
+      - "05. Benchmarking LLMs with Free & Open Models": tutorials/05_benchmarking_llms_with_open_models.md
+      - "06. Analysing, Publishing & Citing Results": tutorials/06_analysing_and_publishing_results.md
+      - "07. Tools versus Mental Math": tutorials/07_tools_versus_mental_math.md
+  - "Course: AI in Finance": course/index.md
   - Using the MCP Servers: mcp-setup.md
+  - Integrations (LangGraph, ADK, A2A): integrations.md
   - Numerical Validation:
       - Overview: validation/index.md
       - Fixed Income: validation/fixed_income.md
@@ -67,5 +72,7 @@ nav:
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md
       - "Benchmark Paper (Pre-Print 2)": papers/02_benchmark_paper.md
+  - Release notes:
+      - "0.2.0 (alpha)": releases/v0.2.0.md
   - Contributing: contributing.md
 

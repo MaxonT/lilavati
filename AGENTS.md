@@ -9,10 +9,12 @@ line in its change log). Outdated rules are worse than none: remove ones that no
 ## Commands
 ```bash
 uv sync --extra dev
-uv run ruff check src tests scripts
+uv run ruff check src tests scripts examples
 uv run mypy src
 uv run pytest
 uv run --extra docs --extra dev mkdocs build --strict   # when docs change
+uv run python scripts/check_claims.py                   # when docs, docstrings or printed text change
+uv run python scripts/check_tutorials.py                # when tutorials or the APIs they use change
 ```
 
 ## Non-negotiables (details in the skill)

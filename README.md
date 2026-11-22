@@ -2,27 +2,124 @@
 
 # 🪷 Līlāvatī (लीलावती)
 
-### An Open-Source Verifiable Agentic Toolkit for Quantitative Finance
+### Validated quantitative-finance tools for AI agents
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![FastMCP](https://img.shields.io/badge/Protocol-FastMCP-green)](https://github.com/jlowin/fastmcp)
 [![M8ven Score](https://m8ven.ai/badge/mcp/revendrat/lilavati)](https://m8ven.ai/mcp/revendrat/lilavati?s=readme)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20Research-orange)](#academic-research--pre-prints)
+[![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20Research-orange)](#project-status-and-limitations)
 
-*A domain-specific runtime, standardized FastMCP tool bus, and benchmark suite for autonomous financial reasoning, econometrics, credit risk, and algorithmic execution.*
+*Deterministic, reference-tested finance engines (fixed income, derivatives, econometrics, financial ML, execution, sustainability, accounting checks) served as MCP tools for LangGraph, Google ADK, Claude and any MCP client, plus a benchmark for financial agents.*
 
 </div>
 
 ---
 
-> ### ⚠️ Project status: alpha / research preview
-> * **Not production software and not investment advice.** Outputs have not been independently audited. Do not use for trading, credit or compliance decisions without your own validation. Provided "AS IS" under Apache-2.0.
-> * **Default LLM is a mock.** Out of the box, agents use a `mock-evaluator` model that returns canned text, so examples exercise the deterministic tools, not a real LLM. Configure a real provider (OpenAI, Anthropic, Gemini, vLLM, Ollama) via API-key environment variables to run real agent loops.
-> * **Benchmark results:** the repo ships the Līlāvatī-Bench *harness*, a deterministic reference solver (passes by construction), a templated case generator, and a first no-tool baseline of four Google models (`results/`). Those models answered nearly all single-step numeric items correctly, so the current cases are largely saturated; harder tracks are future work. Earlier placeholder leaderboard numbers have been removed.
-> * **Install from source for now** (see below). The PyPI name `lilavati` belongs to an unrelated project; this package will be published as `lilavati-finance` (import name stays `lilavati`). The optional `quantlib` extra is currently unused by the code.
-> * **API server** binds to `127.0.0.1` by default and has no built-in authentication. Put it behind your own auth/proxy before exposing it.
+> **Alpha / research preview. Not investment advice.** Outputs are not independently audited; see [Project status and limitations](#project-status-and-limitations) before relying on them.
+
+---
+
+## 💡 Why Līlāvatī
+
+AI agents are being asked to price bonds, read filings, check covenants and size trades. Two things go wrong, and this open source project has measured both:
+
+1. **Models get numbers wrong when they compute in text.** Without tools, five open-weight models
+   (gpt-oss-120b, gpt-oss-20b, Qwen3.6 27B, Qwen3.8 27B and ALLaM 2 7B, served by Groq) scored between
+   21% and 94% item accuracy on the same 20 generated finance cases; Qwen3.8 27B missed all four
+   Black-Scholes cases ([results](results/ANALYSIS.md)). With a tool, the question becomes parameter
+   extraction: in our live tool-calling test, **gpt-oss-120b, gpt-oss-20b and Qwen3.6 27B** called the
+   bond-pricing tool correctly in all three runs, while Qwen3.8 27B produced malformed tool calls in two
+   of three. On the same 20 questions, tools raised Qwen3.6 27B from 0.70 to 1.00 and Qwen3.8 27B from
+   0.39 to 0.80 item accuracy (paired 95% CIs exclude zero), and exposed new failure modes to measure,
+   such as tool-call loops.
+2. **Finance code is easy to get subtly wrong, even when written with care.** Auditing our own engines
+   against textbooks, original papers and QuantLib found and fixed **33 bugs**, among them GARCH orders
+   passed to `arch` swapped, a Beneish coefficient with the wrong sign, and a Merton solver that returned
+   non-solutions for distressed firms ([validation](docs/validation/index.md)). Every team that writes these
+   formulas from scratch, or asks an agent to, carries the same risk.
+
+On top of that, general-purpose agent frameworks do not by themselves track where a number came from,
+whether a balance sheet still balances, or whether a backtest used data published after its as-of date.
+
+**What Līlāvatī gives you**
+
+- **Validated engines as tools.** Deterministic fixed-income, derivatives, econometrics, financial-ML,
+  execution and sustainability functions. Audited engines are tested against independent references with
+  the measured tolerance published per engine; engines still awaiting audit are marked as such.
+- **No new framework to adopt.** Eight MCP servers that plug into LangGraph, Google ADK, A2A, Claude or any
+  MCP client; the model extracts parameters, the tool returns the number.
+- **Checks agents usually skip.** Z3 accounting-identity checks, `CitationRef` provenance on extracted
+  values, and bi-temporal as-of queries against look-ahead and restatement leakage.
+- **An honest benchmark.** Līlāvatī-Bench reports provider failures, truncation, unparsable replies and wrong
+  answers separately, with a content-free baseline for calibration.
+
+**Why contribute**
+
+- **One validated implementation, shared.** A fix here (such as the GARCH order bug) fixes every agent that
+  calls the tool, instead of each team finding it alone.
+- **Small, checkable contributions.** A typical PR is one function plus a reference test that cites its
+  source. Open work: auditing the order book, Black-Litterman and HRP engines; purged cross-validation;
+  Heston, Nelson-Siegel-Svensson and key-rate durations; harder multi-step benchmark cases
+  ([roadmap](ROADMAP.md)).
+- **Domain expertise counts as much as code.** Practitioners who can supply a worked example from a
+  textbook, term sheet or filing make the references stronger.
+- **AI-assisted contributions are welcome.** The [repository skill](.claude/skills/lilavati-dev/SKILL.md)
+  gives coding agents the same rules human contributors follow.
+
+---
+
+## 👥 Who it is for
+
+| You are | What Līlāvatī gives you today | Start here | Status |
+| :--- | :--- | :--- | :--- |
+| **Finance student or educator** | Runnable tutorials with exercises and instructor notes; a draft 12-week course; everything runs on free tiers or local models | [Tutorial 01](docs/tutorials/01_build_your_first_financial_agent.md), [course](docs/course/index.md) | ✅ all seven tutorials at the tutorial standard, their code executed in CI |
+| **Quantitative researcher or academic** | Līlāvatī-Bench with no-tool and tool arms; every model reply published with a manifest, bootstrap CIs and paired comparisons; reference-tested engines | [Tutorial 06](docs/tutorials/06_analysing_and_publishing_results.md), [results](results/ANALYSIS.md), [paper drafts](docs/papers/02_benchmark_paper.md) | 🟡 pilot-scale evidence (20 generated cases per model, one pass) |
+| **Credit, equity or risk analyst** | Bond analytics, Merton PD, covenant checks, Beneish and Altman scores, WACI and sustainability-linked bond checks; SEC EDGAR, 10-K and Ind AS connectors | Tutorials [01](docs/tutorials/01_build_your_first_financial_agent.md), [03](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md), [04](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md) | 🟡 engines validated; connectors not yet validated on live filings |
+| **AI or agent engineer** | Eight MCP servers; LangGraph, Google ADK and A2A examples; one client for OpenAI-compatible (incl. Groq, Ollama, vLLM), Gemini and Anthropic APIs; a tool-use evaluation harness | [Integrations](docs/integrations.md), [MCP setup](docs/mcp-setup.md), [Tutorial 07](docs/tutorials/07_tools_versus_mental_math.md) | ✅ live-tested on Gemini and Groq; Anthropic format-tested only |
+| **Model validation, audit or compliance** | Per-engine validation pages (reference, measured tolerance, bugs fixed); provenance on extracted values; Z3 accounting-identity checks; a reproducible evidence trail | [Numerical validation](docs/validation/index.md) | 🟡 order book, Black-Litterman, HRP, statement graph and connectors not yet audited |
+| **Open-source contributor** | Clear rules (developer skill, CONTRIBUTING), a roadmap with open items, small checkable tasks (one function plus a cited reference test) | [CONTRIBUTING](CONTRIBUTING.md), [roadmap](ROADMAP.md), [to-do](TODO.md) | ✅ |
+| **Enterprise platform team** | Typed Python APIs, local REST serving, Apache-2.0 | [SECURITY.md](SECURITY.md) | 🗺️ not yet enterprise-ready (see below) |
+
+### Towards enterprise quality
+
+The goal is an open-source project that an institution can adopt with the same confidence as
+commercial software. Where it stands:
+
+| In place | Still needed (tracked in [ROADMAP](ROADMAP.md) and [TODO](TODO.md)) |
+| :--- | :--- |
+| Apache-2.0; typed Pydantic APIs checked with mypy | PyPI release with semantic versioning and an API stability and deprecation policy |
+| 500+ tests, including reference tests against textbooks, papers and QuantLib | Coverage reporting |
+| CI on Python 3.11 and 3.12: lint, type check, tests; strict docs build, every example, tutorial code, claims linter, results manifest | Dependency vulnerability scanning and SBOM |
+| Release workflow with PyPI Trusted Publishing and a clean-install smoke test (ready; awaiting PyPI setup) | First PyPI release; the docs site live on GitHub Pages (workflow ready) |
+| Validation pages per audited engine; published benchmark evidence with a manifest | Audits of the remaining engines; validation on live filings; independent review |
+| Security policy, code of conduct, citation file, changelog | Authentication for the API server; a maintainer team, response targets and release cadence |
+
+---
+
+## 🎓 Learn: tutorials and a course
+
+Every feature comes with a tutorial: what it is for, runnable steps, the real mistakes it guards
+against, how to use it with Claude Code, and exercises.
+
+| Tutorial | You will learn to |
+| :--- | :--- |
+| [01 Credit workflow: covenants, Merton PD & API](docs/tutorials/01_build_your_first_financial_agent.md) | check covenants exactly at the limit, compute a Merton PD, test and serve the workflow |
+| [02 Statistical arbitrage & execution](docs/tutorials/02_statistical_arbitrage_and_execution_agent.md) | test cointegration, validate the estimates on a simulated pair, schedule a liquidation |
+| [03 Forensic screens & bull/bear committee](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md) | check statement consistency first, then screen with Beneish and Altman |
+| [04 Climate risk in a portfolio](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md) | compute WACI, stress a debtor under a carbon price, check a sustainability-linked bond |
+| [05 Benchmarking LLMs with free & open models](docs/tutorials/05_benchmarking_llms_with_open_models.md) | run fair no-tool baselines and classify failures |
+| [06 Analysing, publishing & citing results](docs/tutorials/06_analysing_and_publishing_results.md) | compute CIs, pair comparisons, publish evidence |
+| [07 Tools versus mental math](docs/tutorials/07_tools_versus_mental_math.md) | measure what tools change, on the same questions |
+
+**For universities:** a draft one-semester course, [*AI in Finance: Harnessing LLMs, Correcting
+Their Mistakes*](docs/course/index.md), maps these tutorials to a 12-week schedule with labs,
+assessments and capstone projects that can become pull requests.
+
+**For AI coding agents:** the [`lilavati-dev`](.claude/skills/lilavati-dev/SKILL.md) skill (contributing
+code) and the [`lilavati-bench`](.claude/skills/lilavati-bench/SKILL.md) skill (running and analysing
+benchmarks) give an agent the same rules as a human contributor.
 
 ---
 
@@ -36,30 +133,33 @@ uv run python examples/01_three_statement_reconciliation.py
 uv run lilavati-bench list-cases
 ```
 
+### Use it from your agent framework
+
+Līlāvatī is a tool layer, not another orchestration framework: LangGraph or Google ADK provide
+graphs, checkpointing, streaming and human-in-the-loop; Līlāvatī provides the numbers.
+
+| Framework | How | Example |
+| :--- | :--- | :--- |
+| LangGraph | `langchain-mcp-adapters` → `create_react_agent` | [`examples/integrations/langgraph_agent.py`](examples/integrations/langgraph_agent.py) |
+| Google ADK | `McpToolset` in an `LlmAgent` | [`examples/integrations/adk_agent.py`](examples/integrations/adk_agent.py) |
+| A2A (Agent2Agent) | ADK agent served with `to_a2a` | [`examples/integrations/adk_a2a_server.py`](examples/integrations/adk_a2a_server.py) |
+| Claude Code / Desktop, any MCP client | `lilavati-mcp-*` stdio servers | [`docs/mcp-setup.md`](docs/mcp-setup.md) |
+
+All three framework examples ran end to end on a real model (Gemma 4 31B via the Gemini API),
+with answers matching the tool outputs; see [`examples/integrations/README.md`](examples/integrations/README.md).
+
 ---
 
 ## 📖 The Historic Anecdote & Ethos
 
-In **1150 CE**, Indian mathematician and astronomer **Bhāskarācārya (Bhāskara II)** completed the classical mathematical treatise *Līlāvatī* (*Siddhānta Śiromaṇi*). Unlike contemporary academic texts of antiquity, Bhāskara framed mathematics as an engaging, dialogic conversation with his daughter, Līlāvatī, incorporating affectionate feminine vocatives (*"O Līlāvatī, intelligent girl..."*) throughout.
+In **1150 CE**, Indian mathematician and astronomer **Bhāskarācārya (Bhāskara II)** completed the mathematical treatise *Līlāvatī*, the first part of his *Siddhānta Śiromaṇi*. It poses its problems to a girl named Līlāvatī (by tradition, Bhāskara's daughter), in verses such as *"O Līlāvatī, intelligent girl..."*.
 
-Crucially, substantial portions of the *Līlāvatī* were devoted to practical commercial and financial mathematics:
-* **Miśraka-vyavahāra**: Partnerships, capital shares, joint ventures, and interest rate calculations.
-* **Kraya-vikraya**: Buying, selling, price elasticity, and barter economies.
-* **Suvarṇa-gaṇita**: Alligation and gold purity verification—history’s earliest recorded treatise on **financial auditing, assaying, and ledger balance verification**.
+Substantial parts of the *Līlāvatī* deal with commercial mathematics:
+* **Miśraka-vyavahāra** (mixtures): interest, partnerships and the division of profits by capital shares.
+* **Kraya-vikraya** (buying and selling): rules of proportion for prices and quantities.
+* **Suvarṇa-gaṇita** (gold): the purity and weight of gold alloys when pieces of different fineness are combined.
 
-**Project Līlāvatī** channels this 900-year heritage into modern computational finance. We replace the stochastic, hallucination-prone arithmetic of generic Large Language Models with **deterministic execution, formal invariant verification, and bi-temporal precision**.
-
----
-
-## ⚡ Why Generic Agent Frameworks Can Fall Short in Finance
-
-General-purpose LLM agent frameworks do not by themselves enforce where numbers come from. In finance, this can lead to failures such as:
-
-1. **Mental Math Hallucinations:** LLMs attempt multi-step CAGR, DCF, or bond duration math inside token generation, producing subtly erroneous values.
-2. **Missing Cryptographic Provenance:** Summaries lack verbatim hash-linked references (`CitationRef`) to the underlying 10-K, 10-Q, or statutory footnote.
-3. **Look-Ahead & Restatement Poisoning:** Static RAG pipelines ingest historical filings alongside future restatements or subsequent events, corrupting backtests and credit assessments.
-4. **Broken Accounting Invariants:** LLMs frequently produce three-statement projections where $Assets \neq Liabilities + Equity$ or the cash flow ending balance fails to reconcile with balance sheet cash.
-5. **Econometric Naivety:** Naive agents regress un-differenced non-stationary price series, creating spurious alpha signals from pure noise.
+**Project Līlāvatī** takes its name and its spirit from that tradition of exact commercial computation: language models read and plan, while the numbers come from **deterministic, tested code**, with accounting identities checked and data kept point-in-time.
 
 ---
 
@@ -97,9 +197,31 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
 | **Agents** | Neuro-symbolic runtime, adversarial committee, forensics (Beneish, Altman) | ✅ | `runtime/`, `agents/` |
-| | LLM tool calling: OpenAI-compatible, Gemini, Anthropic, with retries on 429/5xx | ✅ live-tested on Gemini API (Gemma 4 31B, Gemini 4 Hydrogen); Anthropic format-tested only | `llm/client.py` |
-| | Checkpointing, streaming, async, human-in-the-loop | 🗺️ not planned in core: use LangGraph / Google ADK with Līlāvatī's MCP servers | n/a |
+| | LLM tool calling: OpenAI-compatible (incl. Groq presets), Gemini, Anthropic, with retries on 429/5xx | ✅ live-tested on Gemini API (Gemma 4 31B, Gemini 4 Hydrogen) and Groq (gpt-oss-120b, gpt-oss-20b, qwen3.6-27b: 3/3 runs; qwen3.8-27b: 1/3, malformed tool calls); Anthropic format-tested only | `llm/client.py`, `llm/providers.py` |
+| | Checkpointing, streaming, async, human-in-the-loop | not in core by design: use LangGraph / Google ADK with Līlāvatī's MCP servers | n/a |
+| **Integrations** | LangGraph, Google ADK and A2A examples, run end to end on a real model | ✅ | `examples/integrations/` |
 | | Eight FastMCP tool servers | ✅ | `mcp_servers/` |
+
+---
+
+## Project status and limitations
+
+- **Not production software and not investment advice.** Outputs have not been independently audited. Do
+  not use them for trading, credit or compliance decisions without your own validation. Provided "AS IS"
+  under Apache-2.0.
+- **The default LLM is a mock.** Out of the box, agents use `mock-evaluator`, which returns canned text, so
+  the examples exercise the deterministic tools, not a real model. Set a provider key (OpenAI, Anthropic,
+  Gemini, Groq or any OpenAI-compatible endpoint, vLLM, Ollama) in an environment variable to run real
+  agent loops.
+- **Benchmark scope.** The harness, a reference solver (passes by construction), a case generator and
+  no-tool baselines for four Google and five Groq-hosted open-weight models are in
+  [`results/README.md`](results/README.md). The 7 golden cases are saturated; the 20 generated cases
+  separate models. Runs are single-step and single-pass; tool-augmented and multi-step tracks are future work.
+- **Install from source for now.** The PyPI name `lilavati` belongs to an unrelated project; this package
+  will be published as `lilavati-finance` (import name stays `lilavati`). The optional `quantlib` extra is
+  currently unused by the code.
+- **The API server** binds to `127.0.0.1` and has no built-in authentication. Put it behind your own auth or
+  proxy before exposing it.
 
 ---
 
@@ -140,7 +262,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 
 ## 🏆 Līlāvatī-Bench: The Financial Agent Benchmark
 
-To measure progress, we are developing **Līlāvatī-Bench** (harness available; third-party model baselines are not yet published), an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
+To measure progress, we are developing **Līlāvatī-Bench** (harness available; first no-tool baselines for Google and Groq-hosted open-weight models in [`results/README.md`](results/README.md); no leaderboard yet), an open benchmark testing autonomous agents and finance-tuned foundation models across seven tracks:
 
 * **Track 1: Three-Statement Dynamic Reconciliation:** Propagation of operational shocks across 3 statements verified via Z3 SMT solver.
 * **Track 2: Fixed Income, Credit & Debt Waterfalls:** Recovery of debt indentures, tranche seniority, covenant headroom, and Merton default probabilities.
@@ -150,15 +272,29 @@ To measure progress, we are developing **Līlāvatī-Bench** (harness available;
 * **Track 6: Market Microstructure & Optimal Execution:** Almgren-Chriss liquidation and VWAP slippage optimization on simulated order books.
 * **Track 7: Sustainable Finance & Climate Stress Testing:** Grounded extraction of Scope 1/2/3 disclosures, WACI portfolio calculation, carbon tax cash-flow impairments, and Sustainability-Linked Bond (SLB) covenant step-up verification.
 
+Reproduce the paired experiment, no tools versus tools on the same questions (keys are read only
+from environment variables):
+
+```bash
+export GROQ_API_KEY=...   # or GEMINI_API_KEY with --provider gemini
+uv run python scripts/run_llm_baseline.py --provider groq --model openai/gpt-oss-120b \
+    --generated 4 --seed 2026 --max-tokens 8192 --rpm 20 --out results/my_no_tools.jsonl
+uv run python scripts/run_tool_baseline.py --provider groq --model openai/gpt-oss-120b \
+    --generated 4 --seed 2026 --out results/my_tools.jsonl
+uv run python scripts/build_results_manifest.py && uv run python scripts/analyse_results.py
+```
+
+All published replies, the manifest and the generated analysis are in [`results/`](results/README.md)
+(data under CC BY 4.0). See [docs/benchmarks.md](docs/benchmarks.md) for how failures are counted.
+
 ---
 
 ## 🎓 Academic Research & Pre-Prints
 
-Two working-draft papers live in `docs/papers/` (not peer reviewed). We invite researchers and practitioners to help with real model evaluations. Ideas for further write-ups:
-
-1. **"Līlāvatī: A Neuro-Symbolic Agentic Framework for Institutional Financial Reasoning"**.
-2. **"Līlāvatī-Bench: Stress-Testing Financial LLMs and Autonomous Agents on Accounting Invariants and Look-Ahead Bias"**.
-3. **"Eliminating Arithmetic Hallucinations in Financial Agents via SMT Solvers and FastMCP"**.
+Two working drafts live in `docs/papers/` (not peer reviewed): a framework paper
+([01](docs/papers/01_framework_paper.md)) and a benchmark paper ([02](docs/papers/02_benchmark_paper.md))
+whose results come from `results/ANALYSIS.md`. Researchers and practitioners are welcome to help with
+larger evaluations; the research plan is in [TODO.md](TODO.md) (Phases 9–11).
 
 ### Citing Project Līlāvatī
 
@@ -166,12 +302,12 @@ If you use Līlāvatī in your research or applications, please cite:
 
 ```bibtex
 @software{lilavati2026,
-  author = {The Lilavati Team},
-  title = {Līlāvatī: An Open-Source, Neuro-Symbolic Agentic Operating System for Finance},
-  year = {2026},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/revendrat/lilavati}}
+  author  = {Tirumalsety, Revendranath},
+  title   = {Līlāvatī: Validated quantitative-finance tools for AI agents, and a benchmark for financial agents},
+  year    = {2026},
+  version = {0.2.0},
+  url     = {https://github.com/revendrat/lilavati},
+  note    = {Alpha release. ORCID 0000-0003-0549-4022}
 }
 ```
 

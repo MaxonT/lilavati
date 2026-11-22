@@ -178,7 +178,8 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * **Composite Līlāvatī Index:** Weighted institutional benchmark score (0-100).
 - [x] **5.4 Reproduction CLI and baselines:**
   * `lilavati-bench` CLI (`run`, `list-cases`); `scripts/run_llm_baseline.py` direct-prompt baseline with raw outputs in `results/`.
-  * First measured baseline (4 Google models, Nov 2026): answered items were almost all correct, so current cases are saturated.
+  * First measured baseline (4 Google models, Nov 2026): answered items were almost all correct, so the golden cases are saturated.
+  * Groq baselines (5 open-weight models, 2026-11-20, `--provider groq`): generated cases separate models (item accuracy 0.2625-0.9500); truncation, unparsable and provider failures counted separately; `--rescore` re-scores stored replies.
   * No public leaderboard yet.
 - [x] **5.5 Verification:** reference solver passes all 7 golden tracks (by construction; it uses the same engines the checks use).
 
@@ -219,29 +220,54 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 **7B. Honest documentation (blocking)**
 - [x] 7.6 README, docs, dev skill and roadmap list only implemented capabilities; planned items are marked.
 - [x] 7.7 Draft papers: placeholder results removed; measured baselines and limitations stated.
-- [ ] 7.8 Final claims sweep: every number in README/docs/papers traced to code output or a primary source.
+- [x] 7.8 Final claims sweep (completed 2026-11-22). Done: claims linter (`scripts/check_claims.py`, in CI) over README, docs, docstrings and examples; all flagged proof/guarantee/"audited"/maturity/priority language reworded (2026-11-22); benchmark paper numbers come from `results/ANALYSIS.md`. Also done: framework-paper sections 6–7 traced to scripts (6.3 replaced untraceable figures with the credit example's output; latency re-measured; the 100% metrics labelled as by construction); Table 1 venues verified (ConvFinQA is EMNLP 2022; PIXIU task count and two reference entries corrected). References: all 27 unique entries verified against primary sources; corrected TAT-QA authors and title, Garcez et al. venue, Toolformer and ReAct years, Almgren-Chriss issue year and DOI; removed a non-existent "FinBench" entry (arXiv:2311.12345) and an in-text citation to a fictional "Līlāvatī Benchmark Consortium"; added the missing Lean and Isabelle entries. Heritage passages no longer make priority or anachronistic claims; the claims linter skips bibliography titles and now catches historical priority wording.
 
 **7C. Packaging & release (blocking)**
 - [x] 7.9 Distribution renamed to `lilavati-finance` (PyPI name `lilavati` belongs to an unrelated project).
-- [ ] 7.10 Reserve `lilavati-finance` on PyPI; release workflow with Trusted Publishing; install from PyPI verified in a clean environment.
-- [ ] 7.11 Docs site deployed (GitHub Pages); CI runs all examples and the docs build.
+- [~] 7.10 PyPI release. 🟡 Done: `.github/workflows/release.yml` (tag/version check, build, clean-install smoke test on 3.11 and 3.12, Trusted Publishing); local clean installs verified; sdist excludes private `.agents/tasks/`. Pending (maintainer): register the trusted publisher on PyPI, create the `pypi` environment, tag the release.
+- [~] 7.11 Docs site and CI. 🟡 Done: CI runs the strict docs build, every example, tutorial code, claims and manifest checks; `.github/workflows/docs.yml` deploys to Pages. Pending (maintainer): Settings → Pages → Source: GitHub Actions.
 - [ ] 7.12 Real author names in `pyproject.toml`, `CITATION.cff` and papers.
 
 **7D. Benchmark credibility (recommended before announcing the benchmark; not blocking the toolkit)**
-- [ ] 7.13 Tool-augmented baseline with measured TMPR.
+- [x] 7.13 Tool-augmented baseline with measured TMPR (tool grounding): `scripts/run_tool_baseline.py`, paired with the no-tool arm on the same questions; four Groq models (2026-11-21/22; allam-2-7b has no tool support on Groq), results in `results/ANALYSIS.md` and benchmark paper §5.3.
+- [x] 7.13a Results published as evidence: raw replies tracked, `results/manifest.json` (hashes, settings, case hashes), CC BY 4.0 data licence, `scripts/analyse_results.py` (bootstrap CIs, paired differences); generated case ids made unique (content hashes); prompt versioning (v3 fixed the "5-year bond" key).
+- [ ] 7.13b Citable snapshot: GitHub release archived on Zenodo (DOI) once the maintainer enables the integration.
+- [ ] 7.13c Larger evidence base: 20+ generated cases per track on all 7 tracks, 3+ samples per model, held-out private seed.
 - [ ] 7.14 Citation track on real documents (real PoCS).
 - [ ] 7.15 Look-ahead track with a poisoned corpus (real TPI).
 - [ ] 7.16 Multi-step three-statement generated cases.
 
 **7F. Positioning & integrations (blocking for soft release)**
-- [ ] 7.19 Position Līlāvatī as validated finance tools for agents over MCP (works with LangGraph, Google ADK, Claude), not as a competing orchestration framework; update README intro.
-- [ ] 7.20 Runnable LangGraph example using the Līlāvatī MCP servers on a real model.
-- [ ] 7.21 Runnable Google ADK example using the Līlāvatī MCP servers on a real model.
-- [ ] 7.22 Live Anthropic tool-calling run (needs an API key).
+- [x] 7.19 Position Līlāvatī as validated finance tools for agents over MCP (works with LangGraph, Google ADK, Claude), not as a competing orchestration framework; README intro updated.
+- [x] 7.20 LangGraph example (`examples/integrations/langgraph_agent.py`), run end to end on Gemma 4 31B; runs in its own env because `langchain-mcp-adapters` needs `mcp<2`.
+- [x] 7.21 Google ADK example (`examples/integrations/adk_agent.py`), run end to end on Gemma 4 31B.
+- [x] 7.21a A2A: ADK agent served over Agent2Agent (`adk_a2a_server.py`) with a protocol-only client (`a2a_client.py`), run end to end.
+- [ ] 7.21b CI job running the integration examples against a cheap model on a schedule (needs a CI secret).
+- [ ] 7.22 Live Anthropic tool-calling run (needs an API key); live Gemini 4 Neon run (free-tier quota exhausted on 2026-11-19).
+- [x] 7.22a Live Groq tool-calling runs: gpt-oss-120b, gpt-oss-20b, qwen3.6-27b passed 3/3; qwen3.8-27b passed 1/3 (malformed tool calls rejected by Groq, HTTP 400 `tool_use_failed`).
+
+**7G. Tutorials and teaching**
+- [x] 7.23 Tutorials 05–07 (benchmarking with open models; analysing and publishing results; tools versus mental math), user skill `lilavati-bench`, draft course syllabus (`docs/course/index.md`).
+- [x] 7.24a Tutorial 01 retrofitted (2026-11-22): both covenants checked, "debt reduction to comply" instead of a mislabelled equity cure, no "proof" language, localhost serving, real outputs, runnable tests, exercises; `examples/06` rewritten to match.
+- [x] 7.24 Tutorials 02–04 retrofitted (2026-11-22) and executed in CI; examples 07–09 rewritten to match. Fixed on the way: Tutorial 02 could not run as written (empty price series); Tutorial 03 reported a manipulation finding for a firm whose statements were inconsistent, used a real company's name for synthetic data and proxied retained earnings; Tutorial 04 split emissions by an invented 70/30 ratio. The carbon-tax engine docstring now states its unit rule.
 
 **7E. Announcement**
 - [ ] 7.17 External review by at least one practitioner (quant/credit) and one software reviewer; issues triaged.
-- [ ] 7.18 Tag `v0.2.0`, publish to PyPI, then announce as an alpha toolkit for feedback.
+- [ ] 7.18 Tag `v0.2.0`, publish to PyPI, then announce as an alpha toolkit for feedback. 🟡 Release candidate built and verified locally on 2026-11-22 (`dist/`: wheel, sdist, results bundle, SBOM, vulnerability scan, verification report, checksums; release notes in `docs/releases/v0.2.0.md`); version bumped to 0.2.0. Waiting on the maintainer inputs and go-ahead.
+
+---
+
+## Phases 8–12: from validated toolkit to verifiable financial intelligence (planned)
+
+*From the strategy review of 2026-11-21. Tasks, gap analysis and open decisions: [TODO.md](TODO.md).
+Each phase ends in a gate: measurable evidence before the next phase starts.*
+
+- [ ] **Phase 8 (about 4 weeks): credibility, v0.2.** Phase 7 blocking items, tutorials 02–04 retrofit, paired runs in the paper, DOI, external review. *Gate:* every published number traceable to the manifest or a validation page.
+- [ ] **Phase 9 (months 1–3): contracts and evidence.** `VerifiedResult` contract, evidence ledger, trace replay, benchmark v2 (7 tracks, 20+ cases each, 3+ samples, private seed), abstention and real-document cases. *Gate:* a paired tool/no-tool result whose CI excludes zero on non-saturated cases.
+- [ ] **Phase 10 (months 3–6): narrow data commons.** Licence review per source; EDGAR company facts, ALFRED, World Bank; curated India set; minimal ontology; point-in-time track. *Gate:* a measured point-in-time leak on a real vintage dataset.
+- [ ] **Phase 11 (months 6–9): multi-agent reliability research.** Architecture ladder on LangGraph at constant model, data and budget. *Gate:* pilot Financial AI Reliability Report v0.
+- [ ] **Phase 12 (months 9–12): Academy and community.** Learning pathways, university pilot, student competition. *Gate:* outside contributors landing validated engines.
+- [ ] **Enterprise-quality track (alongside):** semantic versioning and API policy, coverage and full CI, vulnerability scanning and SBOM, signed releases, API authentication, CODEOWNERS and maintainer team, independent audit.
 
 ---
 
