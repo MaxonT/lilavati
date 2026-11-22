@@ -1,0 +1,23 @@
+{
+  "created_utc": "2026-11-21T09:46:41+00:00",
+  "git_commit": "68f79a64abc39f5b1fa4557e3e9f1e8a6d5b913d",
+  "git_dirty": true,
+  "python": "3.11.14",
+  "prompt_version": "v3",
+  "script": "scripts/run_tool_baseline.py",
+  "arm": "tools",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "samples": 1,
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "timeout_seconds": 120.0,
+  "max_tool_rounds": 8,
+  "case_set": "generated",
+  "seed": 2026,
+  "per_track": 4,
+  "n_records": 20,
+  "status": "superseded",
+  "tool_prompt_version": "t1",
+  "notes": "Pilot of the tool arm. Prompt t1 asked for the final answer as a text JSON object; gpt-oss-120b instead emitted it as a call to a non-existent tool named 'json', which Groq rejected (HTTP 400 tool_use_failed) although the answer inside was correct. Fixed in t2 with an explicit submit_answer tool. Do not cite."
+}

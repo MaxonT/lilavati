@@ -1,0 +1,41 @@
+GEN-S2026-N4-T1-000 answered    score=1.000 tools=2 grounded=0/0
+GEN-S2026-N4-T1-001 answered    score=1.000 tools=2 grounded=0/0
+GEN-S2026-N4-T1-002 answered    score=1.000 tools=2 grounded=0/0
+GEN-S2026-N4-T1-003 answered    score=1.000 tools=2 grounded=0/0
+GEN-S2026-N4-T2-000 answered    score=1.000 tools=1 grounded=1/1
+GEN-S2026-N4-T2-001 answered    score=1.000 tools=1 grounded=1/1
+GEN-S2026-N4-T2-002 answered    score=1.000 tools=1 grounded=1/1
+GEN-S2026-N4-T2-003 answered    score=1.000 tools=1 grounded=1/1
+GEN-S2026-N4-T5-000 answered    score=1.000 tools=1 grounded=4/4
+GEN-S2026-N4-T5-001 answered    score=1.000 tools=3 grounded=4/4
+GEN-S2026-N4-T5-002 answered    score=0.750 tools=1 grounded=3/4
+GEN-S2026-N4-T5-003 answered    score=1.000 tools=1 grounded=4/4
+GEN-S2026-N4-T6-000 answered    score=1.000 tools=1 grounded=2/2
+GEN-S2026-N4-T6-001 answered    score=1.000 tools=1 grounded=2/2
+GEN-S2026-N4-T6-002 answered    score=1.000 tools=1 grounded=2/2
+GEN-S2026-N4-T6-003 answered    score=1.000 tools=1 grounded=2/2
+GEN-S2026-N4-T7-000 model_error score=0.000 tools=0 grounded=0/0
+GEN-S2026-N4-T7-001 model_error score=0.000 tools=0 grounded=0/0
+GEN-S2026-N4-T7-002 model_error score=0.000 tools=0 grounded=0/0
+GEN-S2026-N4-T7-003 model_error score=0.000 tools=0 grounded=0/0
+{
+  "provider": "groq",
+  "model": "openai/gpt-oss-20b",
+  "arm": "tools",
+  "outcomes": {
+    "answered": 16,
+    "unparsable": 0,
+    "truncated": 0,
+    "model_error": 4,
+    "error": 0
+  },
+  "overall_mean_accuracy": 0.7875,
+  "tool_grounding": 0.9643,
+  "per_track": {
+    "track1_three_statement": 1.0,
+    "track2_fixed_income": 1.0,
+    "track5_derivatives": 0.938,
+    "track6_microstructure": 1.0,
+    "track7_sustainability": 0.0
+  }
+}

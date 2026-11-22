@@ -1,0 +1,21 @@
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T1-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T2-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T3-001", "raw": "{\"series_non_stationary\": true, \"rejects_spurious_relationship\": true}", "parsed": {"series_non_stationary": true, "rejects_spurious_relationship": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T4-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T5-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T6-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 0, "case": "LILAVATI-T7-001", "raw": "{\n  \"portfolio_waci\": 120.0,\n  \"slb_spt_achieved\": false,\n  \"slb_active_coupon\": 0.0425,\n  \"slb_penalty_triggered\": true\n}", "parsed": {"portfolio_waci": 120.0, "slb_spt_achieved": false, "slb_active_coupon": 0.0425, "slb_penalty_triggered": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T1-001", "raw": "{\"is_balanced\": true, \"cash_reconciled\": true, \"assets_equal_liab_equity\": true}", "parsed": {"is_balanced": true, "cash_reconciled": true, "assets_equal_liab_equity": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T2-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T3-001", "raw": "{\"series_non_stationary\": true, \"rejects_spurious_relationship\": true}", "parsed": {"series_non_stationary": true, "rejects_spurious_relationship": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T4-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T5-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T6-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 1, "case": "LILAVATI-T7-001", "raw": "{\n  \"portfolio_waci\": 120.0,\n  \"slb_spt_achieved\": false,\n  \"slb_active_coupon\": 0.0425,\n  \"slb_penalty_triggered\": true\n}", "parsed": {"portfolio_waci": 120.0, "slb_spt_achieved": false, "slb_active_coupon": 0.0425, "slb_penalty_triggered": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T1-001", "raw": "{\"is_balanced\": true, \"cash_reconciled\": true, \"assets_equal_liab_equity\": true}", "parsed": {"is_balanced": true, "cash_reconciled": true, "assets_equal_liab_equity": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T2-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T3-001", "raw": "{\"series_non_stationary\": true, \"rejects_spurious_relationship\": true}", "parsed": {"series_non_stationary": true, "rejects_spurious_relationship": true}, "score": 1.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T4-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T5-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T6-001", "raw": "", "parsed": null, "score": 0.0}
+{"model": "gemma-4-26b-a4b-it", "sample": 2, "case": "LILAVATI-T7-001", "raw": "{\n  \"portfolio_waci\": 120.0,\n  \"slb_spt_achieved\": false,\n  \"slb_active_coupon\": 0.0425,\n  \"slb_penalty_triggered\": true\n}", "parsed": {"portfolio_waci": 120.0, "slb_spt_achieved": false, "slb_active_coupon": 0.0425, "slb_penalty_triggered": true}, "score": 1.0}

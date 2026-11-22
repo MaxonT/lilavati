@@ -1,0 +1,20 @@
+{
+  "created_utc": "2026-11-21T09:55:15+00:00",
+  "git_commit": "68f79a64abc39f5b1fa4557e3e9f1e8a6d5b913d",
+  "git_dirty": true,
+  "python": "3.11.14",
+  "prompt_version": "v3",
+  "script": "scripts/run_llm_baseline.py",
+  "arm": "no_tools",
+  "provider": "groq",
+  "model": "qwen/qwen3.6-27b",
+  "samples": 1,
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "timeout_seconds": 120.0,
+  "rpm": 20.0,
+  "case_set": "generated",
+  "seed": 2026,
+  "per_track": 4,
+  "n_records": 20
+}

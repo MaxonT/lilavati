@@ -1,0 +1,19 @@
+{
+  "provider": "groq",
+  "model": "openai/gpt-oss-20b",
+  "samples": 1,
+  "temperature": 0.0,
+  "errors": 0,
+  "truncated": 0,
+  "unparsable": 0,
+  "overall_mean_accuracy": 1.0,
+  "per_track": {
+    "track1_three_statement": 1.0,
+    "track2_fixed_income": 1.0,
+    "track3_econometrics": 1.0,
+    "track4_financial_ml": 1.0,
+    "track5_derivatives": 1.0,
+    "track6_microstructure": 1.0,
+    "track7_sustainability": 1.0
+  }
+}

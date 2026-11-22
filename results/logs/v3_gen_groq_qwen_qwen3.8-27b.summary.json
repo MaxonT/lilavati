@@ -1,0 +1,24 @@
+{
+  "provider": "groq",
+  "model": "qwen/qwen3.8-27b",
+  "samples": 1,
+  "temperature": 0.0,
+  "outcomes": {
+    "answered": 18,
+    "unparsable": 2,
+    "truncated": 0,
+    "model_error": 0,
+    "error": 0
+  },
+  "errors": 0,
+  "truncated": 0,
+  "unparsable": 2,
+  "overall_mean_accuracy": 0.3917,
+  "per_track": {
+    "track1_three_statement": 0.583,
+    "track2_fixed_income": 0.5,
+    "track5_derivatives": 0.0,
+    "track6_microstructure": 0.5,
+    "track7_sustainability": 0.375
+  }
+}
