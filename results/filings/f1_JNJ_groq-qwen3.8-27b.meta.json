@@ -1,0 +1,30 @@
+{
+  "created_utc": "2026-11-22T18:37:07+00:00",
+  "git_commit": "9287e29dc8a44873210590c23704c4a5063f7c44",
+  "git_dirty": true,
+  "python": "3.11.14",
+  "prompt_version": "v3",
+  "script": "scripts/run_filing_comparison.py",
+  "case_set": "filings",
+  "provider": "groq",
+  "model": "qwen/qwen3.8-27b",
+  "samples": 3,
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "ticker": "JNJ",
+  "accession": "0000200406-26-000016",
+  "period_end": "2025-12-28",
+  "filing_prompt_version": "f1",
+  "items_asked": [
+    "revenue",
+    "cost_of_revenue",
+    "net_income",
+    "total_assets",
+    "total_liabilities",
+    "operating_cash_flow",
+    "capital_expenditure"
+  ],
+  "not_answerable": [],
+  "n_records": 6,
+  "rescored": "2026-11-23: truth revenue = total revenues (Revenues tag first); replies unchanged"
+}

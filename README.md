@@ -100,7 +100,7 @@ commercial software. Where it stands:
 
 ## 🎓 Learn: tutorials and a course
 
-Every feature comes with a tutorial: what it is for, runnable steps, the real mistakes it guards
+Every feature comes with a tutorial (eight so far): what it is for, runnable steps, the real mistakes it guards
 against, how to use it with Claude Code, and exercises.
 
 | Tutorial | You will learn to |
@@ -112,6 +112,7 @@ against, how to use it with Claude Code, and exercises.
 | [05 Benchmarking LLMs with free & open models](docs/tutorials/05_benchmarking_llms_with_open_models.md) | run fair no-tool baselines and classify failures |
 | [06 Analysing, publishing & citing results](docs/tutorials/06_analysing_and_publishing_results.md) | compute CIs, pair comparisons, publish evidence |
 | [07 Tools versus mental math](docs/tutorials/07_tools_versus_mental_math.md) | measure what tools change, on the same questions |
+| [08 A real 10-K, three ways](docs/tutorials/08_real_10k_llm_vs_lilavati.md) | get figures from SEC filings reliably across companies, and compare an LLM alone, an LLM with Līlāvatī, and Līlāvatī alone |
 
 **For universities:** a draft one-semester course, [*AI in Finance: Harnessing LLMs, Correcting
 Their Mistakes*](docs/course/index.md), maps these tutorials to a 12-week schedule with labs,

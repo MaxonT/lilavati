@@ -1,0 +1,294 @@
+[
+  {
+    "ticker": "AAPL",
+    "model": "openai/gpt-oss-120b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "openai/gpt-oss-120b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "openai/gpt-oss-20b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "openai/gpt-oss-20b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "AAPL",
+    "model": "lilavati-xbrl",
+    "arm": "C_lilavati_alone",
+    "samples": 1,
+    "items": "7/7",
+    "ratios": "5/5",
+    "note": "truth by construction; validated against the document by validate_sec_filings.py"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "openai/gpt-oss-120b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "openai/gpt-oss-120b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "openai/gpt-oss-20b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "openai/gpt-oss-20b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "MSFT",
+    "model": "lilavati-xbrl",
+    "arm": "C_lilavati_alone",
+    "samples": 1,
+    "items": "7/7",
+    "ratios": "5/5",
+    "note": "truth by construction; validated against the document by validate_sec_filings.py"
+  },
+  {
+    "ticker": "WMT",
+    "model": "openai/gpt-oss-120b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "openai/gpt-oss-120b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "openai/gpt-oss-20b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "openai/gpt-oss-20b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "18/18",
+    "ratios": "12/12"
+  },
+  {
+    "ticker": "WMT",
+    "model": "lilavati-xbrl",
+    "arm": "C_lilavati_alone",
+    "samples": 1,
+    "items": "6/6",
+    "ratios": "4/4",
+    "note": "truth by construction; validated against the document by validate_sec_filings.py"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "openai/gpt-oss-120b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "openai/gpt-oss-120b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "openai/gpt-oss-20b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "openai/gpt-oss-20b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "qwen/qwen3.6-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "A_llm_alone",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "12/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "qwen/qwen3.8-27b",
+    "arm": "B_llm_extracts_lilavati_computes",
+    "samples": 3,
+    "items": "21/21",
+    "ratios": "15/15"
+  },
+  {
+    "ticker": "JNJ",
+    "model": "lilavati-xbrl",
+    "arm": "C_lilavati_alone",
+    "samples": 1,
+    "items": "7/7",
+    "ratios": "5/5",
+    "note": "truth by construction; validated against the document by validate_sec_filings.py"
+  }
+]
