@@ -2,13 +2,14 @@
 Golden Datasets and Canonical Evaluation Scenarios for Līlāvatī-Bench.
 
 Contains authoritative reference test cases across all seven foundational tracks:
-Track 1: Three-Statement Dynamic Reconciliation
-Track 2: Fixed Income, Credit & Debt Waterfalls
-Track 3: Econometric Rigor & Spurious Correlation Resistance
-Track 4: Financial ML Methodological Soundness (de Prado)
-Track 5: Derivatives & Volatility Arbitrage Invariance
-Track 6: Market Microstructure & Optimal Execution
-Track 7: Sustainable Finance & Climate Stress Testing
+
+- Track 1: Three-Statement Dynamic Reconciliation
+- Track 2: Fixed Income, Credit & Debt Waterfalls
+- Track 3: Econometric Rigor & Spurious Correlation Resistance
+- Track 4: Financial ML Methodological Soundness (de Prado)
+- Track 5: Derivatives & Volatility Arbitrage Invariance
+- Track 6: Market Microstructure & Optimal Execution
+- Track 7: Sustainable Finance & Climate Stress Testing
 """
 
 from __future__ import annotations

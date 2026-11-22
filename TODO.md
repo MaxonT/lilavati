@@ -98,7 +98,11 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 ## Public announcement readiness (reviewed 2026-11-22)
 
 **Must do before announcing**
-- [ ] PyPI release: maintainer registers the pending trusted publisher; then tag `v0.2.0` (7.10, 7.18).
+- [x] Install path for early users: `pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"`
+      (checked in a clean Python 3.12 environment, 2026-11-23; README and getting-started updated).
+- [ ] PyPI release deferred by the maintainer (2026-11-23) until reviewer feedback and the LinkedIn
+      announcement are in. Do not push a `v*` tag before the trusted publisher is registered: it
+      triggers `release.yml`, whose PyPI upload would fail (7.10, 7.18).
 - [ ] External review by one practitioner and one software reviewer (7.17), or announce explicitly as
       "alpha, seeking review" and link the known limitations.
 - [ ] Announcement text and channels (not drafted yet); link the docs site, getting-started page and

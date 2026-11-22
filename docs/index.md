@@ -12,6 +12,7 @@
 General-purpose LLM agent frameworks do not by themselves check where a number came from: models compute in text, can use information published after the as-of date, and leave no auditable provenance.
 
 Līlāvatī addresses this with a **tool layer for agents**:
+
 1. **Zero LLM Arithmetic (design goal):** LLMs read and plan; calculations run in deterministic, tested code (Python, Polars, DuckDB), exposed as FastMCP tools.
 2. **First-Order Formal Invariants (Z3 SMT Solver):** Core accounting identities ($Assets = Liabilities + Equity$) are checked with the Z3 SMT solver on the given numbers (exact rational arithmetic), and debt covenants are checked arithmetically with an at-limit tolerance. These verify the numbers supplied, not a model over all inputs.
 3. **Cryptographic Provenance (`CitationRef`):** Every numerical fact extracted from SEC EDGAR or Ind AS filings carries an immutable SHA-256 document hash, page, and snippet citation.
