@@ -16,5 +16,6 @@
   "case_set": "generated",
   "seed": 2026,
   "per_track": 4,
-  "n_records": 20
+  "n_records": 20,
+  "case_hash_scheme": "v2 (recomputed 2026-11-22 by scripts/migrate_case_hashes.py)"
 }

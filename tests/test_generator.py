@@ -73,3 +73,26 @@ def test_published_generated_content_is_unchanged() -> None:
 def test_legacy_ids_map_to_new_ids() -> None:
     assert legacy_case_id("GEN-S2026-N4-T2-000") == "GEN-T2-000"
     assert legacy_case_id("LILAVATI-T2-001") == "LILAVATI-T2-001"
+
+
+def test_content_hash_ignores_platform_float_noise_in_answers() -> None:
+    # Expected values come from exp/log/erf, whose last digits differ between platform math
+    # libraries; the hash of GEN-S2026-N4-T5-002 differed between macOS and Linux CI. The hash
+    # identifies the question, so it must not depend on the last digits of the answers.
+    import math
+
+    from lilavati.bench.datasets import case_content_hash
+
+    case = next(c for c in generate_cases(2026, 4) if c.case_id == "GEN-S2026-N4-T5-002")
+    noisy = case.model_copy(update={"expected_values": {
+        k: (math.nextafter(v, math.inf) if isinstance(v, float) else v)
+        for k, v in case.expected_values.items()}})
+    assert case_content_hash(noisy) == case_content_hash(case)
+
+
+def test_content_hash_is_pinned() -> None:
+    # Same value on every platform (CI runs Linux; this was computed on macOS arm64).
+    from lilavati.bench.datasets import case_content_hash
+
+    case = next(c for c in generate_cases(2026, 4) if c.case_id == "GEN-S2026-N4-T5-002")
+    assert case_content_hash(case) == "35c73c8197fb9503b64ce46d5047b731215a7688deed76cab0898ff3a5e94cb0"

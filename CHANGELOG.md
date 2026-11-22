@@ -19,6 +19,8 @@
 - Benchmark: generated case ids collided across set sizes (`generate_cases(2026, 2)` and `(2026, 4)` both had `GEN-T2-000`, different bonds); ids now carry seed and size (`GEN-S2026-N4-T2-000`), cases have a content hash (`case_content_hash`), and old ids resolve via `legacy_case_id`. Generated content is unchanged.
 - Benchmark prompt: the `bond_price` key said "price of the 5-year bond" for generated bonds of 2-10 years (gpt-oss-120b priced a 10-year bond as 5-year); prompt v3 fixes it and every record stores `prompt_version`.
 - Ollama preset pointed at the server root instead of its OpenAI-compatible `/v1` endpoint.
+- `case_content_hash` included expected answer values, whose last digits depend on the platform's math library, so hashes differed between macOS and Linux CI; it now hashes only the question (scheme v2), and stored hashes were recomputed by `scripts/migrate_case_hashes.py` without changing any other field.
+- `paired_difference` ordered pairs by content hash, so the seeded bootstrap CI changed when the hash scheme did; pairs are now ordered by case id (published Qwen3.8 bounds moved from +0.1083/+0.6875 to +0.1125/+0.6917; bootstrap Monte Carlo error is about ±0.01).
 ### Changed (breaking)
 - `ExecutionEngine.compute_almgren_chriss_schedule` and the matching MCP tool now require keyword `arrival_price`; impact parameters use the paper's per-day units.
 - Distribution renamed to `lilavati-finance` (the PyPI name `lilavati` belongs to an unrelated project). Import name is still `lilavati`.

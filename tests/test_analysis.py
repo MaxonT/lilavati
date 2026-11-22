@@ -66,3 +66,13 @@ def test_paired_difference_matches_on_content_not_id() -> None:
     assert d["n_pairs"] == 2 and d["mean_diff"] == pytest.approx(0.5)
     assert (d["improved"], d["same"], d["worse"]) == (1, 1, 0)
     assert case_content_hash(BOND)  # pairing key exists for every case
+
+
+def test_paired_ci_does_not_depend_on_the_hash_scheme() -> None:
+    # Pairs are ordered by case id, not by hash: a seeded bootstrap depends on input order, and
+    # ordering by hash moved the published CI when the hash scheme changed.
+    a = [_rec(c.case_id, 0.0) for c in CASES]
+    b = [_rec(c.case_id, float(i % 3 == 0)) for i, c in enumerate(CASES)]
+    d1 = paired_difference(a, b, CASES)
+    d2 = paired_difference(list(reversed(a)), list(reversed(b)), CASES)
+    assert d1["diff_ci95"] == d2["diff_ci95"]

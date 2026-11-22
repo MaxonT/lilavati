@@ -37,6 +37,10 @@ setting was not recorded.
 - **Case ids:** before 2026-11-21, generated ids did not include the set size, so `GEN-T2-000` meant
   different bonds in the 2-per-track and 4-per-track sets. The manifest records each file's case set;
   analysis matches answers to questions by content hash.
+- **Case-hash scheme v1 → v2 (2026-11-22):** v1 also hashed the expected answer values, whose last digits
+  depend on the platform's math library, so the same question hashed differently on macOS and Linux CI. v2
+  hashes only the question; `scripts/migrate_case_hashes.py` recomputed the stored `case_hash` fields and
+  changed nothing else in any record.
 - **allam-2-7b has no tool arm:** Groq returns HTTP 400 "`tool calling` is not supported with this
   model". The tool runner now stops on that error instead of recording it as results.
 - **Gemini runs:** `finish_reason` was not recorded, so their empty replies cannot be split into

@@ -19,5 +19,6 @@
   "n_records": 20,
   "status": "superseded",
   "tool_prompt_version": "t1",
-  "notes": "Pilot of the tool arm. Prompt t1 asked for the final answer as a text JSON object; gpt-oss-120b instead emitted it as a call to a non-existent tool named 'json', which Groq rejected (HTTP 400 tool_use_failed) although the answer inside was correct. Fixed in t2 with an explicit submit_answer tool. Do not cite."
+  "notes": "Pilot of the tool arm. Prompt t1 asked for the final answer as a text JSON object; gpt-oss-120b instead emitted it as a call to a non-existent tool named 'json', which Groq rejected (HTTP 400 tool_use_failed) although the answer inside was correct. Fixed in t2 with an explicit submit_answer tool. Do not cite.",
+  "case_hash_scheme": "v2 (recomputed 2026-11-22 by scripts/migrate_case_hashes.py)"
 }

@@ -259,9 +259,9 @@ has no tool arm: Groq does not support tool calling for it.
 | gpt-oss-120b | 20 / 20 | 0.9375 | 0.9875 | +0.0500 (0.0000 to +0.1500) | 1 / 19 / 0 | 94.4% |
 | gpt-oss-20b | 16 / 20 | 0.7000 | 0.7875 | +0.0875 (−0.2125 to +0.3750) | 6 / 10 / 4 | 96.4% |
 | Qwen3.6 27B | 20 / 20 | 0.7000 | 1.0000 | +0.3000 (+0.1000 to +0.5000) | 6 / 14 / 0 | 100% |
-| Qwen3.8 27B | 16 / 20 | 0.3917 | 0.8000 | +0.4083 (+0.1083 to +0.6875) | 12 / 5 / 3 | 100% |
+| Qwen3.8 27B | 16 / 20 | 0.3917 | 0.8000 | +0.4083 (+0.1125 to +0.6917) | 12 / 5 / 3 | 100% |
 
-CI: percentile bootstrap over the 20 paired differences (5,000 resamples, seed 0).
+CI: percentile bootstrap over the 20 paired differences (5,000 resamples, seed 0, pairs ordered by case id). The bounds carry Monte Carlo error of about ±0.01: over 20 bootstrap seeds, Qwen3.8's lower bound ranged from 0.10 to 0.12 and gpt-oss-20b's from −0.21 to −0.20; no conclusion depends on the seed.
 
 **What this shows.**
 1. For the two Qwen models, tools improved the item mean on the same questions, with paired 95% CIs

@@ -114,7 +114,10 @@ def paired_difference(a: list[dict[str, Any]], b: list[dict[str, Any]], cases: l
         return {(case_content_hash(index[r["case"]]), r["sample"]): r["score"] for r in rows}
 
     sa, sb = by_hash(a), by_hash(b)
-    keys = sorted(set(sa) & set(sb))
+    # Pair on the content hash, but order pairs by case id: a seeded bootstrap depends on the order
+    # of its inputs, and ordering by hash made the CI move when the hash scheme changed.
+    ids = {case_content_hash(c): c.case_id for c in cases}
+    keys = sorted(set(sa) & set(sb), key=lambda k: (ids[k[0]], k[1]))
     if not keys:
         raise ValueError("no shared questions to pair")
     diffs = [sb[k] - sa[k] for k in keys]

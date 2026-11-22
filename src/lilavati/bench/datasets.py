@@ -43,16 +43,23 @@ class BenchmarkTestCase(BaseModel):
 
 
 def case_content_hash(case: BenchmarkTestCase) -> str:
-    """SHA-256 of what a model is asked and how it is scored (track, prompt, inputs, answers, tolerance).
+    """SHA-256 of the question: track, prompt, input data, tolerance and the names of the answer keys.
 
     Case ids are labels; this hash is the identity. Store it with every result so that answers are
     only ever compared on identical questions.
+
+    Expected *values* are deliberately excluded: they are computed with exp, log and the normal
+    CDF, whose last digits differ between platform math libraries, so including them made the hash
+    differ between macOS and Linux (scheme v1, replaced 2026-11-22). Inputs come from a seeded
+    generator and basic arithmetic, which are identical on every platform. The answers follow from
+    the question through the engines, whose version is recorded by the git commit in each run's
+    metadata.
     """
     payload = {
         "track": case.track,
         "prompt": case.prompt,
         "context_data": case.context_data,
-        "expected_values": case.expected_values,
+        "answer_keys": sorted(case.expected_values),
         "tolerance": case.tolerance,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
