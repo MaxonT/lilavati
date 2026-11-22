@@ -8,6 +8,7 @@ by the deterministic engines. Boolean answers are balanced ~50/50 so that a cont
 from __future__ import annotations
 
 import random
+import re
 from datetime import date
 
 from lilavati.bench.datasets import (
@@ -137,6 +138,22 @@ _BUILDERS = {"track1_three_statement": _t1, "track2_fixed_income": _t2, "track5_
 
 
 def generate_cases(seed: int = 0, per_track: int = 10) -> list[BenchmarkTestCase]:
-    """Generate `per_track` fresh cases for each supported track, deterministically from `seed`."""
+    """Generate `per_track` fresh cases for each supported track, deterministically from `seed`.
+
+    One random stream is shared across tracks, so the content of case i depends on `per_track`
+    as well as `seed`. Ids therefore carry both (``GEN-S2026-N4-T2-000``); compare results by
+    `case_content_hash`, not by id.
+    """
     rng = random.Random(seed)
-    return [_BUILDERS[t](rng, i) for t in GENERATED_TRACKS for i in range(per_track)]
+    cases = [_BUILDERS[t](rng, i) for t in GENERATED_TRACKS for i in range(per_track)]
+    prefix = f"GEN-S{seed}-N{per_track}-"
+    return [c.model_copy(update={"case_id": prefix + c.case_id.removeprefix("GEN-")}) for c in cases]
+
+
+def legacy_case_id(case_id: str) -> str:
+    """Map a current generated id to the pre-2026-11-21 form (``GEN-S2026-N4-T2-000`` -> ``GEN-T2-000``).
+
+    Result files written before the id change use the short form; resolve them together with the
+    seed and per-track count recorded in ``results/manifest.json``.
+    """
+    return re.sub(r"^GEN-S\d+-N\d+-", "GEN-", case_id)
