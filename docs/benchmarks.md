@@ -1,6 +1,6 @@
 # Līlāvatī-Bench: Financial AI Agent Benchmark Suite
 
-**Līlāvatī-Bench** is a quantitative benchmark (harness and reference solver available; first no-tool baselines for Google and Groq-hosted open-weight models, see below; no leaderboard yet) for evaluating financial foundation models and agents across seven tracks.
+**Līlāvatī-Bench** is a quantitative benchmark (harness and reference solver available; no-tool baselines and a paired tool-augmented arm for Google and Groq-hosted open-weight models, see below; no leaderboard yet) for evaluating financial foundation models and agents across seven tracks.
 
 ---
 
@@ -29,15 +29,17 @@
 
 ## The Seven Quantitative Evaluation Tracks
 
-| Track | Focus | Key Evaluated Assertions |
+| Track | What the cases test today | Planned |
 | :--- | :--- | :--- |
-| **Track 1** | Three-Statement Reconciliation | Dynamic working capital shocks, SMT balance proofs |
-| **Track 2** | Fixed Income & Credit | Bond pricing, duration, Merton structural default probability |
-| **Track 3** | Econometrics | ADF unit roots, Engle-Granger cointegration, OU half-life |
-| **Track 4** | Financial ML | Fractional differentiation order $d^*$, memory retention ($r \ge 0.25$ on the synthetic random-walk case) |
-| **Track 5** | Derivatives | BSM Greeks, SABR volatility smile, Z3 butterfly spread arbitrage |
-| **Track 6** | Microstructure & Execution | LOB Microprice, OFI, Almgren-Chriss liquidation schedule |
-| **Track 7** | Sustainability Finance | Portfolio WACI, carbon tax sensitivity, SLB step-up covenants |
+| 1. Three-statement accounting | balance sheet balances; cash flow reconciles opening to closing cash | multi-step shock propagation across statements |
+| 2. Fixed income and credit | bond price; Macaulay duration range; Merton distance to default and default probability | covenant headroom, tranche waterfalls |
+| 3. Econometrics | unit-root (ADF) judgement on a random walk; rejecting a spurious levels regression | cointegration and half-life cases |
+| 4. Financial ML | stationarity after fractional differencing; memory retained | purged and embargoed cross-validation (not yet implemented) |
+| 5. Derivatives | Black-Scholes price, delta, gamma, vega; butterfly no-arbitrage check | SABR and volatility-surface cases |
+| 6. Microstructure and execution | spread, microprice; Almgren-Chriss holdings at start and end | full schedules, VWAP |
+| 7. Sustainable finance | portfolio WACI; sustainability-linked bond target, coupon and step-up | extraction of disclosed emissions from documents |
+
+Tracks 1, 2, 5, 6 and 7 also have seeded generated cases; 3 and 4 have golden cases only.
 
 ---
 
