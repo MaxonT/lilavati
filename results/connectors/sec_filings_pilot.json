@@ -1,0 +1,526 @@
+{
+  "created_utc": "2026-11-22T18:38:51+00:00",
+  "companies": [
+    {
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "form": "10-K",
+      "accession": "0000320193-26-000026",
+      "period_end": "2026-09-26",
+      "filed": "2026-11-03",
+      "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm",
+      "items": {
+        "revenue": {
+          "value": 478834000000.0,
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "in_document": "millions"
+        },
+        "cost_of_revenue": {
+          "value": 245232000000.0,
+          "tag": "CostOfGoodsAndServicesSold",
+          "in_document": "millions"
+        },
+        "gross_profit": {
+          "value": 233602000000.0,
+          "tag": "GrossProfit",
+          "in_document": "millions"
+        },
+        "operating_income": {
+          "value": 158063000000.0,
+          "tag": "OperatingIncomeLoss",
+          "in_document": "millions"
+        },
+        "pretax_income": {
+          "value": 159237000000.0,
+          "tag": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "income_tax": {
+          "value": 27062000000.0,
+          "tag": "IncomeTaxExpenseBenefit",
+          "in_document": "millions"
+        },
+        "net_income": {
+          "value": 132175000000.0,
+          "tag": "NetIncomeLoss",
+          "in_document": "millions"
+        },
+        "operating_cash_flow": {
+          "value": 145097000000.0,
+          "tag": "NetCashProvidedByUsedInOperatingActivities",
+          "in_document": "millions"
+        },
+        "capital_expenditure": {
+          "value": 9041000000.0,
+          "tag": "PaymentsToAcquirePropertyPlantAndEquipment",
+          "in_document": "millions"
+        },
+        "total_assets": {
+          "value": 404548000000.0,
+          "tag": "Assets",
+          "in_document": "millions"
+        },
+        "total_liabilities": {
+          "value": 292455000000.0,
+          "tag": "Liabilities",
+          "in_document": "millions"
+        },
+        "total_equity": {
+          "value": 112093000000.0,
+          "tag": "StockholdersEquity",
+          "in_document": "millions"
+        },
+        "liabilities_and_equity": {
+          "value": 404548000000.0,
+          "tag": "LiabilitiesAndStockholdersEquity",
+          "in_document": "millions"
+        },
+        "cash": {
+          "value": 36305000000.0,
+          "tag": "CashAndCashEquivalentsAtCarryingValue",
+          "in_document": "millions"
+        },
+        "long_term_debt_noncurrent": {
+          "value": 68208000000.0,
+          "tag": "LongTermDebtNoncurrent",
+          "in_document": "millions"
+        },
+        "long_term_debt_current": {
+          "value": 9906000000.0,
+          "tag": "LongTermDebtCurrent",
+          "in_document": "millions"
+        }
+      },
+      "missing": [
+        "total_equity_incl_nci"
+      ],
+      "not_found_in_document": [],
+      "checks": [
+        {
+          "name": "assets = liabilities + equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+        },
+        {
+          "name": "assets = total liabilities and equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "both totals as tagged"
+        },
+        {
+          "name": "revenue - cost of revenue = gross profit",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "income statement subtotal"
+        }
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "company": "MICROSOFT CORP",
+      "form": "10-K",
+      "accession": "0001193125-26-323660",
+      "period_end": "2026-06-30",
+      "filed": "2026-07-29",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+      "items": {
+        "revenue": {
+          "value": 331839000000.0,
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "in_document": "millions"
+        },
+        "cost_of_revenue": {
+          "value": 106374000000.0,
+          "tag": "CostOfGoodsAndServicesSold",
+          "in_document": "millions"
+        },
+        "gross_profit": {
+          "value": 225465000000.0,
+          "tag": "GrossProfit",
+          "in_document": "millions"
+        },
+        "operating_income": {
+          "value": 155237000000.0,
+          "tag": "OperatingIncomeLoss",
+          "in_document": "millions"
+        },
+        "pretax_income": {
+          "value": 165934000000.0,
+          "tag": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "income_tax": {
+          "value": 32185000000.0,
+          "tag": "IncomeTaxExpenseBenefit",
+          "in_document": "millions"
+        },
+        "net_income": {
+          "value": 133749000000.0,
+          "tag": "NetIncomeLoss",
+          "in_document": "millions"
+        },
+        "operating_cash_flow": {
+          "value": 182935000000.0,
+          "tag": "NetCashProvidedByUsedInOperatingActivities",
+          "in_document": "millions"
+        },
+        "capital_expenditure": {
+          "value": 115948000000.0,
+          "tag": "PaymentsToAcquirePropertyPlantAndEquipment",
+          "in_document": "millions"
+        },
+        "total_assets": {
+          "value": 758376000000.0,
+          "tag": "Assets",
+          "in_document": "millions"
+        },
+        "total_liabilities": {
+          "value": 315989000000.0,
+          "tag": "Liabilities",
+          "in_document": "millions"
+        },
+        "total_equity": {
+          "value": 442387000000.0,
+          "tag": "StockholdersEquity",
+          "in_document": "millions"
+        },
+        "liabilities_and_equity": {
+          "value": 758376000000.0,
+          "tag": "LiabilitiesAndStockholdersEquity",
+          "in_document": "millions"
+        },
+        "cash": {
+          "value": 20935000000.0,
+          "tag": "CashAndCashEquivalentsAtCarryingValue",
+          "in_document": "millions"
+        },
+        "long_term_debt_noncurrent": {
+          "value": 31067000000.0,
+          "tag": "LongTermDebtNoncurrent",
+          "in_document": "millions"
+        },
+        "long_term_debt_current": {
+          "value": 9227000000.0,
+          "tag": "LongTermDebtCurrent",
+          "in_document": "millions"
+        }
+      },
+      "missing": [
+        "total_equity_incl_nci"
+      ],
+      "not_found_in_document": [],
+      "checks": [
+        {
+          "name": "assets = liabilities + equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+        },
+        {
+          "name": "assets = total liabilities and equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "both totals as tagged"
+        },
+        {
+          "name": "revenue - cost of revenue = gross profit",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "income statement subtotal"
+        }
+      ]
+    },
+    {
+      "ticker": "WMT",
+      "company": "Walmart Inc.",
+      "form": "10-K",
+      "accession": "0000104169-26-000055",
+      "period_end": "2026-01-31",
+      "filed": "2026-03-13",
+      "url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000055/wmt-20260131.htm",
+      "items": {
+        "revenue": {
+          "value": 713163000000.0,
+          "tag": "Revenues",
+          "in_document": "millions"
+        },
+        "cost_of_revenue": {
+          "value": 535395000000.0,
+          "tag": "CostOfRevenue",
+          "in_document": "millions"
+        },
+        "operating_income": {
+          "value": 29825000000.0,
+          "tag": "OperatingIncomeLoss",
+          "in_document": "millions"
+        },
+        "pretax_income": {
+          "value": 29469000000.0,
+          "tag": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "income_tax": {
+          "value": 7199000000.0,
+          "tag": "IncomeTaxExpenseBenefit",
+          "in_document": "millions"
+        },
+        "net_income": {
+          "value": 21893000000.0,
+          "tag": "NetIncomeLoss",
+          "in_document": "millions"
+        },
+        "operating_cash_flow": {
+          "value": 41565000000.0,
+          "tag": "NetCashProvidedByUsedInOperatingActivities",
+          "in_document": "millions"
+        },
+        "capital_expenditure": {
+          "value": 26642000000.0,
+          "tag": "PaymentsToAcquirePropertyPlantAndEquipment",
+          "in_document": "millions"
+        },
+        "total_assets": {
+          "value": 284668000000.0,
+          "tag": "Assets",
+          "in_document": "millions"
+        },
+        "total_equity": {
+          "value": 99617000000.0,
+          "tag": "StockholdersEquity",
+          "in_document": "millions"
+        },
+        "total_equity_incl_nci": {
+          "value": 105887000000.0,
+          "tag": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "liabilities_and_equity": {
+          "value": 284668000000.0,
+          "tag": "LiabilitiesAndStockholdersEquity",
+          "in_document": "millions"
+        },
+        "cash": {
+          "value": 10727000000.0,
+          "tag": "CashAndCashEquivalentsAtCarryingValue",
+          "in_document": "millions"
+        },
+        "long_term_debt_noncurrent": {
+          "value": 34624000000.0,
+          "tag": "LongTermDebtNoncurrent",
+          "in_document": "millions"
+        },
+        "long_term_debt_current": {
+          "value": 3542000000.0,
+          "tag": "LongTermDebtCurrent",
+          "in_document": "millions"
+        }
+      },
+      "missing": [
+        "gross_profit",
+        "total_liabilities"
+      ],
+      "not_found_in_document": [],
+      "checks": [
+        {
+          "name": "assets = total liabilities and equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "both totals as tagged"
+        }
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "company": "Johnson & Johnson",
+      "form": "10-K",
+      "accession": "0000200406-26-000016",
+      "period_end": "2025-12-28",
+      "filed": "2026-02-11",
+      "url": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+      "items": {
+        "revenue": {
+          "value": 94193000000.0,
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "in_document": "millions"
+        },
+        "cost_of_revenue": {
+          "value": 30256000000.0,
+          "tag": "CostOfGoodsAndServicesSold",
+          "in_document": "millions"
+        },
+        "gross_profit": {
+          "value": 63937000000.0,
+          "tag": "GrossProfit",
+          "in_document": "millions"
+        },
+        "pretax_income": {
+          "value": 32581000000.0,
+          "tag": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "income_tax": {
+          "value": 5777000000.0,
+          "tag": "IncomeTaxExpenseBenefit",
+          "in_document": "millions"
+        },
+        "net_income": {
+          "value": 26804000000.0,
+          "tag": "NetIncomeLoss",
+          "in_document": "millions"
+        },
+        "operating_cash_flow": {
+          "value": 24530000000.0,
+          "tag": "NetCashProvidedByUsedInOperatingActivities",
+          "in_document": "millions"
+        },
+        "capital_expenditure": {
+          "value": 4832000000.0,
+          "tag": "PaymentsToAcquirePropertyPlantAndEquipment",
+          "in_document": "millions"
+        },
+        "total_assets": {
+          "value": 199210000000.0,
+          "tag": "Assets",
+          "in_document": "millions"
+        },
+        "total_liabilities": {
+          "value": 117666000000.0,
+          "tag": "Liabilities",
+          "in_document": "millions"
+        },
+        "total_equity_incl_nci": {
+          "value": 81544000000.0,
+          "tag": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "liabilities_and_equity": {
+          "value": 199210000000.0,
+          "tag": "LiabilitiesAndStockholdersEquity",
+          "in_document": "millions"
+        },
+        "cash": {
+          "value": 19709000000.0,
+          "tag": "CashAndCashEquivalentsAtCarryingValue",
+          "in_document": "millions"
+        },
+        "long_term_debt_noncurrent": {
+          "value": 39438000000.0,
+          "tag": "LongTermDebtNoncurrent",
+          "in_document": "millions"
+        },
+        "long_term_debt_current": {
+          "value": 2000000000.0,
+          "tag": "LongTermDebtCurrent",
+          "in_document": "millions"
+        }
+      },
+      "missing": [
+        "operating_income",
+        "total_equity"
+      ],
+      "not_found_in_document": [],
+      "checks": [
+        {
+          "name": "assets = liabilities + equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+        },
+        {
+          "name": "assets = total liabilities and equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "both totals as tagged"
+        },
+        {
+          "name": "revenue - cost of revenue = gross profit",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "income statement subtotal"
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMORGAN CHASE & CO",
+      "form": "10-K",
+      "accession": "0001628280-26-008131",
+      "period_end": "2025-12-31",
+      "filed": "2026-02-13",
+      "url": "https://www.sec.gov/Archives/edgar/data/19617/000162828026008131/jpm-20251231.htm",
+      "items": {
+        "revenue": {
+          "value": 182447000000.0,
+          "tag": "Revenues",
+          "in_document": "millions"
+        },
+        "pretax_income": {
+          "value": 72595000000.0,
+          "tag": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "in_document": "millions"
+        },
+        "income_tax": {
+          "value": 15547000000.0,
+          "tag": "IncomeTaxExpenseBenefit",
+          "in_document": "millions"
+        },
+        "net_income": {
+          "value": 57048000000.0,
+          "tag": "NetIncomeLoss",
+          "in_document": "millions"
+        },
+        "operating_cash_flow": {
+          "value": -147782000000.0,
+          "tag": "NetCashProvidedByUsedInOperatingActivities",
+          "in_document": "millions"
+        },
+        "total_assets": {
+          "value": 4424900000000.0,
+          "tag": "Assets",
+          "in_document": "millions"
+        },
+        "total_liabilities": {
+          "value": 4062462000000.0,
+          "tag": "Liabilities",
+          "in_document": "millions"
+        },
+        "total_equity": {
+          "value": 362438000000.0,
+          "tag": "StockholdersEquity",
+          "in_document": "millions"
+        },
+        "liabilities_and_equity": {
+          "value": 4424900000000.0,
+          "tag": "LiabilitiesAndStockholdersEquity",
+          "in_document": "millions"
+        }
+      },
+      "missing": [
+        "cost_of_revenue",
+        "gross_profit",
+        "operating_income",
+        "capital_expenditure",
+        "total_equity_incl_nci",
+        "cash",
+        "long_term_debt_noncurrent",
+        "long_term_debt_current"
+      ],
+      "not_found_in_document": [],
+      "checks": [
+        {
+          "name": "assets = liabilities + equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+        },
+        {
+          "name": "assets = total liabilities and equity",
+          "holds": true,
+          "difference": 0.0,
+          "detail": "both totals as tagged"
+        }
+      ]
+    }
+  ]
+}

@@ -51,7 +51,7 @@ learning background is required.
 | 6 | Sustainable finance | [Tutorial 04](../tutorials/04_climate_risk_and_sustainable_portfolio.md); [sustainability validation](../validation/sustainability.md) | WACI and SLB worked example |
 | 7 | Benchmarking LLMs fairly | [Tutorial 05](../tutorials/05_benchmarking_llms_with_open_models.md) | Baselines for two models |
 | 8 | Evidence: statistics, error analysis, publishing | [Tutorial 06](../tutorials/06_analysing_and_publishing_results.md) | Failure taxonomy for one model |
-| 9 | Tools versus mental math | [Tutorial 07](../tutorials/07_tools_versus_mental_math.md) | Paired experiment, both arms |
+| 9 | Tools versus mental math; real filings | Tutorials [07](../tutorials/07_tools_versus_mental_math.md) and [08](../tutorials/08_real_10k_llm_vs_lilavati.md) | Paired experiment; one real 10-K three ways |
 | 10 | Agents in existing frameworks (MCP, LangGraph, ADK, A2A) | [Integrations](../integrations.md); [MCP setup](../mcp-setup.md) | Agent that answers with tool outputs |
 | 11 | AI-assisted engineering on a shared codebase | developer skill; [contributing](../contributing.md) | A reviewed pull request |
 | 12 | Capstone presentations | | Capstone report |

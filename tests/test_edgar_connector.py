@@ -239,3 +239,50 @@ def test_extract_three_statement_model(mock_aapl_facts: dict[str, Any]) -> None:
         assert len(sourced_val.citation.doc_hash) == 64
         assert sourced_val.citation.xbrl_tag is not None
         assert sourced_val.citation.xbrl_tag.startswith("us-gaap:")
+
+
+def test_sec_requests_need_a_user_supplied_contact(monkeypatch) -> None:
+    # SEC fair access requires a real contact in the User-Agent (HTTP 403 without one). The
+    # client used to send a made-up default; it now reads LILAVATI_SEC_USER_AGENT and refuses
+    # to send a request without it.
+    import httpx
+    import pytest
+
+    monkeypatch.delenv("LILAVATI_SEC_USER_AGENT", raising=False)
+    with pytest.raises(ValueError, match="LILAVATI_SEC_USER_AGENT"):
+        EdgarClient().fetch_company_facts("AAPL")
+
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"cik": 320193, "facts": {}})
+
+    monkeypatch.setenv("LILAVATI_SEC_USER_AGENT", "Example Org contact@example.org")
+    client = EdgarClient(transport=httpx.MockTransport(handler))
+    assert client.fetch_company_facts("AAPL") == {"cik": 320193, "facts": {}}
+    assert seen[0].headers["User-Agent"] == "Example Org contact@example.org"
+    assert str(seen[0].url).endswith("/CIK0000320193.json")
+
+
+def _aapl_facts() -> dict:
+    import json
+    from pathlib import Path
+
+    path = Path(__file__).parent / "fixtures" / "aapl_companyfacts_10k_fy2025_2026.json"
+    return json.loads(path.read_text())
+
+
+def test_fiscal_year_selects_the_current_period_not_a_comparative() -> None:
+    # Company facts tag every value in a 10-K with that filing's fiscal year, including the
+    # prior-year comparatives. Selecting by fy alone returned FY2025 assets and FY2024 revenue
+    # and net income for "FY2026". Expected values: Apple's FY2026 10-K statements (USD millions).
+    facts = _aapl_facts()
+    assets = EdgarClient.extract_line_item(facts, ["Assets"], 2026)
+    revenue = EdgarClient.extract_line_item(
+        facts, ["RevenueFromContractWithCustomerExcludingAssessedTax"], 2026)
+    net_income = EdgarClient.extract_line_item(facts, ["NetIncomeLoss"], 2026)
+    assert assets is not None and revenue is not None and net_income is not None
+    assert assets.value == 404_548_000_000 and str(assets.citation.period_end) == "2026-09-26"
+    assert revenue.value == 478_834_000_000
+    assert net_income.value == 132_175_000_000

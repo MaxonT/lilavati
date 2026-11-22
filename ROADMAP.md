@@ -215,7 +215,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
 - [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss, econometrics, financial ML (33 bugs fixed). Pending: LOB / Black-Litterman / HRP, statement graph, connectors.
 - [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
-- [ ] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report.
+- [~] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report. 🟡 Started 2026-11-22: 10-K parser checked line by line on Apple's FY2026 10-K (4 bugs fixed; `docs/validation/connectors.md`); EDGAR client contact fixed. Done 2026-11-23: filing-anchored XBRL extraction validated on 5 companies (64 of 64 values found in the filing documents; comparative-period bug fixed); LLM comparison on 4 real 10-Ks (Tutorial 08). Pending: banks and insurers, 10-Q and restatements, Ind AS.
 
 **7B. Honest documentation (blocking)**
 - [x] 7.6 README, docs, dev skill and roadmap list only implemented capabilities; planned items are marked.

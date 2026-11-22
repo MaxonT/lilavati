@@ -38,6 +38,8 @@ def main() -> None:
     manifest = json.loads((RESULTS / "manifest.json").read_text())
     rows: list[dict[str, Any]] = []
     for entry in manifest["files"]:
+        if entry.get("case_set") == "filings":
+            continue  # real-filing comparisons are summarised in results/filings/ (Tutorial 08)
         s = summarise(load_records(entry["path"]), _cases(entry))
         rows.append({"entry": entry, "summary": s})
 

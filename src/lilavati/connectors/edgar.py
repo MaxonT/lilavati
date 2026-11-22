@@ -9,6 +9,7 @@ models where every single line item is cryptographically grounded with a Citatio
 from __future__ import annotations
 
 import hashlib
+import os
 from datetime import date
 from typing import Any
 
@@ -39,6 +40,10 @@ DEFAULT_TICKER_CIK_MAP: dict[str, str] = {
 }
 
 
+def _days(start: str, end: str) -> int:
+    return (date.fromisoformat(end) - date.fromisoformat(start)).days
+
+
 class SourcedThreeStatementModel(BaseModel):
     """A fully integrated ThreeStatementModel where line items carry cryptographic citations."""
 
@@ -62,18 +67,36 @@ class EdgarClient:
 
     BASE_URL = "https://data.sec.gov/api/xbrl/companyfacts"
 
+    USER_AGENT_ENV = "LILAVATI_SEC_USER_AGENT"
+
     def __init__(
         self,
-        user_agent: str = "LilavatiResearch admin@lilavati.ai",
+        user_agent: str | None = None,
         timeout: float = 15.0,
+        transport: httpx.BaseTransport | None = None,
     ) -> None:
-        self.user_agent = user_agent
+        """
+        SEC fair access requires a real contact in the User-Agent, e.g. ``"Your Name you@example.org"``.
+        Pass it here or set ``LILAVATI_SEC_USER_AGENT``; it is checked when a request is made, so
+        clients used only with pre-fetched facts need neither.
+        """
+        self._user_agent = user_agent
         self.timeout = timeout
-        self.headers = {
-            "User-Agent": self.user_agent,
-            "Accept-Encoding": "gzip, deflate",
-            "Host": "data.sec.gov",
-        }
+        self._transport = transport
+
+    @property
+    def user_agent(self) -> str:
+        ua = self._user_agent or os.environ.get(self.USER_AGENT_ENV, "").strip()
+        if not ua:
+            raise ValueError(
+                f"SEC EDGAR requires a contact in the User-Agent. Set {self.USER_AGENT_ENV} to "
+                "something like 'Your Name you@example.org' (SEC fair-access policy)."
+            )
+        return ua
+
+    @property
+    def headers(self) -> dict[str, str]:
+        return {"User-Agent": self.user_agent, "Accept-Encoding": "gzip, deflate", "Host": "data.sec.gov"}
 
     def resolve_cik(self, ticker_or_cik: str) -> str:
         """Resolves a ticker symbol or raw CIK into a 10-digit zero-padded CIK string."""
@@ -92,8 +115,9 @@ class EdgarClient:
         cik = self.resolve_cik(ticker_or_cik)
         url = f"{self.BASE_URL}/CIK{cik}.json"
 
-        with httpx.Client(timeout=self.timeout) as client:
-            resp = client.get(url, headers=self.headers)
+        headers = self.headers  # raises a clear error if no contact is configured
+        with httpx.Client(timeout=self.timeout, transport=self._transport) as client:
+            resp = client.get(url, headers=headers)
             if resp.status_code == 404:
                 raise FileNotFoundError(f"SEC EDGAR facts not found for CIK {cik} (HTTP 404).")
             if resp.status_code != 200:
@@ -139,7 +163,15 @@ class EdgarClient:
             if not matching:
                 continue
 
-            # Pick the entry with the latest filing date (to account for restatements/updates)
+            # A 10-K tags every value it reports with its own fiscal year, including the prior-year
+            # comparatives, so fy alone does not identify the period. The filing's own period is the
+            # latest end date; for flow items in an annual filing, keep full-year durations only
+            # (a 10-K can also report quarters). Ties: the latest filing (restatements).
+            if period == "FY":
+                annual = [e for e in matching if "start" not in e or 350 <= _days(e["start"], e["end"]) <= 380]
+                matching = annual or matching
+            latest_end = max(str(e.get("end", "")) for e in matching)
+            matching = [e for e in matching if str(e.get("end", "")) == latest_end]
             matching.sort(key=lambda x: str(x.get("filed", "")), reverse=True)
             chosen = matching[0]
 

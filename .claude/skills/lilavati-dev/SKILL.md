@@ -132,6 +132,24 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 - **Identities must be platform-independent.** Never hash floats produced by exp/log/erf: their last digits
   differ between math libraries (the v1 case hash differed between macOS and Linux CI). Hash inputs, not
   computed outputs, and pin a known hash in a test so CI on another OS catches drift.
+- **Statement parsing: labels, rows, gaps.** Match a label at the start of a line before matching it as a substring
+  ("Income before provision for income taxes" contains "provision for income taxes"); take a row's trailing
+  amounts across wrapped lines (a par value inside a label became "common equity"); skip section headers ending
+  in ":"; sum repeated rows (current and non-current term debt); report items not found
+  (`missing_items`) instead of zero-filling them. Check parsers line by line against a real filing.
+- **SEC figures: anchor on the filing, not on `fy`.** A 10-K tags its prior-year comparatives with its own fiscal
+  year; selecting by `fy` returned Apple's FY2024 revenue as FY2026. Use the submissions index, then the facts
+  with that accession, end date and duration (`connectors/sec_filing.py`). Prefer XBRL over text parsing.
+- **HTML to text: inline tags join, block tags separate.** Microsoft's 10-K splits "INCOME" across spans; replacing
+  every tag with a space hid the heading. Anchor on headings followed by figures, not the contents page.
+- **When every model fails the same way, check the answer key.** All four models "missed" Walmart's revenue
+  identically; the key used net sales where the prompt asked for total revenue. Fix the key and re-score the
+  stored replies; do not re-ask.
+- **Fixtures that quote real data must be real.** A test fixture labelled "as extracted from Apple's 10-K" once
+  contained an invented line; copy excerpts verbatim from the source or label the data synthetic.
+- **External services need real contacts, supplied by the user.** SEC EDGAR requires a contact in the User-Agent;
+  never invent one (`admin@lilavati.ai` was) and never use the maintainer's email without asking; read it from
+  `LILAVATI_SEC_USER_AGENT`.
 - **Read the prompt before blaming the model.** Prompt v2 defined `bond_price` as "price of the 5-year
   bond" for generated 2-10-year bonds; gpt-oss-120b priced a 10-year bond as 5-year and was scored
   wrong. Bump `llm_eval.PROMPT_VERSION` whenever the model-visible text changes, and never mix versions.
@@ -261,3 +279,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-22: Reference-verification rule after the paper reference audit.
 - 2026-11-22: Platform-independent case hashes after Linux CI found the v1 hash differed from macOS.
 - 2026-11-22: Onboarding docs; tested-vs-planned and third-party-script rules.
+- 2026-11-22: 10-K parser live validation rules; real fixtures; user-supplied service contacts.
+- 2026-11-23: SEC filing-anchoring, HTML text, and answer-key rules (Tutorial 08).

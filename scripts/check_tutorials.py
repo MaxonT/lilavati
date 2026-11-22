@@ -7,7 +7,8 @@ Conventions in `docs/tutorials/*.md`:
 - Untitled ```` ```python ```` blocks are run one by one from the repository root, with the scratch
   directory on `PYTHONPATH` so they can import the titled files.
 - Titled files named `tests/test_*.py` are run with pytest.
-- Blocks that need an API key (they mention `*_API_KEY`) are skipped and reported, never run.
+- Blocks that need an API key or the SEC contact (they mention `*_API_KEY` or
+  `LILAVATI_SEC_USER_AGENT`) are skipped and reported, never run.
 
 Tutorials not yet retrofitted to the tutorial standard are listed in PENDING and skipped.
 
@@ -27,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXTRA_DOCS = ["getting-started.md", "faq.md", "contributing.md"]  # other pages whose code must run
 PENDING: set[str] = set()  # tutorials not yet at the tutorial standard (all retrofitted 2026-11-22)
 FENCE = re.compile(r'```python(?:\s+title="(?P<title>[^"]+)")?\n(?P<code>.*?)```', re.S)
-NEEDS_KEY = re.compile(r"\b[A-Z]+_API_KEY\b")
+NEEDS_KEY = re.compile(r"\b[A-Z]+_API_KEY\b|\bLILAVATI_SEC_USER_AGENT\b")  # keys or network contacts
 
 
 def check(tutorial: Path) -> list[str]:
@@ -38,7 +39,7 @@ def check(tutorial: Path) -> list[str]:
         for i, m in enumerate(FENCE.finditer(tutorial.read_text(encoding="utf-8"))):
             code, title = m.group("code"), m.group("title")
             if NEEDS_KEY.search(code):
-                print(f"  SKIP block {i} (needs an API key)")
+                print(f"  SKIP block {i} (needs an API key or SEC contact)")
                 continue
             if title:
                 target = work / title

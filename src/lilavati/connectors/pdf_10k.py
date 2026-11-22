@@ -64,6 +64,13 @@ class ExtractedFiling10K(BaseModel):
     citations: dict[str, CitationRef]
     is_smt_verified: bool
     smt_verification_details: str
+    missing_items: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Current-year line items not found in the filing. The statement models still hold 0.0 "
+            "for them (the schema requires a number), so check this list before using such a field."
+        ),
+    )
 
 
 class PDF10KParser:
@@ -186,21 +193,76 @@ class PDF10KParser:
             vals.append(val)
         return vals
 
+    _TRAILING_NUMBERS = re.compile(r"[A-Za-z][^A-Za-z]*$")
+
+    @classmethod
+    def _row_amounts(cls, lines: list[str], idx: int) -> tuple[list[float], str]:
+        """Amounts of the statement row starting at ``lines[idx]``: the numbers after its last word.
+
+        A label can wrap onto following lines (e.g. "Common stock ..., $0.00001 par value: ... shares"
+        then "authorized; ... respectively  104,815  93,568"); the row is joined with up to two
+        continuation lines until it ends in numbers. Taking only the trailing numbers keeps par
+        values and share counts inside the label out of the amounts.
+        """
+        row = lines[idx].strip()
+        if row.endswith(":"):  # a section header ("Cost of sales:"), not a row with amounts
+            return [], row
+        for extra in lines[idx + 1: idx + 3]:
+            tail = cls._TRAILING_NUMBERS.search(row)
+            if tail and cls._parse_line_numbers(tail.group(0)[1:]):
+                break
+            row = f"{row} {extra.strip()}"
+        tail = cls._TRAILING_NUMBERS.search(row)
+        amounts = cls._parse_line_numbers(tail.group(0)[1:]) if tail else []
+        return amounts, row
+
+    @classmethod
+    def _find_in_lines(
+        cls, lines: list[str], target_keywords: list[str], col_idx: int = 0
+    ) -> tuple[float | None, str | None]:
+        """Value in column ``col_idx`` of the first row labelled by a keyword.
+
+        Rows whose label starts with the keyword win over rows that merely contain it:
+        "Income before provision for income taxes" contains "provision for income taxes", and the
+        substring match once returned pretax income as the tax expense.
+        """
+        for prefer_start in (True, False):
+            for kw in target_keywords:  # keywords are in priority order
+                k = kw.lower()
+                for i, line in enumerate(lines):
+                    text = line.strip().lower()
+                    if (text.startswith(k) if prefer_start else k in text):
+                        amounts, row = cls._row_amounts(lines, i)
+                        if len(amounts) > col_idx:
+                            return amounts[col_idx], row
+        return None, None
+
+    @classmethod
+    def _sum_rows(cls, lines: list[str], label: str, col_idx: int = 0) -> float | None:
+        """Sum of column ``col_idx`` over every row whose label starts with ``label``.
+
+        Balance sheets list some items twice, e.g. "Term debt" under current and again under
+        non-current liabilities; total debt needs both.
+        """
+        total, found = 0.0, False
+        for i, line in enumerate(lines):
+            if line.strip().lower().startswith(label.lower()):
+                amounts, _ = cls._row_amounts(lines, i)
+                if len(amounts) > col_idx:
+                    total += amounts[col_idx]
+                    found = True
+        return total if found else None
+
+    def _page_lines(self, page_num: int) -> list[str]:
+        if page_num < 1 or page_num > self.page_count:
+            return []
+        return self.reader.pages[page_num - 1].extract_text().split("\n")
+
     def _find_metric_in_page(
         self, page_num: int, target_keywords: list[str], col_idx: int = 0
     ) -> tuple[float | None, str | None]:
-        """Finds a target line item by keyword in a specific page and extracts column value and raw snippet."""
-        if page_num < 1 or page_num > self.page_count:
-            return None, None
-        page_text = self.reader.pages[page_num - 1].extract_text()
-        for line in page_text.split("\n"):
-            line_lower = line.lower()
-            for kw in target_keywords:
-                if kw.lower() in line_lower:
-                    vals = self._parse_line_numbers(line)
-                    if len(vals) > col_idx:
-                        return vals[col_idx], line.strip()
-        return None, None
+        """Finds a line item by label on a page and returns (value in column, raw row)."""
+        return self._find_in_lines(self._page_lines(page_num), target_keywords, col_idx)
 
     def extract_full_filing(
         self,
@@ -304,8 +366,8 @@ class PDF10KParser:
         cp_curr, _ = self._find_metric_in_page(bs_p, ["Commercial paper"], 0)
         cp_prior, _ = self._find_metric_in_page(bs_p, ["Commercial paper"], 1)
 
-        term_curr, _ = self._find_metric_in_page(bs_p, ["Term debt"], 0)
-        term_prior, _ = self._find_metric_in_page(bs_p, ["Term debt"], 1)
+        term_curr = self._sum_rows(self._page_lines(bs_p), "Term debt", 0)  # current + non-current
+        term_prior = self._sum_rows(self._page_lines(bs_p), "Term debt", 1)
 
         cur_liab_curr, _ = self._find_metric_in_page(bs_p, ["Total current liabilities"], 0)
         cur_liab_prior, _ = self._find_metric_in_page(bs_p, ["Total current liabilities"], 1)
@@ -401,6 +463,21 @@ class PDF10KParser:
 
         dividends_curr, _ = self._find_metric_in_page(cf_p, ["Payments for dividends"], 0)
         dividends_prior, _ = self._find_metric_in_page(cf_p, ["Payments for dividends"], 1)
+
+        # Record what was not found before the fallbacks below replace it with 0.0, so that a
+        # missing line item is never mistaken for a reported zero.
+        found = {
+            "revenue": rev_curr, "cogs": cogs_curr, "gross_profit": gp_curr,
+            "operating_income": opinc_curr, "net_income": ni_curr, "sga_expense": sga_curr,
+            "research_and_development": rnd_curr, "tax_expense": tax_curr,
+            "interest_expense": None,  # not searched: many filers do not report it as a line
+            "cash_and_equivalents": cash_curr, "accounts_receivable": ar_curr, "inventory": inv_curr,
+            "net_ppe": ppe_curr, "total_assets": assets_curr, "accounts_payable": ap_curr,
+            "commercial_paper": cp_curr, "term_debt": term_curr, "total_liabilities": liab_curr,
+            "total_equity": equity_curr, "retained_earnings": re_curr, "common_equity": common_eq_curr,
+            "cfo": cfo_curr, "capex": capex_curr,
+        }
+        missing_items = sorted(k for k, v in found.items() if v is None)
 
         # Fallbacks & sanity defaults
         r_c = rev_curr or 0.0
@@ -538,6 +615,7 @@ class PDF10KParser:
             citations=citations,
             is_smt_verified=smt_res.is_valid,
             smt_verification_details=smt_res.model_dump_json(),
+            missing_items=missing_items,
         )
 
     def extract_mda_excerpt(self, max_pages: int = 3) -> str:

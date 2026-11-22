@@ -72,6 +72,7 @@ nav:
       - "05. Benchmarking LLMs with Free & Open Models": tutorials/05_benchmarking_llms_with_open_models.md
       - "06. Analysing, Publishing & Citing Results": tutorials/06_analysing_and_publishing_results.md
       - "07. Tools versus Mental Math": tutorials/07_tools_versus_mental_math.md
+      - "08. A Real 10-K, Three Ways": tutorials/08_real_10k_llm_vs_lilavati.md
   - "Course: AI in Finance": course/index.md
   - Using the MCP Servers: mcp-setup.md
   - Integrations (LangGraph, ADK, A2A): integrations.md
@@ -84,6 +85,7 @@ nav:
       - Forensics: validation/forensics.md
       - Econometrics: validation/econometrics.md
       - Financial ML: validation/financial_ml.md
+      - Filing connectors: validation/connectors.md
   - Līlāvatī-Bench: benchmarks.md
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md
