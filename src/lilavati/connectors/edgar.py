@@ -184,7 +184,7 @@ class EdgarClient:
     ) -> SourcedThreeStatementModel:
         """
         Extracts a full canonical Three-Statement Model for a company and fiscal year,
-        guaranteeing cryptographic citation on every line item and Z3 formal verification.
+        attaching a hash-linked citation to every line item, ready for Z3 identity checks.
         """
         cik = self.resolve_cik(ticker_or_cik)
         if facts is None:

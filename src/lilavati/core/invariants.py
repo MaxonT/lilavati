@@ -49,7 +49,7 @@ class SuvarnaEngine:
         tolerance: float = 1e-4,
     ) -> InvariantCheckResult:
         """
-        Formally verifies balance sheet equilibrium using Z3 SMT solver:
+        Checks balance sheet equilibrium on the given numbers using the Z3 SMT solver:
         Assets == Liabilities + Equity (within absolute tolerance, in input units).
         """
         _require_finite(
@@ -111,7 +111,7 @@ class SuvarnaEngine:
         tolerance: float = 1e-4,
     ) -> InvariantCheckResult:
         """
-        Formally verifies balance sheet equilibrium and cash flow reconciliation:
+        Checks balance sheet equilibrium and cash flow reconciliation on the given numbers:
         1. Balance Sheet: Assets == Liabilities + Equity
         2. Cash Flow: CashEnd == CashStart + CFO + CFI + CFF
 

@@ -5,7 +5,7 @@ Enforces strict point-in-time (PIT) separation between:
 1. Valid Time (T_v): The accounting period an economic event or statement describes.
 2. System / Transaction Time (T_s): The exact timestamp when a filing or restatement became public.
 
-Guarantees 100% look-ahead bias resistance during historical agent backtesting.
+Queries return only what was known at the as-of time, which limits look-ahead bias in historical backtests.
 """
 
 from __future__ import annotations

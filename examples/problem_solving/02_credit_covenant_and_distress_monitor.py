@@ -1,5 +1,5 @@
 """
-Problem 02: Private Credit Covenant Monitoring & Automated Cure Calculation.
+Problem 02: Private Credit Covenant Monitoring & Remedy Calculation.
 
 Real-World Institutional Problem:
 A private debt fund manages a $150M Senior Secured Credit Facility for 'Omni Logistics Corp.'
@@ -12,8 +12,9 @@ The agent pipeline:
 1. Ingests statutory quarterly figures.
 2. Formally evaluates covenant compliance via CovenantGate (Z3 SMT solver).
 3. Computes the implied Merton structural Distance-to-Default and credit spread jump.
-4. Deterministically computes the exact 'Equity Cure' cash injection required to restore compliance.
-5. Emits an audited Credit Committee Action Notice.
+4. Deterministically computes the net debt reduction required to restore compliance (how a sponsor
+   equity cure counts towards it is set by the credit agreement).
+5. Emits a Credit Committee Action Notice with the computed figures.
 """
 
 from __future__ import annotations
@@ -43,15 +44,15 @@ class CreditMonitoringState(FinancialState):
     current_coverage: float = 0.0
     is_covenant_breached: bool = False
     merton_default_prob_pct: float = 0.0
-    equity_cure_needed_mil: float = 0.0
+    debt_reduction_needed_mil: float = 0.0  # USD m of net debt to repay to meet the leverage test
     credit_committee_action: str = "MONITOR"
 
 
 def main() -> None:
     console.print(
         Panel.fit(
-            "[bold cyan]Problem 02: Private Debt Covenant Monitoring & Cure Agent[/bold cyan]\n"
-            "Detecting covenant breaches, Merton credit distress, and calculating sponsor equity cures.",
+            "[bold cyan]Problem 02: Private Debt Covenant Monitoring & Remedy Agent[/bold cyan]\n"
+            "Detecting covenant breaches, Merton credit distress, and the net debt reduction needed to comply.",
             title="Project Līlāvatī Institutional Solutions",
         )
     )
@@ -85,7 +86,7 @@ def main() -> None:
     # Max leverage 3.50x, Min interest coverage 3.00x
     covenant_gate = CovenantGate(max_leverage=3.50, min_interest_coverage=3.00)
 
-    # --- Node 3: Credit Risk & Equity Cure Calculation ---
+    # --- Node 3: Credit Risk & Remedy Calculation ---
     def remedy_and_credit_risk_node(state: CreditMonitoringState) -> CreditMonitoringState:
         facts = state.extracted_facts
         net_debt = float(facts["total_debt"]) - float(facts["cash"])
@@ -106,15 +107,17 @@ def main() -> None:
         )
         state.merton_default_prob_pct = merton.default_probability * 100.0
 
-        # Calculate exact Equity Cure required to bring leverage to exactly 3.50x:
-        # Target Net Debt = 3.50 * EBITDA = 3.50 * 35 = $122.5M
-        # Required paydown = Current Net Debt ($140M) - Target ($122.5M) = $17.5M
-        max_allowed_net_debt = 3.50 * ebitda
+        # Net debt reduction that brings leverage back to the covenant limit.
+        max_allowed_net_debt = covenant_gate.max_leverage * ebitda
         if net_debt > max_allowed_net_debt:
-            state.equity_cure_needed_mil = net_debt - max_allowed_net_debt
-            state.credit_committee_action = "ISSUE DEFAULT NOTICE: Demand $17.5M Sponsor Equity Cure within 15 days or accelerate facility."
+            state.debt_reduction_needed_mil = net_debt - max_allowed_net_debt
+            state.credit_committee_action = (
+                f"ISSUE DEFAULT NOTICE: require ${state.debt_reduction_needed_mil:.1f}M of net debt "
+                "reduction (e.g. sponsor equity applied to repayment, if the agreement allows a cure) "
+                "within the cure period, or accelerate the facility."
+            )
         else:
-            state.equity_cure_needed_mil = 0.0
+            state.debt_reduction_needed_mil = 0.0
             state.credit_committee_action = "MAINTAIN PASS STATUS"
 
         return state
@@ -160,10 +163,11 @@ def main() -> None:
         "[bold yellow]ELEVATED RISK[/bold yellow]",
     )
     table.add_row(
-        "Mandatory Equity Cure Required",
-        f"${final_state.equity_cure_needed_mil:.1f}M",
+        "Net Debt Reduction to Comply",
+        f"${final_state.debt_reduction_needed_mil:.1f}M",
         "N/A",
-        "[bold red]CASH INJECTION NEEDED[/bold red]",
+        "[bold red]REDUCTION NEEDED[/bold red]" if final_state.debt_reduction_needed_mil > 0
+        else "[green]NONE[/green]",
     )
 
     console.print(table)

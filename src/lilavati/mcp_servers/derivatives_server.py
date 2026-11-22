@@ -165,7 +165,7 @@ def check_butterfly_arbitrage(
     strikes: list[float],
     call_prices: list[float],
 ) -> dict[str, Any]:
-    """Formally verifies butterfly spread convexity across option strikes via Z3 SMT solver.
+    """Checks butterfly spread convexity across the given option prices via the Z3 SMT solver.
 
     Points are sorted by strike; strikes must be distinct and all values finite.
     """

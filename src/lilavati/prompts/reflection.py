@@ -20,7 +20,7 @@ def generate_smt_reflection_prompt(
     lines = [
         f"### CRITICAL FORMAL INVARIANT FAILURE: {invariant_name}",
         "",
-        "The Z3 SMT solver proved that your extracted/projected financial model violates fundamental identities:",
+        "The Z3 SMT solver found that the numbers in your extracted/projected financial model violate fundamental identities:",
         "",
     ]
     for idx, v in enumerate(violations, 1):

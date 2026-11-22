@@ -9,8 +9,8 @@ However, management has been aggressively pulling forward revenues through unbil
 Agent Pipeline Built with Project Līlāvatī:
 1. Extracts financial statements across periods (t and t-1).
 2. Computes the 8-variable Beneish M-Score and Altman Z-Score deterministically.
-3. Formally proves balance sheet equilibrium using SuvarnaEngine (Z3 SMT solver).
-4. Issues a binding, audited Investment Committee Due Diligence Memorandum.
+3. Checks balance sheet equilibrium on the given numbers using SuvarnaEngine (Z3 SMT solver).
+4. Issues an Investment Committee Due Diligence Memorandum with its evidence attached.
 """
 
 from __future__ import annotations

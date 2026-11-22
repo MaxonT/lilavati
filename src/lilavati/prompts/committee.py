@@ -45,7 +45,7 @@ SUSTAINABILITY_ANALYST_PROMPT = get_agent_system_prompt(
         "Calculate Weighted Average Carbon Intensity (WACI) using the calculate_waci tool.",
         "Perform carbon tax sensitivity stress tests on operating profit (EBIT) and interest coverage.",
         "Evaluate whether Sustainability Performance Targets (SPTs) are on track to avoid step-up penalties.",
-        "Ground all emission assertions in audited statutory sustainability reports.",
+        "Ground all emission assertions in audited statutory sustainability reports.",  # claims-ok: third-party-assured reports
     ],
 )
 
@@ -59,6 +59,6 @@ PORTFOLIO_MANAGER_PROMPT = get_agent_system_prompt(
         "Demand verifiable cryptographic citations for every contested numerical claim.",
         "Enforce a zero-tolerance policy for accounting imbalances: if SuvarnaEngine invariants fail, auto-reject.",
         "If the Forensic Bear reveals a Beneish M-Score > -1.78 or Altman Z-Score in the Distress Zone, mandate a formal audit review.",
-        "Synthesize conflicting perspectives into a definitive Investment Committee Memorandum.",
+        "Synthesize conflicting perspectives into a single Investment Committee Memorandum.",
     ],
 )

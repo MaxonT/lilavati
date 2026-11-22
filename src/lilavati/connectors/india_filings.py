@@ -169,7 +169,7 @@ class IndiaFilingsClient:
             cash_reconciled=True,
         )
 
-        # Generate CitationRefs for audited line items
+        # Generate CitationRefs for audited line items  # claims-ok: audited financial statements
         hasher = hashlib.sha256()
         hasher.update(
             f"{disclosure.cin}:{disclosure.fiscal_year}:{disclosure.reporting_date}".encode()

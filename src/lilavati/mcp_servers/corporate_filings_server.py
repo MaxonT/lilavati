@@ -1,7 +1,7 @@
 """
 FastMCP Server for SEC EDGAR Corporate Filings & Structured XBRL Disclosures.
 
-Exposes tools to fetch, parse, and formally verify company three-statement filings
+Exposes tools to fetch, parse, and check (Z3, on the reported numbers) company three-statement filings
 with cryptographic CitationRefs.
 """
 
@@ -56,7 +56,7 @@ def extract_single_line_item(
     fiscal_year: int,
 ) -> dict[str, Any]:
     """
-    Extracts a specific audited metric (e.g. 'Assets', 'Revenues', 'NetIncomeLoss')
+    Extracts a specific reported metric (e.g. 'Assets', 'Revenues', 'NetIncomeLoss')
     from SEC EDGAR with verbatim citation and accession number.
     """
     client = EdgarClient()

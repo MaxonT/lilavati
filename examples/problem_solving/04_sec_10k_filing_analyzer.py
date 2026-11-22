@@ -1,12 +1,12 @@
 """
-Problem 04: Production-Grade SEC Form 10-K Filing Analyzer & Formal Invariant Auditor.
+Problem 04: SEC Form 10-K Filing Analyzer & Invariant Checker.
 
 Real-World Institutional Problem:
 An investment firm receives a newly filed SEC Form 10-K regulatory disclosure (e.g., Apple Inc. 2026 10-K).
 The investment team needs to rapidly, accurately, and without hallucinations:
 1. Parse the multi-page PDF filing, extract canonical financial statements across multiple years.
 2. Bind every single extracted number to an immutable cryptographic citation anchor (SHA-256 hash, physical page, raw snippet).
-3. Formally prove using an SMT theorem prover (Z3 solver) that the reported balance sheet and cash flow equations hold.
+3. Check with the Z3 SMT solver that the reported balance sheet and cash flow equations hold for the reported numbers.
 4. Run forensic accounting diagnostics: 8-variable Beneish M-Score (earnings manipulation) and Altman Z-Score (solvency).
 5. Audit operational leverage, segment margin divergence (Hardware vs. Services), and cash conversion quality.
 6. Stress-test climate transition risk under carbon taxation scenarios.
@@ -241,8 +241,9 @@ def build_sec_10k_pipeline() -> FinancialStateGraph:
         )
         sust_engine = SustainabilityEngine()
 
-        # Scope 1 + Scope 2 emissions (~350k tCO2e scope 1, ~1.15M tCO2e scope 2)
-        # Normalize financial inputs to dollars
+        # Illustrative inputs, NOT taken from Apple's disclosures: Scope 1 350,000 tCO2e,
+        # Scope 2 1,150,000 tCO2e, interest expense USD 3.0bn. Financials normalised to dollars
+        # so that emissions (t) x price ($/t) is in the same unit as EBIT.
         tax_res = sust_engine.stress_test_carbon_tax(
             revenue=state.revenue_curr * 1e6,
             ebit=state.operating_income_curr * 1e6,
@@ -332,7 +333,7 @@ def main() -> None:
     summary_table.add_row(
         "Total Assets",
         f"${final_state.total_assets_curr:,.0f}M",
-        "Proven identical to Liab + Equity (Z3 SAT)",
+        "Equals Liab + Equity for the reported numbers (Z3 SAT)",
     )
     summary_table.add_row(
         "Total Liabilities",
@@ -347,7 +348,7 @@ def main() -> None:
     summary_table.add_row(
         "Z3 SMT Invariant Verification",
         f"STATUS: {final_state.smt_status}",
-        "[bold green]FORMALLY VERIFIED (Assets == Liab + Equity)[/bold green]",
+        "[bold green]CHECKED (Assets == Liab + Equity)[/bold green]",
     )
     summary_table.add_row(
         "Beneish 8-Factor M-Score",
@@ -380,7 +381,7 @@ def main() -> None:
     # --- Cryptographic Provenance Anchors ---
     console.print()
     cit_table = Table(
-        title="Immutable Cryptographic Citation Anchors (Zero LLM Hallucination Guarantee)",
+        title="Hash-Linked Citation Anchors (each value traced to the filing)",
         show_header=True,
         header_style="bold yellow",
     )

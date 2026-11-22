@@ -73,7 +73,7 @@ class DeepFinancialAgent:
         Explores multi-branch financial hypotheses:
         1. Formulates Bull, Base, and Stressed Bear branches.
         2. Recomputes statements reactively through StatementGraph.
-        3. Formally proves accounting identities via SuvarnaEngine.
+        3. Checks accounting identities on the given numbers via SuvarnaEngine (Z3).
         4. Prunes unviable branches that produce cash shortfalls without liquidity.
         5. Computes probability-weighted expected financial parameters.
         """

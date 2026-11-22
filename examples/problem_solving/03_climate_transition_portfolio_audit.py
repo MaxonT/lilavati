@@ -13,7 +13,7 @@ Agent Pipeline Built with Project Līlāvatī:
 1. Ingests third-party verified emissions inventory from statutory reports with SHA-256 provenance.
 2. Evaluates SLB covenant target achievement and computes active coupon and penalty cash outflows.
 3. Stress-tests corporate operating margin (EBIT) and debt coverage under carbon tax scenarios.
-4. Generates an audited TCFD-compliant Climate Risk Memorandum for the Investment Committee.
+4. Generates a TCFD-style Climate Risk Memorandum for the Investment Committee.
 """
 
 from __future__ import annotations
