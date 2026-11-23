@@ -24,13 +24,15 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import date
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from lilavati.connectors.edgar import EdgarClient
 from lilavati.core.invariants import SuvarnaEngine
 from lilavati.core.provenance import CitationRef, SourcedValue
+
+if TYPE_CHECKING:  # edgar imports this module; the client is only needed at call time
+    from lilavati.connectors.edgar import EdgarClient
 
 Kind = Literal["instant", "duration"]
 
@@ -75,10 +77,11 @@ class FilingRef(BaseModel):
     accession: str
     filing_date: date
     report_date: date
-    primary_document: str
+    primary_document: str = Field(default="", description="empty when only the company facts were read")
 
     @property
     def url(self) -> str:
+        """The primary document, or the filing's folder when the document name is not known."""
         return (f"https://www.sec.gov/Archives/edgar/data/{int(self.cik)}/"
                 f"{self.accession.replace('-', '')}/{self.primary_document}")
 
@@ -124,6 +127,37 @@ def filings_from_submissions(submissions: dict[str, Any], forms: tuple[str, ...]
 
 def _days(start: str, end: str) -> int:
     return (date.fromisoformat(end) - date.fromisoformat(start)).days
+
+
+def filing_for_fiscal_year(facts: dict[str, Any], fiscal_year: int, form: str = "10-K") -> FilingRef:
+    """The ``form`` filing for ``fiscal_year``, identified from the company facts alone.
+
+    Every fact a 10-K reports carries that filing's fiscal year (``fy``), including its prior-year
+    comparatives, so the facts with ``fy == fiscal_year``, ``fp == "FY"`` and an annual duration all
+    come from the one filing; its period end is their latest end date. If several accessions match
+    (a re-filed 10-K), the one with the latest period end is taken, then the earliest filed.
+    Amendments (10-K/A) are excluded. The primary document name is not in the company facts, so
+    ``url`` is the filing's folder.
+    """
+    if form not in DURATION_DAYS:
+        raise ValueError(f"form must be one of {sorted(DURATION_DAYS)}, got {form!r}")
+    lo, hi = DURATION_DAYS[form]
+    found: dict[str, tuple[str, str]] = {}  # accession -> (latest end, earliest filed)
+    for concept in facts.get("facts", {}).get("us-gaap", {}).values():
+        for entries in concept.get("units", {}).values():
+            for e in entries:
+                if (e.get("form") != form or e.get("fy") != fiscal_year or e.get("fp") != "FY"
+                        or "start" not in e or not lo <= _days(e["start"], e["end"]) <= hi):
+                    continue
+                end, filed = found.get(e["accn"], (e["end"], e["filed"]))
+                found[e["accn"]] = (max(end, e["end"]), min(filed, e["filed"]))
+    if not found:
+        raise ValueError(f"no {form} with annual facts for fiscal year {fiscal_year} in the company facts")
+    latest_end = max(end for end, _ in found.values())
+    accession = min((a for a, (end, _) in found.items() if end == latest_end), key=lambda a: found[a][1])
+    end, filed = found[accession]
+    return FilingRef(cik=str(facts["cik"]).zfill(10), form=form, accession=accession,
+                     filing_date=date.fromisoformat(filed), report_date=date.fromisoformat(end))
 
 
 def _select(entries: list[dict[str, Any]], filing: FilingRef, kind: Kind) -> dict[str, Any] | None:
@@ -290,6 +324,8 @@ def fetch_filing_extraction(ticker_or_cik: str, form: str = "10-K", filings_back
         raise ValueError(f"form must be one of {sorted(DURATION_DAYS)}, got {form!r}")
     if filings_back < 0:
         raise ValueError("filings_back must be 0 (latest) or more")
+    from lilavati.connectors.edgar import EdgarClient
+
     client = client or EdgarClient()
     filings = filings_from_submissions(client.fetch_submissions(ticker_or_cik), forms=(form,))
     if filings_back >= len(filings):

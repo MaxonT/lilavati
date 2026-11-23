@@ -74,7 +74,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Pulls live company filings (10-K, 10-Q) from SEC EDGAR API with compliant User-Agent headers.
   * Parses standardized `us-gaap` taxonomy line items into canonical `ThreeStatementModel`.
   * Generates cryptographic `CitationRef` for every parsed fact.
-  * *Validation:* filing-anchored extraction (`connectors/sec_filing.py`, MCP tool `get_filing_figures`) piloted on the latest 10-Ks of 5 companies (7.5, `docs/validation/connectors.md`); tests on verbatim SEC data. 🟡 The fiscal-year `ThreeStatementModel` path fills untagged fields with placeholders; to be replaced by the filing-anchored path.
+  * *Validation:* filing-anchored extraction (`connectors/sec_filing.py`, MCP tool `get_filing_figures`) piloted on the latest 10-Ks of 5 companies (7.5, `docs/validation/connectors.md`); tests on verbatim SEC data. The `ThreeStatementModel` path uses the fiscal year's own 10-K, records derived fields and refuses filings missing required items (86 of 86 reported values found in 3 10-Ks; J&J and JPMorgan refused).
 - [~] **1.2 Market & Macro Series Connector (🟡 partial):**
   * Implemented: OHLCV normalisation to Polars DataFrames and Nelson-Siegel fitting from supplied yield observations.
   * Not implemented: data fetching (OHLCV download, FRED connector for SOFR, Treasury yields, CPI, Fed Funds).
