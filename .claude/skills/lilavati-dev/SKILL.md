@@ -68,7 +68,12 @@ right and every claim being true. These rules come from real bugs found in this 
   `cash_reconciled=True` anyway; deriving liabilities as assets minus equity makes A = L + E hold by
   construction. Take each input from the source (the prior-period comparative in the same filing),
   run identity checks on reported numbers only, and record every derived field with its formula.
-  Test that the check fails on a perturbed input.
+  Test that the check fails on a perturbed input. The 10-K PDF parser and the Ind AS crosswalk had
+  the same hard-coded `cash_reconciled=True`, plus equity substituted by assets minus liabilities.
+- **A subtotal made of several lines is their sum, not the first line found.** The Ind AS map took
+  "first key present" for cost of goods sold (Schedule III shows materials consumed, purchases of
+  stock-in-trade and change in inventories) and for tax (current only, no deferred). Map each
+  component, sum the ones present, and record the formula.
 - **No silent clipping or fallbacks** that change the answer (e.g. clipping both numerator and
   denominator of a sinh ratio). Use numerically stable forms (`expm1`, `log1p`, exp-ratio forms).
 - **Thresholds and ratios: compare with a tolerance.** A value exactly at a limit must pass:
@@ -255,7 +260,7 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 | Sustainability | `core/sustainability.py` | WACI, carbon-tax stress, SLB step-up |
 | Forensics | `agents/forensics.py` | Beneish (1999), Altman (1968) |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
-| Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); validation `docs/validation/connectors.md` |
+| Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py`, `connectors/india_filings.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); validation `docs/validation/connectors.md` |
 | Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
 | Benchmark | `bench/` | golden cases, seeded generator (`case_content_hash`, `legacy_case_id`), runner, evaluators. `lilavati-bench run` only runs the reference solver (`--model` is a label) |
 | LLM evaluation | `bench/llm_eval.py`, `bench/tool_eval.py`, `bench/analysis.py` | prompts (`PROMPT_VERSION`), parsing, outcome classes; tool arm with grounding; summaries, bootstrap CIs, paired differences. Scripts: `run_llm_baseline.py`, `run_tool_baseline.py`, `build_results_manifest.py`, `analyse_results.py` |
@@ -310,3 +315,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   and hash).
 - 2026-11-23: Rule against checks on derived inputs, after the three-statement model back-solved
   opening cash and hard-coded `cash_reconciled=True`; repo map updated for `statement_model_from_filing`.
+- 2026-11-23: Subtotal-components rule (Ind AS cost of goods, tax); PDF parser and Ind AS crosswalk
+  examples added to the derived-inputs rule; `india_filings.py` in the repo map.

@@ -21,11 +21,21 @@ p. 39), read line by line. USD millions.
 | Total assets, total liabilities, shareholders' equity | | 404,548 / 292,455 / 112,093 | same | pass |
 | Cash, retained earnings, cash from operations | | 36,305 / 13,700 / 145,097 | same | pass |
 | FY2025 comparatives (same items) | | as printed | match | pass |
-| A = L + E and cash roll-forward (Z3, on the extracted numbers) | | | hold | pass |
+| A = L + E (Z3) and cash reconciliation, both years | | | hold | pass |
 
-Open items: one issuer and one filing only (the roadmap asks for at least two of each); other
-`or 0.0` fallbacks remain for items not listed in `missing_items`; footnote markers such as "(1)"
-after a label would be read as −1.
+The checks used to be assumed or circular: `cash_reconciled` was set to `True` for both years
+whatever the numbers, the Z3 cash check started from the balance sheet's prior cash or 0.0, a
+missing equity line became assets minus liabilities (so A = L + E held by construction), a missing
+common equity line became total equity, and missing investing or financing totals became minus
+capital expenditure or minus buybacks and dividends. Now nothing is substituted: an item not found is
+0.0 and listed in `missing_items`, a check with a missing input is not run and its flag is `False`,
+and the cash check uses the cash flow statement's own balances (cash including restricted cash):
+FY2026 35,934 + 145,097 − 17,280 − 127,446 = 36,305; FY2025 29,943 + 111,482 + 15,195 − 120,686 =
+35,934. Each check is in `ExtractedFiling10K.checks`.
+
+Open items: one issuer and one filing only (the roadmap asks for at least two of each); labels are
+Apple's (other filers word some lines differently); prior-year items not found are 0.0 but not listed
+in `missing_items`; footnote markers such as "(1)" after a label would be read as −1.
 
 ## SEC EDGAR XBRL connector
 
@@ -72,8 +82,6 @@ Open items:
   quarterly, so the quarterly duration rule lists them as missing (seen on Apple's 10-Q for the
   quarter ended 2026-06-27).
 - 10-K/A and restated comparatives are not covered.
-- The Ind AS crosswalk (`IndiaFilingsClient.parse_ind_as_disclosure`) fills missing keys with 0.0 and
-  cites them, and sets `cash_reconciled=True` without a check. Not validated; do not rely on it.
 - Five companies is a pilot, not a validation set.
 
 **Three-statement model** (`EdgarClient.extract_three_statement_model`, MCP tool
@@ -110,3 +118,24 @@ includes R&D and is not the reported SG&A line. Source: `scripts/validate_sec_fi
 **Citations.** An XBRL fact's citation carries the SHA-256 of the fact record as SEC serves it
 (canonical JSON, `sec_filing.fact_hash`): re-fetch the company facts, find the record and hash it to
 check. XBRL facts have no page, so `page` is `None` (it used to be a placeholder 1).
+
+## Ind AS crosswalk
+
+`IndiaFilingsClient.parse_ind_as_disclosure` maps Schedule III (Division II) line items, supplied by
+the caller, into the canonical model. It does not fetch filings, and it has not been run on a real
+annual report yet; the tests use a fictional company built to satisfy the Schedule III and Ind AS 7
+arithmetic.
+
+Fixed (2026-11-23), on that test disclosure: cost of goods sold took only the first cost line found
+(4,000 instead of 4,800, the sum of materials consumed, purchases of stock-in-trade and the change in
+inventories); operating income left out other expenses (4,300 instead of 1,800); tax took current
+tax alone (400 instead of 425); every key not given became 0.0 and was cited as reported (net
+income 0.0 when profit was missing); opening cash was back-solved from the cash flows and
+`cash_reconciled` set to `True`. It now returns `IndASParseResult` with `derived` (each formula),
+`not_reported` (optional fields not given) and `checks` (balance sheet totals as reported; opening
+cash + cash flows + exchange-rate effect = closing cash, Ind AS 7), raises naming any required item
+not given, and cites only the items in the disclosure.
+
+Open items: no live annual report yet; consolidated vs standalone and the "other equity" breakdown
+(retained earnings is "other equity" unless given separately, and recorded as such) depend on what
+the caller supplies.
