@@ -10,6 +10,7 @@ verbatim bounding text snippets), and verifies accounting invariants via the Suv
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from datetime import date
 from pathlib import Path
@@ -18,6 +19,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field
 from pypdf import PdfReader
 
+from lilavati.connectors.sec_filing import IdentityCheck
 from lilavati.core.invariants import SuvarnaEngine
 from lilavati.core.provenance import CitationRef
 from lilavati.schemas.statements import (
@@ -62,15 +64,18 @@ class ExtractedFiling10K(BaseModel):
     model_current_year: ThreeStatementModel
     model_prior_year: ThreeStatementModel
     citations: dict[str, CitationRef]
-    is_smt_verified: bool
-    smt_verification_details: str
+    is_smt_verified: bool = Field(
+        ..., description="current year: assets = liabilities + equity (Z3) and the cash reconciliation hold")
+    smt_verification_details: str = Field(..., description="the checks as JSON")
     missing_items: list[str] = Field(
         default_factory=list,
         description=(
             "Current-year line items not found in the filing. The statement models still hold 0.0 "
-            "for them (the schema requires a number), so check this list before using such a field."
+            "for them (the schema requires a number), so check this list before using such a field. "
+            "A check whose inputs are missing is not run, and its flag (is_balanced, cash_reconciled) is False."
         ),
     )
+    checks: list[IdentityCheck] = Field(default_factory=list, description="identities on the parsed numbers")
 
 
 class PDF10KParser:
@@ -252,6 +257,26 @@ class PDF10KParser:
                     total += amounts[col_idx]
                     found = True
         return total if found else None
+
+    CASH_BEGIN_LABELS = ["cash, cash equivalents, and restricted cash and cash equivalents, beginning",
+                         "cash, cash equivalents and restricted cash, beginning",
+                         "cash and cash equivalents, beginning", "cash and cash equivalents at beginning"]
+    CASH_END_LABELS = ["cash, cash equivalents, and restricted cash and cash equivalents, ending",
+                       "cash, cash equivalents and restricted cash, end",
+                       "cash and cash equivalents, end", "cash and cash equivalents at end"]
+
+    @classmethod
+    def _find_wrapped(cls, lines: list[str], labels: list[str], col_idx: int = 0) -> float | None:
+        """Value in column ``col_idx`` of the first row whose label, joined with the next line, starts
+        with one of ``labels`` (lower case). Apple's cash balance labels wrap before "beginning"."""
+        for label in labels:
+            for i in range(len(lines)):
+                joined = " ".join(x.strip() for x in lines[i: i + 2]).lower()
+                if joined.startswith(label):
+                    amounts, _ = cls._row_amounts(lines, i)
+                    if len(amounts) > col_idx:
+                        return amounts[col_idx]
+        return None
 
     def _page_lines(self, page_num: int) -> list[str]:
         if page_num < 1 or page_num > self.page_count:
@@ -479,128 +504,81 @@ class PDF10KParser:
         }
         missing_items = sorted(k for k, v in found.items() if v is None)
 
-        # Fallbacks & sanity defaults
-        r_c = rev_curr or 0.0
-        c_c = cogs_curr or 0.0
-        gp_c = gp_curr or (r_c - c_c)
-        op_c = opinc_curr or 0.0
-        ni_c = ni_curr or 0.0
+        # Cash flow statement balances, per year: the cash flow statement reconciles cash including
+        # restricted cash, which can differ from the balance sheet's cash line.
+        cf_lines = self._page_lines(cf_p)
+        begin = [self._find_wrapped(cf_lines, self.CASH_BEGIN_LABELS, col) for col in (0, 1)]
+        end = [self._find_wrapped(cf_lines, self.CASH_END_LABELS, col) for col in (0, 1)]
+        fx = [self._find_in_lines(cf_lines, ["Effect of exchange rate"], col)[0] for col in (0, 1)]
+        found["cfi"], found["cff"] = cfi_curr, cff_curr
+        found["cash_flow_beginning"], found["cash_flow_ending"] = begin[0], end[0]
+        missing_items = sorted(k for k, v in found.items() if v is None)
 
-        r_p = rev_prior or 0.0
-        c_p = cogs_prior or 0.0
-        gp_p = gp_prior or (r_p - c_p)
-        op_p = opinc_prior or 0.0
-        ni_p = ni_prior or 0.0
+        def z(x: float | None) -> float:
+            """0.0 for an item not found (listed in missing_items); a reported 0 stays 0."""
+            return 0.0 if x is None else x
 
-        ass_c = assets_curr or 0.0
-        liab_c = liab_curr or 0.0
-        eq_c = equity_curr or (ass_c - liab_c)
-
-        ass_p = assets_prior or 0.0
-        liab_p = liab_prior or 0.0
-        eq_p = equity_prior or (ass_p - liab_p)
-
-        # Construct Pydantic canonical models
+        # Construct Pydantic canonical models. Items not found are 0.0 and listed in missing_items;
+        # nothing is substituted (no equity from assets minus liabilities, no cash flows from capex,
+        # buybacks or dividends), so no check below can pass on a value derived from what it checks.
         is_model_curr = IncomeStatement(
-            revenue=r_c,
-            cogs=c_c,
-            gross_profit=gp_c,
-            sga_expense=sga_curr or 0.0,
-            operating_income=op_c,
-            interest_expense=0.0,
-            tax_expense=tax_curr or 0.0,
-            net_income=ni_c,
+            revenue=z(rev_curr), cogs=z(cogs_curr), gross_profit=z(gp_curr), sga_expense=z(sga_curr),
+            operating_income=z(opinc_curr), interest_expense=0.0, tax_expense=z(tax_curr),
+            net_income=z(ni_curr),
         )
         is_model_prior = IncomeStatement(
-            revenue=r_p,
-            cogs=c_p,
-            gross_profit=gp_p,
-            sga_expense=sga_prior or 0.0,
-            operating_income=op_p,
-            interest_expense=0.0,
-            tax_expense=tax_prior or 0.0,
-            net_income=ni_p,
+            revenue=z(rev_prior), cogs=z(cogs_prior), gross_profit=z(gp_prior), sga_expense=z(sga_prior),
+            operating_income=z(opinc_prior), interest_expense=0.0, tax_expense=z(tax_prior),
+            net_income=z(ni_prior),
         )
-
         bs_model_curr = BalanceSheet(
-            cash_and_equivalents=cash_curr or 0.0,
-            accounts_receivable=ar_curr or 0.0,
-            inventory=inv_curr or 0.0,
-            net_ppe=ppe_curr or 0.0,
-            total_assets=ass_c,
-            accounts_payable=ap_curr or 0.0,
-            total_debt=(cp_curr or 0.0) + (term_curr or 0.0),
-            total_liabilities=liab_c,
-            common_equity=common_eq_curr or eq_c,
-            retained_earnings=re_curr or 0.0,
-            total_equity=eq_c,
+            cash_and_equivalents=z(cash_curr), accounts_receivable=z(ar_curr), inventory=z(inv_curr),
+            net_ppe=z(ppe_curr), total_assets=z(assets_curr), accounts_payable=z(ap_curr),
+            total_debt=z(cp_curr) + z(term_curr), total_liabilities=z(liab_curr),
+            common_equity=z(common_eq_curr), retained_earnings=z(re_curr), total_equity=z(equity_curr),
         )
         bs_model_prior = BalanceSheet(
-            cash_and_equivalents=cash_prior or 0.0,
-            accounts_receivable=ar_prior or 0.0,
-            inventory=inv_prior or 0.0,
-            net_ppe=ppe_prior or 0.0,
-            total_assets=ass_p,
-            accounts_payable=ap_prior or 0.0,
-            total_debt=(cp_prior or 0.0) + (term_prior or 0.0),
-            total_liabilities=liab_p,
-            common_equity=common_eq_prior or eq_p,
-            retained_earnings=re_prior or 0.0,
-            total_equity=eq_p,
+            cash_and_equivalents=z(cash_prior), accounts_receivable=z(ar_prior), inventory=z(inv_prior),
+            net_ppe=z(ppe_prior), total_assets=z(assets_prior), accounts_payable=z(ap_prior),
+            total_debt=z(cp_prior) + z(term_prior), total_liabilities=z(liab_prior),
+            common_equity=z(common_eq_prior), retained_earnings=z(re_prior), total_equity=z(equity_prior),
         )
+        flows = [(cfo_curr, cfi_curr, cff_curr), (cfo_prior, cfi_prior, cff_prior)]
+        cf_models = [CashFlowStatement(cfo=z(o), cfi=z(i), cff=z(f), net_change_in_cash=z(o) + z(i) + z(f))
+                     for o, i, f in flows]
 
-        capex_c_abs = abs(capex_curr or 0.0)
-        capex_p_abs = abs(capex_prior or 0.0)
-        cfo_c = cfo_curr or 0.0
-        cfo_p = cfo_prior or 0.0
-
-        cfi_c = cfi_curr or -capex_c_abs
-        cfi_p = cfi_prior or -capex_p_abs
-
-        cff_c = cff_curr or (-(repurchases_curr or 0.0) - (dividends_curr or 0.0))
-        cff_p = cff_prior or (-(repurchases_prior or 0.0) - (dividends_prior or 0.0))
-
-        cf_model_curr = CashFlowStatement(
-            cfo=cfo_c,
-            cfi=cfi_c,
-            cff=cff_c,
-            net_change_in_cash=(cfo_c + cfi_c + cff_c),
-        )
-        cf_model_prior = CashFlowStatement(
-            cfo=cfo_p,
-            cfi=cfi_p,
-            cff=cff_p,
-            net_change_in_cash=(cfo_p + cfi_p + cff_p),
-        )
+        checks: list[IdentityCheck] = []
+        balanced: list[bool] = []
+        reconciled: list[bool] = []
+        for col, (year, (ass, liab, eq)) in enumerate(
+                (("current", (assets_curr, liab_curr, equity_curr)),
+                 ("prior", (assets_prior, liab_prior, equity_prior)))):
+            if ass is not None and liab is not None and eq is not None:
+                res = SuvarnaEngine.verify_balance_sheet_equation(
+                    total_assets=ass, total_liabilities=liab, shareholders_equity=eq, tolerance=0.5)
+                checks.append(IdentityCheck(name=f"{year}: assets = liabilities + equity", holds=res.is_valid,
+                                            difference=ass - liab - eq, detail="Z3 on the parsed numbers"))
+                balanced.append(res.is_valid)
+            else:
+                balanced.append(False)  # not checkable: an input is missing (see missing_items)
+            o, i, f = flows[col]
+            if begin[col] is not None and end[col] is not None and None not in (o, i, f):
+                d = z(end[col]) - (z(begin[col]) + z(o) + z(i) + z(f) + z(fx[col]))
+                checks.append(IdentityCheck(
+                    name=f"{year}: opening cash + cash flows = closing cash", holds=abs(d) <= 0.5, difference=d,
+                    detail="cash flow statement balances; CFO + CFI + CFF + exchange-rate effect"
+                           + ("" if fx[col] is not None else " (no exchange-rate line, taken as 0)")))
+                reconciled.append(abs(d) <= 0.5)
+            else:
+                reconciled.append(False)
 
         tsm_curr = ThreeStatementModel(
-            income_statement=is_model_curr,
-            balance_sheet=bs_model_curr,
-            cash_flow_statement=cf_model_curr,
-            is_balanced=abs(ass_c - (liab_c + eq_c)) < 1.0,
-            cash_reconciled=True,
+            income_statement=is_model_curr, balance_sheet=bs_model_curr, cash_flow_statement=cf_models[0],
+            is_balanced=balanced[0], cash_reconciled=reconciled[0],
         )
         tsm_prior = ThreeStatementModel(
-            income_statement=is_model_prior,
-            balance_sheet=bs_model_prior,
-            cash_flow_statement=cf_model_prior,
-            is_balanced=abs(ass_p - (liab_p + eq_p)) < 1.0,
-            cash_reconciled=True,
-        )
-
-        # 4. Formal SMT Invariant Verification via SuvarnaEngine
-        suvarna = SuvarnaEngine()
-        smt_res = suvarna.verify_three_statement_invariants(
-            total_assets=ass_c,
-            total_liabilities=liab_c,
-            shareholders_equity=eq_c,
-            net_income=ni_c,
-            cash_start=cash_prior or 0.0,
-            cash_end=cash_curr or 0.0,
-            cfo=cfo_c,
-            cfi=cf_model_curr.cfi,
-            cff=cf_model_curr.cff,
-            tolerance=1.0,
+            income_statement=is_model_prior, balance_sheet=bs_model_prior, cash_flow_statement=cf_models[1],
+            is_balanced=balanced[1], cash_reconciled=reconciled[1],
         )
 
         return ExtractedFiling10K(
@@ -613,9 +591,10 @@ class PDF10KParser:
             model_current_year=tsm_curr,
             model_prior_year=tsm_prior,
             citations=citations,
-            is_smt_verified=smt_res.is_valid,
-            smt_verification_details=smt_res.model_dump_json(),
+            is_smt_verified=balanced[0] and reconciled[0],
+            smt_verification_details=json.dumps([c.model_dump() for c in checks]),
             missing_items=missing_items,
+            checks=checks,
         )
 
     def extract_mda_excerpt(self, max_pages: int = 3) -> str:

@@ -124,8 +124,10 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
       10-K PDF parser and Ind AS still open. Purged cross-validation (7.4).
 - [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
-- [ ] Ind AS crosswalk: list missing keys instead of 0.0, and check cash reconciliation instead of
-      setting it to True.
+- [x] Ind AS crosswalk and 10-K PDF parser: no zero-fill or substitutes; real cash and balance checks
+      (2026-11-23). Ind AS still untested on a real annual report.
+- [ ] Pluggable PDF parser connectors (roadmap 1.5): a backend interface so pypdf, pdfplumber, layout and
+      OCR parsers share the statement mapping and checks; per-backend validation on the same filings.
 - [ ] Resolve citations against a store of source hashes in `ProvenanceGate` (today it checks form only).
 - [ ] `FinancialResearchAgent` is a workflow demonstration on assumed inputs; replace the assumptions
       with filing data (prior year, receivables, debt) or retire it.

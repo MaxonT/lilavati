@@ -78,14 +78,21 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [~] **1.2 Market & Macro Series Connector (🟡 partial):**
   * Implemented: OHLCV normalisation to Polars DataFrames and Nelson-Siegel fitting from supplied yield observations.
   * Not implemented: data fetching (OHLCV download, FRED connector for SOFR, Treasury yields, CPI, Fed Funds).
-- [x] **1.3 India BSE/NSE Ind AS Corporate Filings Connector:**
-  * Ingestion wrapper for Indian corporate disclosures and MCA Ind AS taxonomy filings.
-  * Entity Taxonomy Reconciliation Engine (ETRE) mapping Ind AS terms to canonical `ChartOfAccounts`.
-  * *Validation:* tested on modelled Ind AS figures. 🟡 Validation against a real Reliance/Infosys annual report is pending.
+- [~] **1.3 India Ind AS Crosswalk (🟡 partial):**
+  * Implemented: `IndiaFilingsClient.parse_ind_as_disclosure` maps Schedule III (Division II) line items, supplied by the caller, into the canonical `ThreeStatementModel`, with `derived` formulas, `not_reported` items and checks (balance sheet totals; Ind AS 7 cash reconciliation).
+  * Not implemented: fetching disclosures from BSE, NSE or MCA.
+  * *Validation:* tested on a fictional disclosure built to satisfy the Schedule III arithmetic (`docs/validation/connectors.md`). 🟡 Validation against a real annual report is pending.
 - [x] **1.4 Bi-Temporal DuckDB Local Data Warehouse:**
   * DuckDB storage layer implementing dual-time indexing: `valid_time` (period described) vs `as_of_timestamp` (filing date).
   * Enforces temporal filters preventing look-ahead leakage in historical backtests.
   * *Validation:* Query historical filing before and after an 8-K/restatement; verify restatement is invisible at $T_0$.
+- [ ] **1.5 Pluggable PDF parser connectors (🗺️ planned):**
+  * Today the 10-K PDF parser (`connectors/pdf_10k.py`) reads text with pypdf only, and its labels are Apple's.
+  * Split text extraction from statement mapping: a small backend interface (page count, page lines or tables, document hash) so that the row matching, `missing_items` and checks run unchanged on any backend.
+  * Backends as optional extras, chosen per call: pypdf (default), pdfplumber (tables), Docling or unstructured (layout), OCR for scanned filings (Tesseract), and hosted parsers (API keys from environment variables only). Record each backend's licence (PyMuPDF is AGPL) before adding it.
+  * Label sets per issuer and per standard (US GAAP 10-K, Ind AS annual report) instead of Apple's labels in code.
+  * Provenance: the citation records the backend and its version, since page text and row splits differ between backends.
+  * *Validation:* each backend on the same filings (Apple's FY2026 10-K first, then other issuers and an Ind AS annual report), line by line against the printed statements, in `docs/validation/connectors.md`; backends that disagree on a value are reported, not averaged. A test that every backend gives the same figures on a shared fixture.
 
 ---
 
