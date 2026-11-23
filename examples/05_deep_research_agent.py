@@ -2,9 +2,12 @@
 Example 05: Autonomous Financial Research Agent (Search + Deep Reasoning + Forensic Synthesis).
 
 Demonstrates:
-1. FinancialSearchAgent: Autonomous filing discovery with SHA-256 cryptographic provenance.
-2. DeepFinancialAgent: Multi-branch hypothesis tree search and SMT invariant pruning.
-3. FinancialResearchAgent: End-to-end synthesis into an Investment Research Dossier with citations.
+1. FinancialSearchAgent: figures from the latest 10-K filed by the as-of date, each with a citation
+   to its SEC XBRL fact (needs LILAVATI_SEC_USER_AGENT; without it, the run says so and uses an
+   illustrative baseline).
+2. DeepFinancialAgent: a bull/base/bear scenario tree with Z3 identity checks on each branch.
+3. FinancialResearchAgent: the steps chained into a dossier that lists its assumed inputs. A workflow
+   demonstration, not research on the company.
 """
 
 from __future__ import annotations
@@ -49,12 +52,8 @@ def main() -> None:
     exec_table.add_column("Summary / Value", style="bold green", justify="right")
     exec_table.add_column("Status / Assessment", style="dim")
 
-    exec_table.add_row("Rating Recommendation", dossier.recommendation, "Highest conviction thesis")
-    exec_table.add_row(
-        "12-Month Target Price",
-        f"${dossier.target_price:.2f}",
-        "Fundamental DCF / multiple valuation",
-    )
+    exec_table.add_row("Data source", dossier.data_source[:60], "see assumed inputs below")
+    exec_table.add_row("Screen outcome", dossier.recommendation, "from the Beneish flag only")
     exec_table.add_row(
         "Expected Net Income (Prob-Weighted)",
         f"${dossier.scenario_analysis.probability_weighted_net_income:,.1f}M",
@@ -63,17 +62,17 @@ def main() -> None:
     exec_table.add_row(
         "Beneish M-Score (Earnings Quality)",
         f"{dossier.forensic_accounting_summary['beneish_m_score']:.2f}",
-        "Safe Zone (M <= -1.78): High reporting quality",
+        "above -1.78 flags possible manipulation"
+        if dossier.forensic_accounting_summary["is_manipulator"]
+        else "below the -1.78 threshold",
     )
     exec_table.add_row(
         "Portfolio WACI (Carbon Intensity)",
         f"{dossier.climate_risk_summary['waci']:.1f} tCO2e/$M",
-        "Paris-Aligned Benchmark Compliant"
-        if dossier.climate_risk_summary["carbon_intensity_clean"]
-        else "High Carbon Drag",
+        "assumed emissions",
     )
     exec_table.add_row(
-        "Statutory Citations Verified", str(dossier.citations_count), "100% SHA-256 Provenance"
+        "Cited filing facts", str(dossier.citations_count), "each with an XBRL fact hash"
     )
 
     console.print(exec_table)
@@ -105,6 +104,9 @@ def main() -> None:
     console.print(
         f"\n[bold yellow]Executive Research Thesis:[/bold yellow]\n{dossier.executive_thesis}\n"
     )
+    console.print("[bold yellow]Assumed inputs:[/bold yellow]")
+    for item in dossier.assumed_inputs:
+        console.print(f"  - {item}")
 
 
 if __name__ == "__main__":

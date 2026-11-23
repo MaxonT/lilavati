@@ -2,11 +2,11 @@
 
 **Author:** Revendranath Tirumalsety ([ORCID 0000-0003-0549-4022](https://orcid.org/0000-0003-0549-4022))  
 **Classification:** Quantitative Finance, Benchmarking, Machine Learning, Multi-Agent Systems  
-**Status:** Working draft, not peer reviewed. Section 5.2 reports measured results for four Google models; section 6 is illustrative (see notice below).  
+**Status:** Working draft, not peer reviewed. Section 5.2 reports measured no-tool results for four Google and five Groq-hosted open-weight models, section 5.3 a paired tool-augmented arm for four of the Groq models; section 6 is illustrative (see notice below).  
 
 ---
 
-> **Draft notice (read first).** This is a working draft. The repository currently ships the benchmark *harness* and a deterministic *reference solver* only. Section 5.2 now contains measured results for four Google models only (no OpenAI, Anthropic, Llama or Qwen runs). The error anecdotes and failure-rate statistics in section 6 remain **illustrative hypotheses, not measurements**. The reference solver calls the same deterministic tools that the checks verify, so its 100% scores demonstrate harness correctness, **not** superiority over any model.
+> **Draft notice (read first).** This is a working draft. The repository ships the benchmark harness, a deterministic reference solver, a seeded case generator and a tool-augmented evaluation arm. Sections 5.2 and 5.3 contain measured results (four Google models; five open-weight models on Groq, four of them also with tools; no OpenAI or Anthropic runs). The error anecdotes and failure-rate statistics in section 6 remain **illustrative hypotheses, not measurements**. The reference solver calls the same deterministic tools that the checks verify, so its 100% scores demonstrate harness correctness, **not** superiority over any model.
 
 ## Abstract
 
@@ -248,7 +248,7 @@ We ran four Google models through the harness on 2026-11-17/18 with a single dir
 2. The **golden cases do not separate strong models** (several score 100%). The **generated cases do separate the Groq models**: accuracy on answered items ranged from 21.2% (ALLaM 2 7B) and 43.5% (Qwen3.8 27B) to 100%; Qwen3.8 missed all four Black-Scholes cases. The samples are small (7 golden + 10-20 generated cases per model, one pass), so these are indications, not rankings.
 3. Losses come from three distinct sources that must be reported separately: provider failures (most of the Google-run losses), **token-budget truncation** (6 of 20 generated replies each for gpt-oss-20b and Qwen3.6 27B at 8,192 tokens; in the prompt-v2 runs Qwen3.6's truncated replies were long-hand Black-Scholes arithmetic) and wrong answers.
 4. The 7 golden cases are easily guessable (a content-free answerer scores 63.6%); the generated set was introduced to fix this (15.7%).
-5. Not yet evaluated: multi-step three-statement modelling on real filings, citation grounding against real documents, and look-ahead resistance with a poisoned corpus. These are where we expect differences to appear and are the priority for benchmark v2.
+5. Not yet evaluated: multi-step three-statement modelling on real filings, citation grounding against real documents, and look-ahead resistance with a poisoned corpus. A first single-step pilot on real filings, outside the benchmark, is in Tutorial 08: four Groq models read the financial statements of four 10-Ks; they extracted all 324 line items correctly, and computed 225 of 228 ratios correctly themselves against 228 of 228 when code computed them (`results/filings/`). These are where we expect differences to appear and are the priority for benchmark v2.
 
 ### 5.3 Tool-augmented arm, paired with the no-tool baseline
 

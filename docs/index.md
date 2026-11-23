@@ -15,7 +15,7 @@ Līlāvatī addresses this with a **tool layer for agents**:
 
 1. **Zero LLM Arithmetic (design goal):** LLMs read and plan; calculations run in deterministic, tested code (Python, Polars, DuckDB), exposed as FastMCP tools.
 2. **First-Order Formal Invariants (Z3 SMT Solver):** Core accounting identities ($Assets = Liabilities + Equity$) are checked with the Z3 SMT solver on the given numbers (exact rational arithmetic), and debt covenants are checked arithmetically with an at-limit tolerance. These verify the numbers supplied, not a model over all inputs.
-3. **Cryptographic Provenance (`CitationRef`):** Every numerical fact extracted from SEC EDGAR or Ind AS filings carries an immutable SHA-256 document hash, page, and snippet citation.
+3. **Cryptographic Provenance (`CitationRef`):** Every numerical fact extracted from SEC EDGAR or Ind AS filings carries a citation: a SHA-256 hash of its source (the document for PDF or HTML, the fact record SEC serves for XBRL), the filing and period, the page where the source has pages, and a snippet.
 4. **Bi-Temporal Point-in-Time Isolation:** Disclosures are indexed with Dual-Time semantics (Valid Time $T_v$ vs System Time $T_s$) so that queries return only what was known at the as-of time; detecting look-ahead use by an agent is still partial (TPI).
 5. **OpenTelemetry-Compatible Tracing:** A trace of agent turns, LLM prompts and tokens, deterministic tool outputs and solver check results.
 
@@ -25,7 +25,7 @@ Līlāvatī addresses this with a **tool layer for agents**:
 
 - **New here?** [Getting started](getting-started.md): install, then a first result from Python, an
   AI assistant (MCP), an agent framework or the benchmark, in a few minutes each.
-- **Learning?** Seven [tutorials](tutorials/01_build_your_first_financial_agent.md) and a draft
+- **Learning?** Eight [tutorials](tutorials/01_build_your_first_financial_agent.md) and a draft
   [course](course/index.md).
 - **Checking the numbers?** [Numerical validation](validation/index.md) and the
   [benchmark evidence](benchmarks.md).
@@ -38,6 +38,14 @@ Līlāvatī addresses this with a **tool layer for agents**:
 ## Quickstart
 
 ### Installation
+
+Not on PyPI yet. To use it:
+
+```bash
+pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"
+```
+
+To contribute, or to run the tutorials and the commands below, work from a clone:
 
 ```bash
 git clone https://github.com/revendrat/lilavati.git
@@ -76,24 +84,29 @@ uv run lilavati-bench list-cases
 
 ---
 
-## 📚 End-to-End Tutorials & Guides
+## 📚 Tutorials
 
-Explore complete, runnable walkthroughs demonstrating how to build, test, and serve verifiable agents across key institutional finance domains:
+Runnable walkthroughs; CI runs their code exactly as written. Each has objectives, the real mistakes
+it guards against, exercises and instructor notes.
 
-1. [Tutorial 01: Credit Underwriting & SMT Proofs](tutorials/01_build_your_first_financial_agent.md)
-   - *Use Case:* Commercial loan underwriting: maintenance covenants (net leverage and interest coverage, exact at the limit), debt reduction needed to comply, and a Merton default probability.
-   - *Companion Code:* `examples/06_build_custom_agent_and_api.py`
-
-2. [Tutorial 02: Statistical Arbitrage & Algorithmic Execution](tutorials/02_statistical_arbitrage_and_execution_agent.md)
-   - *Use Case:* Quantitative pairs trading, Engle-Granger cointegration, OU mean-reversion half-life, memory-preserving fractional differentiation ($d^*$), LOB microstructure, and Almgren-Chriss liquidation.
-   - *Companion Code:* `examples/07_stat_arb_and_execution_agent.py`
-
-3. [Tutorial 03: Forensic Accounting & Adversarial Investment Committee](tutorials/03_forensic_accounting_and_adversarial_committee.md)
-   - *Use Case:* Fundamental equity research, 8-variable Beneish M-Score manipulation detection, Altman Z-Score distress, multi-role adversarial committee deliberation, and Z3 SMT balance sheet reconciliation.
-   - *Companion Code:* `examples/08_forensic_committee_agent.py`
-
-4. [Tutorial 04: Climate Transition Risk & Sustainable Portfolio Optimization](tutorials/04_climate_risk_and_sustainable_portfolio.md)
-   - *Use Case:* TCFD Weighted Average Carbon Intensity (WACI), carbon tax balance sheet shock stress testing, Sustainability-Linked Bond (SLB) covenants, and Hierarchical Risk Parity (HRP) allocation.
-   - *Companion Code:* `examples/09_climate_sustainable_portfolio_agent.py`
-
-
+1. [Tutorial 01: Your First Credit Workflow](tutorials/01_build_your_first_financial_agent.md):
+   maintenance covenants (net leverage and interest coverage, exact at the limit), the debt reduction
+   needed to comply, a Merton default probability and a local API. Code: `examples/06_build_custom_agent_and_api.py`.
+2. [Tutorial 02: Statistical Arbitrage and Optimal Execution](tutorials/02_statistical_arbitrage_and_execution_agent.md):
+   Engle-Granger cointegration, OU half-life, fractional differencing ($d^*$), order-book metrics and
+   an Almgren-Chriss liquidation schedule. Code: `examples/07_stat_arb_and_execution_agent.py`.
+3. [Tutorial 03: Forensic Accounting Screens and a Bull/Bear Committee](tutorials/03_forensic_accounting_and_adversarial_committee.md):
+   Beneish M-score, Altman Z-score, a Z3 balance-sheet check and a rule-based committee.
+   Code: `examples/08_forensic_committee_agent.py`.
+4. [Tutorial 04: Climate Risk in a Portfolio](tutorials/04_climate_risk_and_sustainable_portfolio.md):
+   WACI, carbon-tax stress, sustainability-linked bond covenants and HRP allocation (HRP not yet
+   checked against a reference). Code: `examples/09_climate_sustainable_portfolio_agent.py`.
+5. [Tutorial 05: Benchmarking LLMs with Free and Open Models](tutorials/05_benchmarking_llms_with_open_models.md):
+   choosing a free or local provider, keeping keys private, and no-tool baselines with failures
+   classified (provider error, model error, truncation, unparsable).
+6. [Tutorial 06: Analysing, Publishing and Citing Results](tutorials/06_analysing_and_publishing_results.md):
+   the results manifest, bootstrap confidence intervals and paired comparisons.
+7. [Tutorial 07: Tools versus Mental Math](tutorials/07_tools_versus_mental_math.md): the same
+   questions with and without deterministic tools, and tool grounding.
+8. [Tutorial 08: A Real 10-K, Three Ways](tutorials/08_real_10k_llm_vs_lilavati.md): SEC figures
+   taken from the filing itself, compared across an LLM alone, an LLM with Līlāvatī and Līlāvatī alone.

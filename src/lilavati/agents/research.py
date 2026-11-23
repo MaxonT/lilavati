@@ -1,8 +1,10 @@
 """
-Autonomous Institutional Financial Research Agent for Project Līlāvatī.
+Research workflow demonstration for Project Līlāvatī.
 
-Synthesizes filing discovery, deep hypothesis scenario search, forensic audits,
-and climate risk modeling into an Investment Research Dossier with citations and tool outputs.
+Chains filing search, a scenario tree, a Beneish screen and a carbon-intensity calculation into a
+dossier. Only revenue and total assets come from a filing (when SEC is reachable); every other input
+is an assumption, listed in ``ResearchDossier.assumed_inputs``, and ``data_source`` says where the
+figures came from. It demonstrates the workflow; it is not research on the company.
 """
 
 from __future__ import annotations
@@ -37,6 +39,8 @@ class ResearchDossier(BaseModel):
     climate_risk_summary: dict[str, Any]
     citations_count: int
     proof_of_citation_hashes: list[str]
+    data_source: str = ""
+    assumed_inputs: list[str] = []
 
 
 class FinancialResearchAgent:
@@ -79,8 +83,19 @@ class FinancialResearchAgent:
 
         # Step 2: Build Statement Graph from Discovered Facts
         facts_map = {f.metric_name: f.value for f in search_rep.discovered_facts}
-        rev = facts_map.get("revenue", 391035.0)
-        assets = facts_map.get("total_assets", 364980.0)
+        # Everything below except revenue and total assets is an assumption, listed in the dossier.
+        assumed = ["gross margin, SGA ratio, tax and interest rates, capex, depreciation, cash, debt, equity",
+                   "all prior-year and balance-sheet inputs to the Beneish M-score except revenue and assets",
+                   "Scope 1+2 emissions (50,000 tCO2e) for the carbon intensity"]
+        if "revenue" in facts_map and "total_assets" in facts_map:
+            rev, assets = facts_map["revenue"], facts_map["total_assets"]
+            data_source = (f"revenue and total assets from {search_rep.verified_citations[0].filing_type} filed "
+                           f"{search_rep.verified_citations[0].filing_date} (SEC XBRL)")
+        else:
+            # Illustrative baseline, clearly labelled: no filing data was retrieved.
+            rev, assets = 100_000.0, 200_000.0
+            data_source = "illustrative: no filing data retrieved (" + "; ".join(search_rep.notes) + ")"
+            assumed.insert(0, "revenue 100,000 and total assets 200,000 (USD millions), illustrative")
 
         graph = StatementGraph(
             revenue=rev,
@@ -136,21 +151,23 @@ class FinancialResearchAgent:
         )
 
         rec = "OVERWEIGHT" if not m_score_res.is_likely_manipulator else "UNDERWEIGHT"
+        beneish = ("below" if not m_score_res.is_likely_manipulator else "above")
         thesis = (
-            f"Autonomous investment research for {symbol} indicates resilient cash generation. "
-            f"Expected probability-weighted net income is ${reasoning_tree.probability_weighted_net_income:,.1f}M. "
-            f"Forensic earnings quality is sound (Beneish M-Score={m_score_res.m_score:.2f} <= -1.78). "
-            f"Portfolio carbon intensity is Paris-aligned at {waci_res.waci:.2f} tCO2e/$M."
+            f"Scenario run for {symbol} ({data_source}). "
+            f"Probability-weighted net income ${reasoning_tree.probability_weighted_net_income:,.1f}M; "
+            f"Beneish M-score {m_score_res.m_score:.2f} ({beneish} the -1.78 threshold); "
+            f"carbon intensity {waci_res.waci:.2f} tCO2e/$M. Most inputs are assumptions (see assumed_inputs), "
+            "so this is a demonstration of the workflow, not research on the company."
         )
 
         hashes = [c.doc_hash for c in search_rep.verified_citations]
 
         return ResearchDossier(
             symbol=symbol,
-            company_name=f"{symbol} Corp.",
+            company_name=symbol,
             as_of_date=as_of_date,
             recommendation=rec,
-            target_price=245.0,
+            target_price=None,  # no valuation model is run
             executive_thesis=thesis,
             forensic_accounting_summary={
                 "beneish_m_score": m_score_res.m_score,
@@ -165,4 +182,6 @@ class FinancialResearchAgent:
             },
             citations_count=len(search_rep.verified_citations),
             proof_of_citation_hashes=hashes,
+            data_source=data_source,
+            assumed_inputs=assumed,
         )

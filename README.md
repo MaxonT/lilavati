@@ -74,11 +74,11 @@ whether a balance sheet still balances, or whether a backtest used data publishe
 
 | You are | What Līlāvatī gives you today | Start here | Status |
 | :--- | :--- | :--- | :--- |
-| **Finance student or educator** | Runnable tutorials with exercises and instructor notes; a draft 12-week course; everything runs on free tiers or local models | [Tutorial 01](docs/tutorials/01_build_your_first_financial_agent.md), [course](docs/course/index.md) | ✅ all seven tutorials at the tutorial standard, their code executed in CI |
+| **Finance student or educator** | Runnable tutorials with exercises and instructor notes; a draft 12-week course; everything runs on free tiers or local models | [Tutorial 01](docs/tutorials/01_build_your_first_financial_agent.md), [course](docs/course/index.md) | ✅ all eight tutorials at the tutorial standard, their code executed in CI |
 | **Quantitative researcher or academic** | Līlāvatī-Bench with no-tool and tool arms; every model reply published with a manifest, bootstrap CIs and paired comparisons; reference-tested engines | [Tutorial 06](docs/tutorials/06_analysing_and_publishing_results.md), [results](results/ANALYSIS.md), [paper drafts](docs/papers/02_benchmark_paper.md) | 🟡 pilot-scale evidence (20 generated cases per model, one pass) |
-| **Credit, equity or risk analyst** | Bond analytics, Merton PD, covenant checks, Beneish and Altman scores, WACI and sustainability-linked bond checks; SEC EDGAR, 10-K and Ind AS connectors | Tutorials [01](docs/tutorials/01_build_your_first_financial_agent.md), [03](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md), [04](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md) | 🟡 engines validated; connectors not yet validated on live filings |
+| **Credit, equity or risk analyst** | Bond analytics, Merton PD, covenant checks, Beneish and Altman scores, WACI and sustainability-linked bond checks; SEC EDGAR, 10-K and Ind AS connectors | Tutorials [01](docs/tutorials/01_build_your_first_financial_agent.md), [03](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md), [04](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md), [08](docs/tutorials/08_real_10k_llm_vs_lilavati.md) | 🟡 engines validated; SEC XBRL extraction piloted on five companies' latest 10-Ks; 10-K PDF parser and Ind AS crosswalk not yet validated on live filings |
 | **AI or agent engineer** | Eight MCP servers; LangGraph, Google ADK and A2A examples; one client for OpenAI-compatible (incl. Groq, Ollama, vLLM), Gemini and Anthropic APIs; a tool-use evaluation harness | [Integrations](docs/integrations.md), [MCP setup](docs/mcp-setup.md), [Tutorial 07](docs/tutorials/07_tools_versus_mental_math.md) | ✅ live-tested on Gemini and Groq; Anthropic format-tested only |
-| **Model validation, audit or compliance** | Per-engine validation pages (reference, measured tolerance, bugs fixed); provenance on extracted values; Z3 accounting-identity checks; a reproducible evidence trail | [Numerical validation](docs/validation/index.md) | 🟡 order book, Black-Litterman, HRP, statement graph and connectors not yet audited |
+| **Model validation, audit or compliance** | Per-engine validation pages (reference, measured tolerance, bugs fixed); provenance on extracted values; Z3 accounting-identity checks; a reproducible evidence trail | [Numerical validation](docs/validation/index.md) | 🟡 order book, Black-Litterman, HRP and statement graph not yet audited; connectors piloted ([connectors page](docs/validation/connectors.md)) |
 | **Open-source contributor** | Clear rules (developer skill, CONTRIBUTING), a roadmap with open items, small checkable tasks (one function plus a cited reference test) | [CONTRIBUTING](CONTRIBUTING.md), [roadmap](ROADMAP.md), [to-do](TODO.md) | ✅ |
 | **Enterprise platform team** | Typed Python APIs, local REST serving, Apache-2.0 | [SECURITY.md](SECURITY.md) | 🗺️ not yet enterprise-ready (see below) |
 
@@ -92,8 +92,8 @@ commercial software. Where it stands:
 | Apache-2.0; typed Pydantic APIs checked with mypy | PyPI release with semantic versioning and an API stability and deprecation policy |
 | 500+ tests, including reference tests against textbooks, papers and QuantLib | Coverage reporting |
 | CI on Python 3.11 and 3.12: lint, type check, tests; strict docs build, every example, tutorial code, claims linter, results manifest | Dependency vulnerability scanning and SBOM |
-| Release workflow with PyPI Trusted Publishing and a clean-install smoke test (ready; awaiting PyPI setup) | First PyPI release; the docs site live on GitHub Pages (workflow ready) |
-| Validation pages per audited engine; published benchmark evidence with a manifest | Audits of the remaining engines; validation on live filings; independent review |
+| Release workflow with PyPI Trusted Publishing and a clean-install smoke test (ready; awaiting PyPI setup) | First PyPI release (deferred until reviewer feedback; install from GitHub meanwhile) |
+| Validation pages per audited engine; published benchmark evidence with a manifest; documentation site on GitHub Pages | Audits of the remaining engines; wider live-filing validation (more companies, 10-Q, banks); independent review |
 | Security policy, code of conduct, citation file, changelog | Authentication for the API server; a maintainer team, response targets and release cadence |
 
 ---
@@ -205,7 +205,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | **Verification & data** | Z3 three-statement invariants | ✅ | `core/invariants.py` |
 | | Statement DAG with driver shocks | ✅ | `core/graph.py` |
 | | Bi-temporal DuckDB store, `CitationRef` provenance | ✅ | `core/temporal.py`, `core/provenance.py` |
-| | SEC EDGAR XBRL, 10-K PDF parser, Ind AS crosswalk (live-data validation pending) | ✅ | `connectors/` |
+| | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk not yet validated live) | ✅ | `connectors/` |
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
 | **Agents** | Neuro-symbolic runtime, adversarial committee, forensics (Beneish, Altman) | ✅ | `runtime/`, `agents/` |
@@ -228,9 +228,11 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 - **Benchmark scope.** The harness, a reference solver (passes by construction), a case generator and
   no-tool baselines for four Google and five Groq-hosted open-weight models are in
   [`results/README.md`](results/README.md). The 7 golden cases are saturated; the 20 generated cases
-  separate models. Runs are single-step and single-pass; tool-augmented and multi-step tracks are future work.
-- **Install from source for now.** The PyPI name `lilavati` belongs to an unrelated project; this package
-  will be published as `lilavati-finance` (import name stays `lilavati`). The optional `quantlib` extra is
+  separate models. Tool-augmented runs for four Groq models are in the same folder ([Tutorial 07](docs/tutorials/07_tools_versus_mental_math.md)), and a
+  real-10-K comparison in `results/filings/` ([Tutorial 08](docs/tutorials/08_real_10k_llm_vs_lilavati.md)). Runs are single-step and
+  single-pass; multi-step tracks are future work.
+- **Not on PyPI yet.** Install from GitHub (see Quick start). The PyPI name `lilavati` belongs to an unrelated
+  project; this package will be published as `lilavati-finance` (import name stays `lilavati`). The optional `quantlib` extra is
   currently unused by the code.
 - **The API server** binds to `127.0.0.1` and has no built-in authentication. Put it behind your own auth or
   proxy before exposing it.
@@ -266,7 +268,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 ```
 
 1. **Zero LLM Arithmetic Policy (design goal):** Agents are designed so that calculated numbers originate from deterministic FastMCP tools, and runtime gates flag numbers lacking tool provenance. This reduces, but cannot mathematically eliminate, arithmetic in model prose.
-2. **`CitationRef` Provenance:** Every extracted line item carries a cryptographic hash: `CitationRef(doc_hash, page, table_id, xbrl_tag)`.
+2. **`CitationRef` Provenance:** Every extracted line item carries a citation, `CitationRef(doc_hash, page, table_id, xbrl_tag)`: a SHA-256 of the source document, or for XBRL of the fact record SEC serves (XBRL facts have no page).
 3. **Bi-Temporal Point-in-Time Isolation:** Using DuckDB bi-temporal semantics, queries specify `valid_time` and `as_of_timestamp` to prevent look-ahead bias and restatement contamination.
 4. **Z3 SMT Invariant Verification (`Suvarna` Engine):** Financial statement identities ($A = L + E$) and no-arbitrage bounds are encoded in first-order logic. Infeasible projections trigger automatic agent self-correction.
 

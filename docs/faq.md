@@ -37,6 +37,11 @@ results are CC BY 4.0; code is Apache-2.0.
 **Which Python versions are supported?**
 3.11 and 3.12 (both run in CI).
 
+**Is it on PyPI?**
+Not yet. Install from GitHub:
+`pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"` (import name
+`lilavati`). Pin a commit hash instead of `main` for a course or a paper.
+
 **`ModuleNotFoundError: No module named 'google'` when running the ADK examples.**
 Install the optional extra: `uv sync --extra dev --extra adk`.
 
@@ -63,6 +68,11 @@ clear message instead of recording errors.
 **Groq returns HTTP 400 `tool_use_failed`.**
 The model produced a malformed tool call and Groq rejected it. That is the model's failure, and the
 benchmark records it as `model_error`; it is never re-run.
+
+**SEC EDGAR: `ValueError` asking for `LILAVATI_SEC_USER_AGENT`, or HTTP 403.**
+SEC asks every client for a real contact. Set `LILAVATI_SEC_USER_AGENT="Your Name you@example.org"`
+in your shell (for MCP, in the server's environment; see [MCP setup](mcp-setup.md)). It is not an
+API key, but keep it out of committed files all the same.
 
 **Ollama: connection refused or 404.**
 Start `ollama serve` and pull a model. Ollama's OpenAI-compatible API is under `/v1`:

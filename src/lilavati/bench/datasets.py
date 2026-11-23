@@ -92,7 +92,15 @@ GOLDEN_BENCHMARK_CASES: list[BenchmarkTestCase] = [
         ),
         as_of_date=date(2024, 11, 1),
         doc_hash=DOC_HASH_AAPL_2024,
-        source_citation="Apple Inc. Form 10-K FY2024 (SEC CIK: 0000320193), Item 8, pp. 48-52",
+        # Balance-sheet and income figures are Apple's FY2024 10-K values (XBRL: assets 364,980,
+        # liabilities 308,030, revenue 391,035, net income 93,736). The cash flows are constructed so
+        # that cash reconciles (29,943 + 118,264 - 2,400 - 115,867 = 29,940); they are not Apple's
+        # reported cash flows (operating cash flow was 118,254). The question is frozen: changing it
+        # changes case_content_hash and breaks comparison with published results.
+        source_citation=(
+            "Apple Inc. Form 10-K FY2024 (SEC CIK 0000320193), balance sheet and income statement; "
+            "cash-flow figures constructed for the exercise"
+        ),
         context_data={
             "total_assets": 364980.0,
             "total_liabilities": 308030.0,

@@ -20,7 +20,10 @@ class CitationRef(BaseModel):
 
     doc_hash: str = Field(
         ...,
-        description="SHA-256 hash of the normalized source document (HTML/PDF/XBRL)",
+        description=(
+            "SHA-256 of the source: the document bytes for a PDF or HTML filing; for an XBRL fact, the "
+            "fact record as served by SEC (canonical JSON), so anyone can re-fetch and check it"
+        ),
         min_length=64,
         max_length=64,
     )
@@ -36,10 +39,10 @@ class CitationRef(BaseModel):
         ...,
         description="Fiscal period end date described by this report (Valid Time)",
     )
-    page: int = Field(
-        ...,
+    page: int | None = Field(
+        default=None,
         ge=1,
-        description="1-based page number where the claim appears",
+        description="1-based page number where the claim appears; None for sources without pages (XBRL facts)",
     )
     table_id: str | None = Field(
         default=None,
@@ -61,7 +64,7 @@ class CitationRef(BaseModel):
         filing_type: str,
         filing_date: date,
         period_end: date,
-        page: int,
+        page: int | None,
         raw_snippet: str,
         table_id: str | None = None,
         xbrl_tag: str | None = None,

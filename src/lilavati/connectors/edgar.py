@@ -9,6 +9,7 @@ models where every single line item is cryptographically grounded with a Citatio
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from datetime import date
 from typing import Any
@@ -66,6 +67,8 @@ class EdgarClient:
     """SEC EDGAR client for structured XBRL disclosures."""
 
     BASE_URL = "https://data.sec.gov/api/xbrl/companyfacts"
+    SUBMISSIONS_URL = "https://data.sec.gov/submissions"
+    TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 
     USER_AGENT_ENV = "LILAVATI_SEC_USER_AGENT"
 
@@ -83,6 +86,7 @@ class EdgarClient:
         self._user_agent = user_agent
         self.timeout = timeout
         self._transport = transport
+        self._ticker_map: dict[str, str] | None = None
 
     @property
     def user_agent(self) -> str:
@@ -98,21 +102,51 @@ class EdgarClient:
     def headers(self) -> dict[str, str]:
         return {"User-Agent": self.user_agent, "Accept-Encoding": "gzip, deflate", "Host": "data.sec.gov"}
 
-    def resolve_cik(self, ticker_or_cik: str) -> str:
-        """Resolves a ticker symbol or raw CIK into a 10-digit zero-padded CIK string."""
+    def resolve_cik(self, ticker_or_cik: str, online: bool = False) -> str:
+        """Resolves a ticker symbol or raw CIK into a 10-digit zero-padded CIK string.
+
+        Known tickers come from a small built-in map. With ``online=True``, other tickers are looked
+        up in SEC's company list (``company_tickers.json``, one request, cached on the client).
+        """
         clean = ticker_or_cik.strip().upper()
         if clean in DEFAULT_TICKER_CIK_MAP:
             return DEFAULT_TICKER_CIK_MAP[clean]
         # If numeric string provided, pad with leading zeros
         if clean.isdigit():
             return clean.zfill(10)
+        if online:
+            if self._ticker_map is None:
+                rows = self.get_json(self.TICKERS_URL)
+                self._ticker_map = {str(r["ticker"]).upper(): str(r["cik_str"]).zfill(10) for r in rows.values()}
+            if clean in self._ticker_map:
+                return self._ticker_map[clean]
+            raise ValueError(f"Ticker '{ticker_or_cik}' is not in SEC's company list; provide a CIK.")
         raise ValueError(
-            f"Unknown or unmapped ticker symbol: '{ticker_or_cik}'. Provide a 10-digit CIK or register in map."
+            f"Unknown or unmapped ticker symbol: '{ticker_or_cik}'. Provide a 10-digit CIK, register it in "
+            "the map, or call resolve_cik(..., online=True) to use SEC's company list."
         )
+
+    def get_json(self, url: str) -> Any:
+        """GET a JSON document from sec.gov or data.sec.gov with the configured contact."""
+        headers = {"User-Agent": self.user_agent, "Accept-Encoding": "gzip, deflate"}
+        with httpx.Client(timeout=self.timeout, transport=self._transport, follow_redirects=True) as client:
+            resp = client.get(url, headers=headers)
+        if resp.status_code == 404:
+            raise FileNotFoundError("SEC EDGAR document not found (HTTP 404).")
+        if resp.status_code != 200:
+            raise RuntimeError(
+                f"SEC EDGAR error: HTTP {resp.status_code}. Check that {self.USER_AGENT_ENV} holds a real contact."
+            )
+        return resp.json()
+
+    def fetch_submissions(self, ticker_or_cik: str) -> dict[str, Any]:
+        """The company's SEC submissions index (recent filings: accession, form, dates, documents)."""
+        cik = self.resolve_cik(ticker_or_cik, online=True)
+        return self.get_json(f"{self.SUBMISSIONS_URL}/CIK{cik}.json")  # type: ignore[no-any-return]
 
     def fetch_company_facts(self, ticker_or_cik: str) -> dict[str, Any]:
         """Fetches raw structured XBRL company facts JSON from SEC EDGAR."""
-        cik = self.resolve_cik(ticker_or_cik)
+        cik = self.resolve_cik(ticker_or_cik, online=True)
         url = f"{self.BASE_URL}/CIK{cik}.json"
 
         headers = self.headers  # raises a clear error if no contact is configured
@@ -176,25 +210,26 @@ class EdgarClient:
             chosen = matching[0]
 
             val = float(chosen["val"])
-            filing_date_str = str(chosen.get("filed", "2024-01-01"))
-            end_date_str = str(chosen.get("end", "2024-01-01"))
-            accn = str(chosen.get("accn", "unknown-accession"))
+            # SEC fact records always carry these; a record without them is not citable
+            filing_date_str = str(chosen["filed"])
+            end_date_str = str(chosen["end"])
+            accn = str(chosen["accn"])
 
             f_date = date.fromisoformat(filing_date_str)
             p_end = date.fromisoformat(end_date_str)
 
-            # Cryptographic document hash from accession number and tag
-            hasher = hashlib.sha256()
-            hasher.update(f"{accn}:{tag}:{filing_date_str}".encode())
-            doc_hash = hasher.hexdigest()
+            # Hash of the fact record itself (see sec_filing.fact_hash), so the citation can be checked
+            doc_hash = hashlib.sha256(
+                json.dumps(chosen, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
 
             citation = CitationRef(
                 doc_hash=doc_hash,
                 filing_type=form,
                 filing_date=f_date,
                 period_end=p_end,
-                page=1,
-                table_id="primary_statements",
+                page=None,
+                table_id="xbrl",
                 xbrl_tag=f"us-gaap:{tag}",
                 raw_snippet=f"{val:,.0f} USD (accn: {accn})",
             )
@@ -218,7 +253,7 @@ class EdgarClient:
         Extracts a full canonical Three-Statement Model for a company and fiscal year,
         attaching a hash-linked citation to every line item, ready for Z3 identity checks.
         """
-        cik = self.resolve_cik(ticker_or_cik)
+        cik = self.resolve_cik(ticker_or_cik, online=facts is None)
         if facts is None:
             facts = self.fetch_company_facts(cik)
 
@@ -257,9 +292,11 @@ class EdgarClient:
         # 2. Extract Income Statement Items
         rev_item = self.extract_line_item(
             facts,
+            # Total revenues first, as in sec_filing.CANONICAL_ITEMS (Walmart: Revenues 713,163
+            # includes membership income; contract revenue 706,413 is net sales only).
             [
-                "RevenueFromContractWithCustomerExcludingAssessedTax",
                 "Revenues",
+                "RevenueFromContractWithCustomerExcludingAssessedTax",
                 "SalesRevenueNet",
             ],
             fiscal_year,

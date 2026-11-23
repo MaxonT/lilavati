@@ -74,7 +74,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Pulls live company filings (10-K, 10-Q) from SEC EDGAR API with compliant User-Agent headers.
   * Parses standardized `us-gaap` taxonomy line items into canonical `ThreeStatementModel`.
   * Generates cryptographic `CitationRef` for every parsed fact.
-  * *Validation:* tested against a synthetic EDGAR payload shaped like Apple's company facts. 🟡 Live AAPL/MSFT validation is pending (Phase 7).
+  * *Validation:* filing-anchored extraction (`connectors/sec_filing.py`, MCP tool `get_filing_figures`) piloted on the latest 10-Ks of 5 companies (7.5, `docs/validation/connectors.md`); tests on verbatim SEC data. 🟡 The fiscal-year `ThreeStatementModel` path fills untagged fields with placeholders; to be replaced by the filing-anchored path.
 - [~] **1.2 Market & Macro Series Connector (🟡 partial):**
   * Implemented: OHLCV normalisation to Polars DataFrames and Nelson-Siegel fitting from supplied yield observations.
   * Not implemented: data fetching (OHLCV download, FRED connector for SOFR, Treasury yields, CPI, Fed Funds).
@@ -215,7 +215,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
 - [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss, econometrics, financial ML (33 bugs fixed). Pending: LOB / Black-Litterman / HRP, statement graph, connectors.
 - [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
-- [~] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report. 🟡 Started 2026-11-22: 10-K parser checked line by line on Apple's FY2026 10-K (4 bugs fixed; `docs/validation/connectors.md`); EDGAR client contact fixed. Done 2026-11-23: filing-anchored XBRL extraction validated on 5 companies (64 of 64 values found in the filing documents; comparative-period bug fixed); LLM comparison on 4 real 10-Ks (Tutorial 08). Pending: banks and insurers, 10-Q and restatements, Ind AS.
+- [~] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report. 🟡 Started 2026-11-22: 10-K parser checked line by line on Apple's FY2026 10-K (4 bugs fixed; `docs/validation/connectors.md`); EDGAR client contact fixed. Done 2026-11-23: filing-anchored XBRL extraction validated on 5 companies (71 of 71 values found in the filing documents; comparative-period bug fixed); LLM comparison on 4 real 10-Ks (Tutorial 08). Also 2026-11-23: the same flow as the MCP tool `get_filing_figures`, with ticker lookup through SEC's company list. Pending: banks and insurers, 10-Q validation (cash-flow items are year-to-date) and restatements, Ind AS.
 
 **7B. Honest documentation (blocking)**
 - [x] 7.6 README, docs, dev skill and roadmap list only implemented capabilities; planned items are marked.
@@ -224,7 +224,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 **7C. Packaging & release (blocking)**
 - [x] 7.9 Distribution renamed to `lilavati-finance` (PyPI name `lilavati` belongs to an unrelated project).
-- [~] 7.10 PyPI release. 🟡 Done: `.github/workflows/release.yml` (tag/version check, build, clean-install smoke test on 3.11 and 3.12, Trusted Publishing); local clean installs verified; sdist excludes private `.agents/tasks/`. Done 2026-11-22: GitHub `pypi` environment created, restricted to `v*` tags. Pending (maintainer): register the trusted publisher on PyPI; then tag the release.
+- [~] 7.10 PyPI release. 🟡 Done: `.github/workflows/release.yml` (tag/version check, build, clean-install smoke test on 3.11 and 3.12, Trusted Publishing); local clean installs verified; sdist excludes private `.agents/tasks/`. Done 2026-11-22: GitHub `pypi` environment created, restricted to `v*` tags. Pending (maintainer): register the trusted publisher on PyPI; then tag the release. Deferred 2026-11-23 until reviewer feedback and the announcement; early users install from GitHub.
 - [x] 7.11 Docs site and CI. 🟡 Done: CI runs the strict docs build, every example, tutorial code, claims and manifest checks; `.github/workflows/docs.yml` deploys to Pages. Done 2026-11-22: Pages enabled (source "GitHub Actions"); the site is live at https://revendrat.github.io/lilavati/ and redeploys on every docs change to `main`.
 - [x] 7.12 Author Revendranath Tirumalsety (ORCID 0000-0003-0549-4022) in `pyproject.toml`, `CITATION.cff`, the README citation and both papers.
 
@@ -253,7 +253,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 **7E. Announcement**
 - [ ] 7.17 External review by at least one practitioner (quant/credit) and one software reviewer; issues triaged.
-- [ ] 7.18 Tag `v0.2.0`, publish to PyPI, then announce as an alpha toolkit for feedback. 🟡 Release candidate built and verified locally on 2026-11-22 (`dist/`: wheel, sdist, results bundle, SBOM, vulnerability scan, verification report, checksums; release notes in `docs/releases/v0.2.0.md`); version bumped to 0.2.0. Waiting on the maintainer inputs and go-ahead.
+- [ ] 7.18 Announce as an alpha toolkit for feedback (GitHub install), then tag `v0.2.0` and publish to PyPI (order changed 2026-11-23). 🟡 Release candidate built and verified locally on 2026-11-22 (`dist/`: wheel, sdist, results bundle, SBOM, vulnerability scan, verification report, checksums; release notes in `docs/releases/v0.2.0.md`); version bumped to 0.2.0. Waiting on the maintainer inputs and go-ahead.
 
 ---
 

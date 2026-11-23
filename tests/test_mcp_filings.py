@@ -195,3 +195,29 @@ def test_mcp_corporate_filings_extract_line_item(mock_aapl_facts: dict[str, Any]
             ticker_or_cik="AAPL", metric_name="Unknown", fiscal_year=2024
         )
         assert "error" in err_res
+
+
+def test_mcp_get_filing_figures_lists_missing_items_and_computes_ratios() -> None:
+    import json
+    from pathlib import Path
+
+    from lilavati.connectors.sec_filing import extract_filing, filings_from_submissions
+    from lilavati.mcp_servers.corporate_filings_server import get_filing_figures
+
+    fix = Path(__file__).parent / "fixtures"
+    facts = json.loads((fix / "aapl_companyfacts_10k_fy2025_2026.json").read_text())
+    filing = filings_from_submissions(json.loads((fix / "aapl_submissions_subset.json").read_text()))[0]
+    real = extract_filing(facts, filing)
+
+    with patch("lilavati.mcp_servers.corporate_filings_server.fetch_filing_extraction", return_value=real):
+        res = get_filing_figures("AAPL")
+    assert res["filing"]["accession"] == "0000320193-26-000026"
+    assert res["filing"]["url"].endswith("/000032019326000026/aapl-20260926.htm")
+    assert res["values"]["revenue"]["value"] == 478_834_000_000
+    assert res["missing"] == ["total_equity_incl_nci"]
+    # Apple FY2026: (478,834 - 245,232) / 478,834, as in Tutorial 08
+    assert round(res["ratios"]["gross_margin"], 4) == 0.4879
+
+    with patch("lilavati.mcp_servers.corporate_filings_server.fetch_filing_extraction",
+               side_effect=ValueError("form must be one of ['10-K', '10-Q'], got '8-K'")):
+        assert "error" in get_filing_figures("AAPL", form="8-K")

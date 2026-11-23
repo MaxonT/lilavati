@@ -122,3 +122,64 @@ def test_inline_tags_do_not_split_words() -> None:
     text = document_text(raw)
     assert "INCOME STATEMENTS" in text
     assert "318,034" in text and "318,034 261,802" in text  # table cells stay separate
+
+
+WMT_FACTS = json.loads((FIX / "wmt_companyfacts_revenue_fy2026.json").read_text())
+WMT_SUBS = json.loads((FIX / "wmt_submissions_subset.json").read_text())
+
+
+def test_revenue_is_total_revenues_when_both_tags_are_reported() -> None:
+    # Walmart's FY2026 10-K (period ended 2026-01-31) prints "Net sales 706,413" and
+    # "Total revenues 713,163" (with membership and other income); XBRL tags the first as contract
+    # revenue and the second as Revenues. The answer key once used net sales and scored every model
+    # wrong. Fixtures: verbatim SEC subsets (source URLs inside).
+    filing = filings_from_submissions(WMT_SUBS)[0]
+    assert (filing.accession, str(filing.report_date)) == ("0000104169-26-000055", "2026-01-31")
+    ex = extract_filing(WMT_FACTS, filing)
+    assert ex.values["revenue"].value == 713_163_000_000
+    assert ex.tags_used["revenue"] == "Revenues"
+
+
+def test_live_extraction_uses_the_submissions_index_and_the_filings_own_facts(monkeypatch) -> None:
+    import httpx
+
+    from lilavati.connectors.edgar import EdgarClient
+    from lilavati.connectors.sec_filing import fetch_filing_extraction
+
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(str(request.url))
+        assert request.headers["User-Agent"] == "Example Org contact@example.org"
+        assert request.headers["Host"] == request.url.host  # no fixed data.sec.gov Host header
+        if request.url.path == "/files/company_tickers.json":
+            return httpx.Response(200, json={"0": {"cik_str": 104169, "ticker": "WMT", "title": "Walmart Inc."}})
+        if request.url.path == "/submissions/CIK0000104169.json":
+            return httpx.Response(200, json=WMT_SUBS)
+        if request.url.path == "/api/xbrl/companyfacts/CIK0000104169.json":
+            return httpx.Response(200, json=WMT_FACTS)
+        return httpx.Response(404)
+
+    client = EdgarClient(user_agent="Example Org contact@example.org", transport=httpx.MockTransport(handler))
+    ex = fetch_filing_extraction("WMT", client=client)
+    assert ex.filing.accession == "0000104169-26-000055"
+    assert ex.values["revenue"].value == 713_163_000_000
+    assert [u.split("/")[2] for u in seen] == ["www.sec.gov", "data.sec.gov", "data.sec.gov"]
+
+    with pytest.raises(ValueError, match="only 1 10-K"):
+        fetch_filing_extraction("0000104169", filings_back=1, client=client)
+    with pytest.raises(ValueError, match="form must be"):
+        fetch_filing_extraction("WMT", form="8-K", client=client)
+
+
+def test_citation_hash_is_of_the_fact_record_and_has_no_page() -> None:
+    # A citation must be checkable: re-fetch the company facts, find the record, hash it.
+    import hashlib
+
+    ex = extract_filing(FACTS, _latest_10k())
+    cit = ex.values["total_assets"].citation
+    record = next(e for e in FACTS["facts"]["us-gaap"]["Assets"]["units"]["USD"]
+                  if e["accn"] == "0000320193-26-000026" and e["end"] == "2026-09-26")
+    expected = hashlib.sha256(json.dumps(record, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    assert cit.doc_hash == expected
+    assert cit.page is None  # XBRL facts have no page; no placeholder page number
