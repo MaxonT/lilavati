@@ -3,6 +3,7 @@
 ## [Unreleased]
 These changes ship in 0.2.0 when it is tagged (the version in `pyproject.toml` is already 0.2.0).
 ### Added
+- `SourceStore` (`lilavati.core.provenance`) and `ProvenanceGate(store)`: citations are resolved against the sources a pipeline read (SEC company facts, PDF or HTML pages, Ind AS disclosures), checking hash, tag, period, filing date, page snippet and value. Without a store the gate checks only the form, as before. Registration helpers `PDF10KParser.register_in` and `india_filings.register_disclosure`; `record_hash` is the one canonical hash for XBRL fact records. Tutorial 08 Step 3b.
 - MCP tool `get_filing_figures` (`lilavati-mcp-corporate-filings`): one 10-K or 10-Q's own line items, missing items, identity checks and ratios. `sec_filing.fetch_filing_extraction` runs the flow live; `EdgarClient.fetch_submissions`, `EdgarClient.get_json`, and `resolve_cik(..., online=True)`, which looks up any listed ticker in SEC's company list.
 - `lilavati.connectors.sec_filing`: filing-anchored XBRL extraction (submissions index → the filing's own facts by accession, end date and duration), missing items, identity checks, statement text window and deterministic ratios. `scripts/validate_sec_filings.py` (5-company pilot: 71 of 71 values found in the filing documents) and `scripts/run_filing_comparison.py` (LLM alone vs LLM + Līlāvatī vs Līlāvatī alone; results in `results/filings/`).
 - Tutorial 08: a real 10-K, three ways.

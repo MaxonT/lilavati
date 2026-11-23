@@ -21,15 +21,13 @@ accession number, tag and period.
 
 from __future__ import annotations
 
-import hashlib
-import json
 from datetime import date
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from lilavati.core.invariants import SuvarnaEngine
-from lilavati.core.provenance import CitationRef, SourcedValue
+from lilavati.core.provenance import CitationRef, SourcedValue, record_hash
 
 if TYPE_CHECKING:  # edgar imports this module; the client is only needed at call time
     from lilavati.connectors.edgar import EdgarClient
@@ -106,9 +104,11 @@ def fact_hash(entry: dict[str, Any]) -> str:
     """SHA-256 of one XBRL fact record as SEC serves it (canonical JSON: sorted keys, no spaces).
 
     Re-fetch the company facts, find the entry with the same accession, tag, period and value, and
-    hash it the same way to check a citation.
+    hash it the same way to check a citation. The record does not contain the concept name: two
+    concepts reported with the same value, period and accession share a hash (Apple's cash with and
+    without restricted cash), so the citation's ``xbrl_tag`` is part of the reference.
     """
-    return hashlib.sha256(json.dumps(entry, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return record_hash(entry)
 
 
 def filings_from_submissions(submissions: dict[str, Any], forms: tuple[str, ...] = ("10-K",)) -> list[FilingRef]:

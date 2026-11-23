@@ -128,7 +128,13 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       (2026-11-23). Ind AS still untested on a real annual report.
 - [ ] Pluggable PDF parser connectors (roadmap 1.5): a backend interface so pypdf, pdfplumber, layout and
       OCR parsers share the statement mapping and checks; per-backend validation on the same filings.
-- [ ] Resolve citations against a store of source hashes in `ProvenanceGate` (today it checks form only).
+- [ ] Ind AS crosswalk on one real annual report (a manufacturer, so the Schedule III cost lines exist),
+      line by line against the printed statements (7.5).
+- [ ] 10-K PDF parser on a second issuer (labels are Apple's today) (7.5); list prior-year items not found
+      (only current-year items are in `missing_items`); footnote markers such as "(1)" after a label are
+      read as −1.
+- [x] `ProvenanceGate(store)` resolves citations against a `SourceStore` of the sources read (2026-11-23);
+      without a store it still checks the form only.
 - [ ] `FinancialResearchAgent` is a workflow demonstration on assumed inputs; replace the assumptions
       with filing data (prior year, receivables, debt) or retire it.
 - [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).

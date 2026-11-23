@@ -8,6 +8,7 @@ formal SMT equilibrium, credit covenant limits, cryptographic provenance, and te
 from __future__ import annotations
 
 from lilavati.core.invariants import SuvarnaEngine
+from lilavati.core.provenance import SourceStore
 from lilavati.framework.state import FinancialState
 from lilavati.prompts.reflection import generate_smt_reflection_prompt
 
@@ -81,7 +82,18 @@ class CovenantGate:
 
 
 class ProvenanceGate:
-    """Verifies that all extracted financial claims carry valid 64-character SHA-256 hashes."""
+    """Checks the citations in a state: their form, and, given a ``SourceStore``, that they resolve.
+
+    Without a store, only the form is checked (a 64-character hash, a page of 1 or more when given, a
+    non-empty snippet): a well-formed citation to a source nobody read passes. With
+    ``ProvenanceGate(store)``, every sourced value and every recorded citation must also resolve
+    against the sources registered in the store (``SourceStore.check``): known hash, matching tag,
+    period and filing date for XBRL facts, snippet on the cited page for documents, and the value
+    equal to the source's.
+    """
+
+    def __init__(self, store: SourceStore | None = None) -> None:
+        self.store = store
 
     def __call__(self, state: FinancialState) -> FinancialState:
         for val in state.sourced_values:
@@ -91,6 +103,13 @@ class ProvenanceGate:
                 state.fail_gate(
                     f"Provenance failure on claim '{val.value}': invalid citation hash, page or snippet."
                 )
+            elif self.store is not None:
+                for problem in self.store.check(cit, val.normalized_value):
+                    state.fail_gate(f"Provenance failure on claim '{val.value}': {problem}")
+        if self.store is not None:
+            for cit in state.citations:
+                for problem in self.store.check(cit):
+                    state.fail_gate(f"Provenance failure on citation '{cit.raw_snippet[:40]}': {problem}")
 
         return state
 

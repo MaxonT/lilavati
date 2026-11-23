@@ -9,7 +9,7 @@ from lilavati.agents.deep import DeepFinancialAgent, DeepReasoningTree
 from lilavati.agents.research import FinancialResearchAgent, ResearchDossier
 from lilavati.agents.search import FinancialSearchAgent, SearchReport
 from lilavati.core.invariants import SuvarnaEngine
-from lilavati.core.provenance import CitationRef, SourcedValue
+from lilavati.core.provenance import CitationRef, SourcedValue, SourceStore
 from lilavati.framework.agent import FinancialAgent
 from lilavati.framework.gates import (
     CovenantGate,
@@ -41,6 +41,7 @@ __all__ = [
     "TemporalPurityGate",
     "CitationRef",
     "SourcedValue",
+    "SourceStore",
     "SuvarnaEngine",
     "Tracer",
     "__version__",

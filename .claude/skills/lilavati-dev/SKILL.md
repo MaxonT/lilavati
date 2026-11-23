@@ -74,6 +74,11 @@ right and every claim being true. These rules come from real bugs found in this 
   "first key present" for cost of goods sold (Schedule III shows materials consumed, purchases of
   stock-in-trade and change in inventories) and for tax (current only, no deferred). Map each
   component, sum the ones present, and record the formula.
+- **A content hash identifies content, not meaning.** An XBRL fact record has no concept name, so
+  Apple's cash with and without restricted cash are identical records with one hash; a store keyed by
+  hash alone kept only one concept. Keep every entry under a hash and match on the citation's tag.
+  Value tolerances for source amounts are float rounding only: a relative 1e-9 let $479 through on
+  a revenue of $478.8 billion.
 - **No silent clipping or fallbacks** that change the answer (e.g. clipping both numerator and
   denominator of a sinh ratio). Use numerically stable forms (`expm1`, `log1p`, exp-ratio forms).
 - **Thresholds and ratios: compare with a tolerance.** A value exactly at a limit must pass:
@@ -250,7 +255,7 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 
 | Area | Module | Notes |
 | :--- | :--- | :--- |
-| Provenance / bi-temporal | `core/provenance.py`, `core/temporal.py` | `CitationRef`, `SourcedValue`, DuckDB as-of queries |
+| Provenance / bi-temporal | `core/provenance.py`, `core/temporal.py` | `CitationRef`, `SourcedValue`, `SourceStore` + `ProvenanceGate(store)` (citation resolution), DuckDB as-of queries |
 | Invariants | `core/invariants.py` | Z3 identity checks; covenant arithmetic |
 | Fixed income | `core/fixed_income.py` | bonds (price, durations, convexity, DV01), Nelson-Siegel, Merton |
 | Derivatives | `core/derivatives.py` | BSM + Greeks, CRR, implied vol, SABR (Hagan 2002), butterfly check |
@@ -317,3 +322,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   opening cash and hard-coded `cash_reconciled=True`; repo map updated for `statement_model_from_filing`.
 - 2026-11-23: Subtotal-components rule (Ind AS cost of goods, tax); PDF parser and Ind AS crosswalk
   examples added to the derived-inputs rule; `india_filings.py` in the repo map.
+- 2026-11-23: Content-hash rule after building `SourceStore` (identical XBRL records share a hash;
+  tolerance for source amounts); repo map lists `SourceStore`.

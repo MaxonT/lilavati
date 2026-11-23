@@ -94,6 +94,49 @@ free_cash_flow         136,056.0000
 liabilities_to_assets  0.7229
 ```
 
+## Step 3b: Check every citation against what was read
+
+A citation with the right shape says nothing about its source: a figure typed one dollar off, or a hash of
+a document nobody read, is still well formed. Register the sources the pipeline actually read in a
+`SourceStore`, and `ProvenanceGate(store)` resolves each citation: the hash must be a registered
+source, the XBRL tag, period and filing date must match the fact record, and the value must equal it.
+
+```python
+import json
+
+from lilavati.connectors.sec_filing import extract_filing, filings_from_submissions
+from lilavati.core.provenance import SourcedValue, SourceStore
+from lilavati.framework import FinancialState, ProvenanceGate
+
+facts = json.load(open("tests/fixtures/aapl_companyfacts_10k_fy2025_2026.json"))
+filing = filings_from_submissions(json.load(open("tests/fixtures/aapl_submissions_subset.json")))[0]
+result = extract_filing(facts, filing)
+
+store = SourceStore()
+store.add_xbrl_company_facts(facts)          # register what was actually read
+
+state = FinancialState(sourced_values=list(result.values.values()))
+print("as extracted:", ProvenanceGate(store)(state).is_valid)
+
+# A revenue figure one dollar off, with a perfectly well-formed citation:
+revenue = result.values["revenue"]
+typo = SourcedValue(value=revenue.value + 1, citation=revenue.citation)
+print("form check only:", ProvenanceGate()(FinancialState(sourced_values=[typo])).is_valid)
+checked = ProvenanceGate(store)(FinancialState(sourced_values=[typo]))
+print("against the source:", checked.is_valid)
+print(checked.gate_violations[0])
+```
+
+```text
+as extracted: True
+form check only: True
+against the source: False
+Provenance failure on claim '478834000001.0': 4d099cb271f7...: value 478,834,000,001.00 differs from the record's 478,834,000,000.00
+```
+
+The same store takes a PDF or HTML filing (`PDF10KParser.register_in(store)`: the snippet must be on
+the cited page) and an Ind AS disclosure (`india_filings.register_disclosure`).
+
 ## Step 4: Any company, live
 
 The SEC asks every client for a real contact. Put yours in your shell profile (never in a file in
@@ -167,6 +210,12 @@ than statements) are where to look next.
   The stored replies were re-scored with the corrected definition (`--rescore`), not re-asked.
 - **A fake contact.** The connector sent a made-up contact address to SEC. It now reads yours from
   `LILAVATI_SEC_USER_AGENT`.
+- **A gate that checked only the form.** `ProvenanceGate` passed any 64-character hash, so a typo
+  in a figure or a citation to an unread source went through. With a `SourceStore` it resolves each
+  citation (Step 3b). Building the store showed that an XBRL fact record has no concept name: Apple
+  reports cash with and without restricted cash as identical records, which share a hash, so the
+  citation's tag is part of the reference. The value tolerance had to be float rounding only
+  (relative 1e-12): a relative 1e-9 let a revenue figure $479 off pass.
 
 ## Using this with Claude Code and MCP
 
@@ -187,6 +236,9 @@ than statements) are where to look next.
 3. Try a 10-Q: change `filings_from_submissions(..., forms=("10-Q",))`. What changes in the duration
    rule, and why?
 4. Choose a bank. Which canonical items make no sense for it, and which would you add instead?
+5. In Step 3b, change a citation's `period_end` to the prior year, then its `xbrl_tag` to
+   `us-gaap:Assets`. What does the gate report for each? Which check would catch a model that quotes
+   the right number for the wrong year?
 
 ## For instructors
 
