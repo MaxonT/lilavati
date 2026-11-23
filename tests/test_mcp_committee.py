@@ -64,7 +64,14 @@ def test_mcp_committee_memo_tool() -> None:
         cfi_t=-80.0,
         cff_t=-50.0,
         market_value_equity=2500.0,
+        total_liabilities_t=500.0,  # 1,400 = 500 + 900
+        shareholders_equity_t=900.0,
+        retained_earnings_t=600.0,
+        operating_income_t=350.0,
+        cash_start_t=100.0,
+        cash_end_t=190.0,  # 100 + 220 - 80 - 50
     )
     assert "recommendation" in res
     assert "formal_invariants_satisfied" in res
     assert res["formal_invariants_satisfied"] is True
+    assert [c["holds"] for c in res["checks"]] == [True, True]

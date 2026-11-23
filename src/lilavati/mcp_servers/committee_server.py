@@ -56,10 +56,24 @@ def evaluate_investment_committee_memo(
     cfi_t: float,
     cff_t: float,
     market_value_equity: float,
+    total_liabilities_t: float,
+    shareholders_equity_t: float,
+    retained_earnings_t: float,
+    operating_income_t: float,
+    cash_start_t: float,
+    cash_end_t: float,
+    fx_effect_on_cash_t: float = 0.0,
 ) -> dict[str, Any]:
     """
-    Runs the multi-role adversarial investment committee debate (Bull, Bear, Auditor, PM)
-    and verifies formal Z3 accounting invariants before emitting the final binding recommendation.
+    Rule-based investment committee memo (no language model): revenue growth against a target,
+    Beneish M-score, Altman Z-score, and identity checks on the inputs, then a recommendation by
+    fixed rules (rejected if an identity fails, Beneish flags manipulation or Altman is in distress).
+
+    All amounts in one currency unit (e.g. USD millions); suffix _t is the current year, _t_minus_1
+    the prior year. Pass reported figures: total liabilities and shareholders' equity from the balance
+    sheet (checked: assets = liabilities + equity), retained earnings and operating income (Altman X2,
+    X3), and cash at the start and end of the year as in the cash flow statement (checked: start + CFO
+    + CFI + CFF + exchange-rate effect = end). "checks" lists each identity with its difference.
     """
     memo = AdversarialCommittee.evaluate_company(
         symbol=symbol,
@@ -90,6 +104,13 @@ def evaluate_investment_committee_memo(
         cfi_t=cfi_t,
         cff_t=cff_t,
         market_value_equity=market_value_equity,
+        total_liabilities_t=total_liabilities_t,
+        shareholders_equity_t=shareholders_equity_t,
+        retained_earnings_t=retained_earnings_t,
+        operating_income_t=operating_income_t,
+        cash_start_t=cash_start_t,
+        cash_end_t=cash_end_t,
+        fx_effect_on_cash_t=fx_effect_on_cash_t,
     )
     return memo.model_dump()
 

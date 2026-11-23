@@ -246,7 +246,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        COGNITIVE AGENT LAYER                           │
-│   Adversarial Committee (Macro Strategist ↔ Quant ↔ Credit ↔ Auditor)  │
+│   Rule-based Committee (Bull growth ↔ Bear Beneish/Altman ↔ Risk ids)  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │ Dispatches Structured Intent
 ┌────────────────────────────────────▼───────────────────────────────────┐

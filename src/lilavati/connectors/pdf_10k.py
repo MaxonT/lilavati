@@ -76,6 +76,8 @@ class ExtractedFiling10K(BaseModel):
         ),
     )
     checks: list[IdentityCheck] = Field(default_factory=list, description="identities on the parsed numbers")
+    capex_current_year: float | None = Field(
+        None, description="payments for property, plant and equipment, current year, as a positive amount")
 
 
 class PDF10KParser:
@@ -603,6 +605,7 @@ class PDF10KParser:
             smt_verification_details=json.dumps([c.model_dump() for c in checks]),
             missing_items=missing_items,
             checks=checks,
+            capex_current_year=None if capex_curr is None else abs(capex_curr),
         )
 
     def extract_mda_excerpt(self, max_pages: int = 3) -> str:

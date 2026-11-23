@@ -244,32 +244,28 @@ The Līlāvatī FastMCP tool registry implements seven core quantitative engines
 
 ## 5. Multi-Agent Deliberation: The Adversarial Committee Protocol
 
-To prevent confirmation bias in qualitative thesis formation, Līlāvatī models investment deliberation as an **Adversarial State Graph** (`FinancialStateGraph`). The graph coordinates three specialized roles:
+The committee (`AdversarialCommittee.evaluate_company`, MCP tool `evaluate_investment_committee_memo`) is a rule-based protocol over deterministic tools; no language model is called. Its roles are labels for fixed rules, and the verdict follows from the tool outputs:
 
 ```mermaid
 sequenceDiagram
-    participant B as Bull Analyst
-    participant F as Forensic Bear Auditor
-    participant R as Risk Officer (Z3 SMT Gate)
-    participant C as Committee Chairperson
+    participant B as Bull (growth rule)
+    participant F as Forensic Bear (Beneish, Altman)
+    participant R as Risk Officer (identity checks)
+    participant C as Verdict rules
 
-    B->>F: Proposes Growth Thesis & Model Projections
+    B->>C: Revenue growth vs target
     Note over F: Computes Beneish M-Score & Altman Z-Score
-    F-->>B: Challenges Earnings Quality (e.g. DSRI > 1.3)
-    B->>R: Submits Reconciled Three-Statement Model
-    Note over R: Executes Suvarna Z3 SMT Proof
-    alt SMT Solver == UNSAT
-        R-->>B: REJECTED (Violation: Cash Mismatch)
-        Note over B: Self-Correction via SMT Reflection
-    else SMT Solver == SAT
-        R->>C: Identities Checked (SAT)
-        F->>C: Forensic Earnings Assessment
-        B->>C: Strategic Growth Thesis
-        Note over C: Formulates Binding Allocation Verdict
+    F->>C: Manipulation flag, distress zone
+    Note over R: Z3 balance sheet identity, cash reconciliation on the reported inputs
+    alt An identity fails
+        R->>C: REJECTED (accounting anomaly), naming the failed identity
+    else All identities hold
+        R->>C: Identities hold
+        Note over C: Rejected on a Beneish flag or Altman distress; approved if growth meets target and Altman is safe; otherwise hold
     end
 ```
 
-1. **The Bull Analyst**: Extracts growth drivers, segment expansion opportunities, and returns on invested capital.
+1. **The Bull**: compares year-on-year revenue growth with a target.
 2. **The Forensic Bear Auditor**: Executes deterministic forensics:
    * **Beneish 8-Factor M-Score**:
      $$\begin{aligned}
@@ -277,10 +273,11 @@ sequenceDiagram
          &+ 0.892 \cdot \text{SGI} + 0.115 \cdot \text{DEPI} - 0.172 \cdot \text{SGAI} \\
          &+ 4.679 \cdot \text{TATA} - 0.327 \cdot \text{LVGI}
      \end{aligned}$$
-     If $M > -1.78$, the company is formally flagged as exhibiting high probability of earnings manipulation.
+     If $M > -1.78$, the company is flagged as a likely manipulator (Beneish 1999).
    * **Altman Z-Score**:
      $$Z = 1.2 X_1 + 1.4 X_2 + 3.3 X_3 + 0.6 X_4 + 0.999 X_5$$
-3. **The Risk & Compliance Officer (Suvarṇa Gatekeeper)**: Enforces Z3 SMT invariant verification on all balance sheet and cash flow reconciliations. No recommendation can pass to the investment committee without an SMT satisfiability certificate.
+     with $X_2$ retained earnings and $X_3$ operating income (EBIT) over total assets, and $X_4$ market equity over total liabilities, all from the inputs.
+3. **The Risk Officer**: checks total assets = total liabilities + equity (Z3, on the given numbers) and opening cash + operating, investing and financing cash flows + exchange-rate effect = closing cash. A failed identity rejects the memo. These inputs are taken as reported: an earlier version derived equity from assets and liabilities and opening cash from the flows, so the checks could not fail, and used net income in place of retained earnings in the Altman score.
 
 ---
 

@@ -69,7 +69,9 @@ right and every claim being true. These rules come from real bugs found in this 
   construction. Take each input from the source (the prior-period comparative in the same filing),
   run identity checks on reported numbers only, and record every derived field with its formula.
   Test that the check fails on a perturbed input. The 10-K PDF parser and the Ind AS crosswalk had
-  the same hard-coded `cash_reconciled=True`, plus equity substituted by assets minus liabilities.
+  the same hard-coded `cash_reconciled=True`, plus equity substituted by assets minus liabilities;
+  the investment committee checked 100 + flows against 100 + flows and passed a balance sheet off by
+  595,000. Grep for checks fed by their own derivation before trusting a `True`.
 - **A subtotal made of several lines is their sum, not the first line found.** The Ind AS map took
   "first key present" for cost of goods sold (Schedule III shows materials consumed, purchases of
   stock-in-trade and change in inventories) and for tax (current only, no deferred). Map each
@@ -328,3 +330,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-23: Content-hash rule after building `SourceStore` (identical XBRL records share a hash;
   tolerance for source amounts); repo map lists `SourceStore`.
 - 2026-11-23: MCP tool hints rule (test-enforced) after an external scan of an old commit.
+- 2026-11-23: Committee example added to the derived-inputs rule (identity checks that could not fail).

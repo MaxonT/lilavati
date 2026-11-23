@@ -1,24 +1,23 @@
 """
-The Adversarial Investment Committee Protocol.
+A rule-based investment committee over deterministic tools (no language model is called).
 
-Orchestrates multi-role deliberation between:
-1. The Bull (Growth & Thematic Strategist)
-2. The Forensic Bear (Accounting Quality & Beneish/Altman Auditor)
-3. The Sustainable Finance Specialist (Transition Risk & WACI Analyst)
-4. The Risk & Compliance Officer / Portfolio Manager (Z3 SMT Invariant Gatekeeper)
+The roles are labels for fixed rules: the Bull compares revenue growth with a target, the Bear runs
+the Beneish M-score and Altman Z-score, and the Risk officer checks the balance sheet identity (Z3)
+and the cash reconciliation on the reported inputs. See ``AdversarialCommittee.evaluate_company``.
 """
 
 from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from lilavati.agents.forensics import (
     AltmanZScoreResult,
     BeneishMScoreResult,
     ForensicEngine,
 )
+from lilavati.connectors.sec_filing import IdentityCheck
 from lilavati.core.invariants import SuvarnaEngine
 
 
@@ -44,7 +43,9 @@ class InvestmentCommitteeMemo(BaseModel):
     bear_concerns: list[str]
     beneish_m_score: BeneishMScoreResult
     altman_z_score: AltmanZScoreResult
-    formal_invariants_satisfied: bool
+    formal_invariants_satisfied: bool = Field(
+        ..., description="every check in `checks` holds (balance sheet identity by Z3, cash reconciliation)")
+    checks: list[IdentityCheck] = Field(default_factory=list, description="identities on the given inputs")
     summary_verdict: str
 
 
@@ -82,13 +83,31 @@ class AdversarialCommittee:
         cfi_t: float,
         cff_t: float,
         market_value_equity: float,
+        *,
+        total_liabilities_t: float,
+        shareholders_equity_t: float,
+        retained_earnings_t: float,
+        operating_income_t: float,
+        cash_start_t: float,
+        cash_end_t: float,
+        fx_effect_on_cash_t: float = 0.0,
     ) -> InvestmentCommitteeMemo:
         """
-        Runs the full adversarial deliberation pipeline:
-        1. Bull Analyst presents growth thesis.
-        2. Forensic Bear tests Beneish M-Score and Altman Z-Score.
-        3. Risk Officer runs formal Z3 SMT verification of financial equilibrium.
-        4. Committee synthesizes final binding verdict.
+        A rule-based committee over deterministic tools; no language model is called.
+
+        1. "Bull": revenue growth against the target.
+        2. "Bear": Beneish M-score (Beneish 1999) and Altman Z-score (Altman 1968; X2 uses retained
+           earnings, X3 operating income as EBIT, X4 market equity over total liabilities).
+        3. "Risk officer": identities on the reported inputs: total assets = total liabilities +
+           shareholders' equity (Z3), and cash at the start + CFO + CFI + CFF + exchange-rate effect =
+           cash at the end (cash as in the cash flow statement).
+        4. Verdict by fixed rules: rejected if an identity fails, if Beneish flags manipulation or if
+           Altman is in distress; approved for allocation only when growth meets the target and Altman
+           is safe; otherwise hold.
+
+        The balance sheet and cash inputs are required: the committee used to derive equity as
+        assets minus (long-term debt + current liabilities) and start cash from the flows, so its
+        identity checks could not fail; Altman used net income for retained earnings.
         """
         # 1. Bull Analyst Perspective
         growth_rate = (revenue_t - revenue_t_minus_1) / revenue_t_minus_1
@@ -123,18 +142,13 @@ class AdversarialCommittee:
             cfo_t=cfo_t,
         )
 
-        working_cap = current_assets_t - current_liabilities_t
-        total_liab = long_term_debt_t + current_liabilities_t
-        retained_earn = net_income_t
-        ebit = revenue_t - cogs_t - sga_t - depreciation_t
-
         z_res = ForensicEngine.calculate_altman_z_score(
-            working_capital=working_cap,
+            working_capital=current_assets_t - current_liabilities_t,
             total_assets=total_assets_t,
-            retained_earnings=retained_earn,
-            ebit=ebit,
+            retained_earnings=retained_earnings_t,
+            ebit=operating_income_t,
             market_value_equity=market_value_equity,
-            total_liabilities=total_liab,
+            total_liabilities=total_liabilities_t,
             sales=revenue_t,
         )
 
@@ -152,26 +166,25 @@ class AdversarialCommittee:
                 f"Altman Z-Score ({z_res.z_score:.2f} < 1.81) indicates near-term credit insolvency risk."
             )
 
-        # 3. Risk & Compliance Officer: SMT Invariant Verification via Suvarna
-        shareholders_equity = total_assets_t - total_liab
-        cash_delta = cfo_t + cfi_t + cff_t
+        # 3. Risk officer: identities on the reported inputs (none derived from what it checks)
+        bs = SuvarnaEngine.verify_balance_sheet_equation(
+            total_assets=total_assets_t, total_liabilities=total_liabilities_t,
+            shareholders_equity=shareholders_equity_t, tolerance=0.5)
+        cash_diff = cash_end_t - (cash_start_t + cfo_t + cfi_t + cff_t + fx_effect_on_cash_t)
+        checks = [
+            IdentityCheck(name="assets = liabilities + equity", holds=bs.is_valid,
+                          difference=total_assets_t - total_liabilities_t - shareholders_equity_t,
+                          detail="Z3 on the given numbers"),
+            IdentityCheck(name="opening cash + cash flows = closing cash", holds=abs(cash_diff) <= 0.5,
+                          difference=cash_diff, detail="CFO + CFI + CFF + exchange-rate effect"),
+        ]
+        identities_hold = all(c.holds for c in checks)
 
-        inv_check = SuvarnaEngine.verify_three_statement_invariants(
-            total_assets=total_assets_t,
-            total_liabilities=total_liab,
-            shareholders_equity=shareholders_equity,
-            net_income=net_income_t,
-            cash_start=100.0,
-            cash_end=100.0 + cash_delta,
-            cfo=cfo_t,
-            cfi=cfi_t,
-            cff=cff_t,
-        )
-
-        # 4. Committee Consensus & Verdict
-        if not inv_check.is_valid:
+        # 4. Verdict by fixed rules
+        if not identities_hold:
             rec = CommitteeRecommendation.REJECTED_ACCOUNTING_ANOMALY
-            verdict = "REJECTED: Proposed financials violate fundamental mathematical balance sheet identities."
+            failed = ", ".join(c.name for c in checks if not c.holds)
+            verdict = f"REJECTED: the inputs fail {failed}."
         elif m_res.is_likely_manipulator:
             rec = CommitteeRecommendation.REJECTED_ACCOUNTING_ANOMALY
             verdict = "REJECTED: Forensic scrutiny revealed severe earnings manipulation probability (Beneish M-Score breach)."
@@ -180,7 +193,8 @@ class AdversarialCommittee:
             verdict = "REJECTED: Credit profile in distressed territory (Altman Z-Score < 1.81)."
         elif growth_rate >= bull_revenue_growth_target and z_res.distress_zone == "Safe":
             rec = CommitteeRecommendation.APPROVED_BUY
-            verdict = "APPROVED FOR ALLOCATION: Clean forensic profile, verified accounting invariants, robust financial health."
+            verdict = ("APPROVED FOR ALLOCATION (rule-based): growth meets the target, Beneish and Altman "
+                       "raise no flag, and the balance sheet and cash identities hold on the inputs.")
         else:
             rec = CommitteeRecommendation.APPROVED_HOLD
             verdict = "HOLD: Moderate credit health with acceptable reporting quality."
@@ -193,6 +207,7 @@ class AdversarialCommittee:
             bear_concerns=bear_concerns,
             beneish_m_score=m_res,
             altman_z_score=z_res,
-            formal_invariants_satisfied=inv_check.is_valid,
+            formal_invariants_satisfied=identities_hold,
+            checks=checks,
             summary_verdict=verdict,
         )

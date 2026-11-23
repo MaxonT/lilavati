@@ -55,6 +55,11 @@ class SEC10KFilingAnalysisState(FinancialState):
     total_assets_curr: float = 0.0
     total_liabilities_curr: float = 0.0
     shareholders_equity_curr: float = 0.0
+    retained_earnings_curr: float = 0.0
+    cogs_curr: float = 0.0
+    cogs_prior: float = 0.0
+    cash_curr: float = 0.0
+    cash_prior: float = 0.0
     cfo_curr: float = 0.0
     capex_curr: float = 0.0
     fcf_curr: float = 0.0
@@ -113,9 +118,16 @@ def build_sec_10k_pipeline() -> FinancialStateGraph:
         state.total_assets_curr = m_c.balance_sheet.total_assets
         state.total_liabilities_curr = m_c.balance_sheet.total_liabilities
         state.shareholders_equity_curr = m_c.balance_sheet.total_equity
+        state.retained_earnings_curr = m_c.balance_sheet.retained_earnings
+        state.cogs_curr, state.cogs_prior = m_c.income_statement.cogs, m_p.income_statement.cogs
+        # Apple reports no restricted cash, so balance sheet cash equals the cash flow statement's
+        # balances (36,305 and 35,934); the parser's own cash check uses the latter.
+        state.cash_curr, state.cash_prior = m_c.balance_sheet.cash_and_equivalents, m_p.balance_sheet.cash_and_equivalents
 
         state.cfo_curr = m_c.cash_flow_statement.cfo
-        state.capex_curr = abs(m_c.cash_flow_statement.cfi)  # CapEx magnitude
+        if filing_data.capex_current_year is None:
+            raise ValueError("capital expenditure not found in the cash flow statement")
+        state.capex_curr = filing_data.capex_current_year  # the capex line, not total investing cash flow
         state.fcf_curr = m_c.cash_flow_statement.cfo - state.capex_curr
 
         # Ground provenance citations
@@ -165,15 +177,16 @@ def build_sec_10k_pipeline() -> FinancialStateGraph:
         console.print(
             "[cyan]➜ Node 3: Executing Forensic Quality of Earnings & Solvency Audit...[/cyan]"
         )
-        # 1. Beneish M-Score & Altman Z-Score via Adversarial Committee Engine
+        # 1. Beneish M-Score & Altman Z-Score via the rule-based committee. Figures not read by the
+        # parser are Apple's FY2026 10-K values (SEC XBRL, accession 0000320193-26-000026), USD millions.
         memo = AdversarialCommittee.evaluate_company(
             symbol="AAPL",
             fiscal_year=2026,
             bull_revenue_growth_target=0.10,
             revenue_t=state.revenue_curr,
             revenue_t_minus_1=state.revenue_prior,
-            cogs_t=state.revenue_curr - state.gross_margin_curr,
-            cogs_t_minus_1=state.revenue_prior * 0.55,
+            cogs_t=state.cogs_curr,
+            cogs_t_minus_1=state.cogs_prior,
             receivables_t=43817.0,
             receivables_t_minus_1=39777.0,
             current_assets_t=173857.0,
@@ -194,7 +207,13 @@ def build_sec_10k_pipeline() -> FinancialStateGraph:
             cfo_t=state.cfo_curr,
             cfi_t=-17280.0,
             cff_t=-127446.0,
-            market_value_equity=3500000.0,
+            market_value_equity=3500000.0,  # assumed market capitalisation (USD 3.5 trillion), not in the 10-K
+            total_liabilities_t=state.total_liabilities_curr,
+            shareholders_equity_t=state.shareholders_equity_curr,
+            retained_earnings_t=state.retained_earnings_curr,
+            operating_income_t=state.operating_income_curr,
+            cash_start_t=state.cash_prior,
+            cash_end_t=state.cash_curr,
         )
 
         state.beneish_m_score = memo.beneish_m_score.m_score
@@ -220,6 +239,7 @@ def build_sec_10k_pipeline() -> FinancialStateGraph:
         # FCF conversion quality
         state.fcf_conversion_ratio = state.cfo_curr / state.net_income_curr
         # Shareholder returns from 10-K CF statement
+        # From the 10-K cash flow statement (SEC XBRL PaymentsForRepurchaseOfCommonStock, PaymentsOfDividends)
         state.share_repurchases_curr = 86390.0
         state.dividends_curr = 15721.0
         state.shareholder_cash_return = state.share_repurchases_curr + state.dividends_curr
