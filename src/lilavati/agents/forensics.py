@@ -168,7 +168,18 @@ class ForensicEngine:
         """
         Calculates the Altman Z-Score for manufacturing/corporate firms:
         Z = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 0.999*X5
+
+        Raises ``ValueError`` if ``total_assets`` or ``total_liabilities`` is zero, since the
+        ratios are undefined then.
         """
+        if total_assets == 0:
+            raise ValueError(
+                "total_assets must be non-zero: the Altman Z-score ratios X1, X2, X3 and X5 divide by it."
+            )
+        if total_liabilities == 0:
+            raise ValueError(
+                "total_liabilities must be non-zero: the Altman Z-score ratio X4 divides by it."
+            )
         x1 = working_capital / total_assets
         x2 = retained_earnings / total_assets
         x3 = ebit / total_assets

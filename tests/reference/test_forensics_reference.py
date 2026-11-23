@@ -34,3 +34,10 @@ def test_distress_zone_value() -> None:
     z, zone = _z(market_value_equity=0.0, sales=500.0)
     # 0.12 + 0.28 + 0.33 + 0 + 0.4995 = 1.2295
     assert z == pytest.approx(1.2295, abs=1e-12) and zone == "Distress"
+
+
+@pytest.mark.parametrize("field", ["total_assets", "total_liabilities"])
+def test_zero_denominator_raises_value_error_naming_the_input(field: str) -> None:
+    # A zero denominator used to surface as a bare ZeroDivisionError with no hint which input was bad.
+    with pytest.raises(ValueError, match=field):
+        _z(**{field: 0.0})
