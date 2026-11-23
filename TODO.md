@@ -104,15 +104,18 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       announcement are in. Do not push a `v*` tag before the trusted publisher is registered: it
       triggers `release.yml`, whose PyPI upload would fail (7.10, 7.18).
 - [ ] External review by one practitioner and one software reviewer (7.17), or announce explicitly as
-      "alpha, seeking review" and link the known limitations.
+      "alpha, seeking review" and link the known limitations. Reviewer email and LinkedIn drafts written
+      2026-11-23 (maintainer sends them).
 - [ ] Announcement text and channels (not drafted yet); link the docs site, getting-started page and
       known limitations.
-- [ ] Open the first-contribution tasks from `docs/contributing.md` as GitHub issues labelled
-      `good first issue`, so new contributors can find them.
+- [x] First-contribution tasks opened as GitHub issues (2026-11-23): #6–#13 `good first issue`,
+      #14–#16 `help wanted` (engine audits).
 
 **Recommended at or soon after the announcement**
 - [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot.
-- [ ] Branch protection on `main` requiring CI to pass; GitHub repository description and topics.
+- [x] Branch protection on `main` (2026-11-23): CI jobs test (3.11), test (3.12) and docs-and-evidence
+      required, also for admins; no force pushes or deletion.
+- [ ] GitHub repository description and topics.
 - [ ] Optionally enable GitHub Discussions for questions.
 
 **Disclosed limitations (follow-up work, not blockers)**
