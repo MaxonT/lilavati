@@ -21,7 +21,7 @@ from pypdf import PdfReader
 
 from lilavati.connectors.sec_filing import IdentityCheck
 from lilavati.core.invariants import SuvarnaEngine
-from lilavati.core.provenance import CitationRef
+from lilavati.core.provenance import CitationRef, SourceStore
 from lilavati.schemas.statements import (
     BalanceSheet,
     CashFlowStatement,
@@ -79,7 +79,10 @@ class ExtractedFiling10K(BaseModel):
 
 
 class PDF10KParser:
-    """Institutional SEC Form 10-K PDF Parser & Invariant Extractor."""
+    """SEC Form 10-K PDF parser: statement line items with page citations and identity checks.
+
+    Text comes from pypdf; the row labels are Apple's (validated on its FY2026 10-K only).
+    """
 
     def __init__(self, file_path_or_url: str, cache_dir: str = "data/sample_filings") -> None:
         self.source = file_path_or_url
@@ -91,6 +94,11 @@ class PDF10KParser:
         self.reader = PdfReader(str(self.local_path))
         self.page_count = len(self.reader.pages)
         self._sections: SectionBoundaries | None = None
+
+    def register_in(self, store: SourceStore) -> str:
+        """Register this filing (bytes and page text) in ``store`` so ``ProvenanceGate(store)`` can
+        resolve its citations: the hash must match and each snippet must be on its cited page."""
+        return store.add_document(self.doc_bytes, [self.reader.pages[i].extract_text() for i in range(self.page_count)])
 
     def _resolve_local_path(self, path_or_url: str) -> Path:
         """Resolves a local path or downloads remote PDF to local cache."""

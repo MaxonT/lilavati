@@ -8,8 +8,6 @@ models where every single line item is cryptographically grounded with a Citatio
 
 from __future__ import annotations
 
-import hashlib
-import json
 import os
 from datetime import date, timedelta
 from typing import Any
@@ -241,10 +239,7 @@ class EdgarClient:
             f_date = date.fromisoformat(filing_date_str)
             p_end = date.fromisoformat(end_date_str)
 
-            # Hash of the fact record itself (see sec_filing.fact_hash), so the citation can be checked
-            doc_hash = hashlib.sha256(
-                json.dumps(chosen, sort_keys=True, separators=(",", ":")).encode()
-            ).hexdigest()
+            doc_hash = fact_hash(chosen)  # the fact record itself, so the citation can be checked
 
             citation = CitationRef(
                 doc_hash=doc_hash,

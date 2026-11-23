@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from lilavati.connectors.sec_filing import IdentityCheck
 from lilavati.core.invariants import SuvarnaEngine
-from lilavati.core.provenance import CitationRef, SourcedValue
+from lilavati.core.provenance import CitationRef, SourcedValue, SourceStore
 from lilavati.schemas.statements import (
     BalanceSheet,
     CashFlowStatement,
@@ -244,8 +244,7 @@ class IndiaFilingsClient:
             cash_reconciled=checks[-1].holds,
         )
 
-        # Hash of the disclosure as supplied (canonical JSON), the only source this parser sees
-        doc_hash = hashlib.sha256(disclosure.model_dump_json().encode()).hexdigest()
+        doc_hash = disclosure_hash(disclosure)  # the disclosure as supplied: the only source this parser sees
         cited = set(used.values()) | set(cogs_keys) | set(debt_keys)
         if "tax_expense" in derived:
             cited |= set(IndiaFilingsClient.TAX_COMPONENTS)
@@ -258,3 +257,15 @@ class IndiaFilingsClient:
                 xbrl_tag=f"mca-ind-as:{key}", raw_snippet=f"{val:,.0f} {disclosure.currency} (CIN: {disclosure.cin})"))
         return IndASParseResult(statement_model=model, sourced_facts=sourced, derived=derived,
                                 not_reported=not_reported, checks=checks)
+
+
+def disclosure_hash(disclosure: IndASCompanyDisclosure) -> str:
+    """SHA-256 of the disclosure as supplied (canonical JSON): the ``doc_hash`` of its citations."""
+    return hashlib.sha256(disclosure.model_dump_json().encode()).hexdigest()
+
+
+def register_disclosure(store: SourceStore, disclosure: IndASCompanyDisclosure) -> str:
+    """Register the disclosure in ``store`` so that ``ProvenanceGate(store)`` can resolve its citations."""
+    doc_hash = disclosure_hash(disclosure)
+    store.add_tagged_values(doc_hash, {f"mca-ind-as:{k}": v * disclosure.scale for k, v in disclosure.facts.items()})
+    return doc_hash

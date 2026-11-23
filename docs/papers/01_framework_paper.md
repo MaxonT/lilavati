@@ -181,7 +181,7 @@ where:
 * $p \in \mathbb{N}_{\ge 1}$ is the 1-based page within a PDF document; it is absent for XBRL facts, which have no pages.
 * $\sigma_{verbatim}$ is the exact textual substring or table cell extracted from the source filing.
 
-The `ProvenanceGate` rejects claims whose citation is malformed (a hash that is not 64 characters, a page below 1, an empty snippet). Resolving a citation against a store of source hashes is not yet implemented.
+The `ProvenanceGate` rejects claims whose citation is malformed (a hash that is not 64 characters, a page below 1, an empty snippet). Given a `SourceStore` of the sources a pipeline actually read, it also resolves each citation: the hash must be a registered source; for an XBRL fact, the tag, period end, filing date and value must match the fact record; for a document, the snippet must appear on the cited page; for a structured disclosure, the value must equal the disclosed one. Without a store only the form is checked. An XBRL fact record carries no concept name, so concepts reported with identical records share a hash and the citation's tag is part of the reference.
 
 ### 3.4 Bi-Temporal Isolation and Point-in-Time Queries
 To formally eliminate look-ahead bias, Līlāvatī implements a bi-temporal warehouse on DuckDB. Every relational record is bound by a two-dimensional temporal interval:
