@@ -45,3 +45,23 @@ def test_mcp_setup_tool_table_matches_the_servers() -> None:
         server = next(v for v in vars(mod).values() if isinstance(v, FastMCP))
         registered = sorted(t.name for t in asyncio.run(server.list_tools()))
         assert table[cmd] == registered, cmd
+
+
+def test_every_tool_declares_all_four_hints_truthfully() -> None:
+    # Hosts use these to warn users, and some directories reject tools missing any of them (an
+    # external scan of an earlier commit reported every tool without hints). All tools only compute
+    # or read; only the SEC tools reach the network.
+    network = {"get_company_filing_statements", "extract_single_line_item", "get_filing_figures"}
+    seen = 0
+    for module in SERVERS:
+        mod = importlib.import_module(f"lilavati.mcp_servers.{module}")
+        server = next(v for v in vars(mod).values() if isinstance(v, FastMCP))
+        for tool in asyncio.run(server.list_tools()):
+            a = tool.annotations
+            assert a is not None, tool.name
+            hints = (a.read_only_hint, a.destructive_hint, a.idempotent_hint, a.open_world_hint)
+            assert all(isinstance(h, bool) for h in hints), (tool.name, hints)
+            assert a.read_only_hint and not a.destructive_hint and a.idempotent_hint, tool.name
+            assert a.open_world_hint == (tool.name in network), tool.name
+            seen += 1
+    assert seen == 25
