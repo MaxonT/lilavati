@@ -127,6 +127,7 @@ class FixedIncomeEngine:
         * Valuation is on a coupon date: the bond has ``round(years_to_maturity * frequency)``
           whole periods left and no accrued interest, so clean = dirty price. A maturity that is
           not a whole number of periods is rounded; stubs and accrued interest are not modelled.
+          A maturity that rounds to zero periods raises ``ValueError``.
         * Price and DV01 are in the units of ``face_value`` (per 100 par only when
           ``face_value=100``).
         * Macaulay and modified duration are in years; modified = Macaulay / (1 + ytm/frequency).
@@ -137,6 +138,12 @@ class FixedIncomeEngine:
           second-order estimate of P(y+1bp) - P(y), which differs by 0.5 * C * P * 1e-8.
         """
         n_periods = int(round(years_to_maturity * frequency))
+        if n_periods < 1:
+            raise ValueError(
+                f"years_to_maturity={years_to_maturity} with frequency={frequency} leaves no whole "
+                "coupon period (the maturity is rounded to whole periods); use a maturity of more than half a "
+                "coupon period, or a larger frequency."
+            )
         coupon = (face_value * coupon_rate) / frequency
         period_yield = ytm / frequency
 
