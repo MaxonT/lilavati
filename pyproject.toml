@@ -92,7 +92,7 @@ lilavati-mcp-sustainability = "lilavati.mcp_servers.sustainability_server:main"
 
 [project.urls]
 Homepage = "https://github.com/revendrat/lilavati"
-Documentation = "https://github.com/revendrat/lilavati#readme"
+Documentation = "https://revendrat.github.io/lilavati/"
 Repository = "https://github.com/revendrat/lilavati.git"
 Issues = "https://github.com/revendrat/lilavati/issues"
 

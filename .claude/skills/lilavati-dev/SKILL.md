@@ -58,6 +58,11 @@ right and every claim being true. These rules come from real bugs found in this 
 - **A limit or failure must not look like success.** When a loop stops at a limit, report it
   (`AgentOutput.completed = False`). `max_reflection_iterations` once also capped tool rounds,
   so a 3-step tool plan returned an empty answer with `smt_invariants_verified=True`.
+- **No fabricated fallbacks in agents or connectors.** `FinancialSearchAgent` returned Apple's
+  figures with invented page numbers for any symbol when SEC was unreachable, and the research agent a
+  fixed target price; both looked like results. On missing data return nothing and say why (`notes`),
+  or label an illustrative baseline and list every assumed input. A citation field with no real
+  value is `None`, not a placeholder (`page=1` for XBRL facts, a hash of an identifier string).
 - **No silent clipping or fallbacks** that change the answer (e.g. clipping both numerator and
   denominator of a sinh ratio). Use numerically stable forms (`expm1`, `log1p`, exp-ratio forms).
 - **Thresholds and ratios: compare with a tolerance.** A value exactly at a limit must pass:
@@ -113,6 +118,11 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   The papers carried a non-existent "FinBench" (arXiv:2311.12345, a placeholder id), a citation to a fictional
   "Līlāvatī Benchmark Consortium", wrong years (Toolformer, ReAct) and a wrong author list (TAT-QA). Never cite a
   source you have not looked up; if a detail (e.g. page range) cannot be confirmed, give the DOI instead.
+- **Totals quoted from a table must be recomputed from the results file**, not carried over from an
+  earlier run: the SEC pilot was quoted as "64 of 64" in four places while its table and
+  `results/connectors/sec_filings_pilot.json` said 71 of 71. A page that says it is "generated" or
+  "checked" needs a test that does so (`tests/test_mcp_registry.py` compares the MCP tool table
+  in `docs/mcp-setup.md` with the registered tools).
 - Record audit results in `docs/validation/<engine>.md` (check, reference, measured tolerance,
   status pass / fixed / open) and update `docs/validation/index.md`.
 - Benchmark results: report provider failures (429/503/timeouts/empty replies) separately from
@@ -204,7 +214,6 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   only as an environment variable on the command (`GROQ_API_KEY=... uv run ...`), never write it to
   `.env` or a script, and tell the maintainer to rotate it.
 - Error handling must not echo request URLs or headers.
-- SEC EDGAR requests need a compliant User-Agent; use a generic project contact, never a personal email.
 - Respect provider rate limits (bounded `--max-requests`, resumable runs). The client retries
   429/5xx with backoff (`ModelSpec.max_retries`); scripts with their own retry loop set it to 0.
 - **Every provider path needs a request/response round-trip test** against the provider's
@@ -240,6 +249,7 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 | Sustainability | `core/sustainability.py` | WACI, carbon-tax stress, SLB step-up |
 | Forensics | `agents/forensics.py` | Beneish (1999), Altman (1968) |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
+| Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); fiscal-year three-statement path has placeholder fields; validation `docs/validation/connectors.md` |
 | Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
 | Benchmark | `bench/` | golden cases, seeded generator (`case_content_hash`, `legacy_case_id`), runner, evaluators. `lilavati-bench run` only runs the reference solver (`--model` is a label) |
 | LLM evaluation | `bench/llm_eval.py`, `bench/tool_eval.py`, `bench/analysis.py` | prompts (`PROMPT_VERSION`), parsing, outcome classes; tool arm with grounding; summaries, bootstrap CIs, paired differences. Scripts: `run_llm_baseline.py`, `run_tool_baseline.py`, `build_results_manifest.py`, `analyse_results.py` |
@@ -287,3 +297,8 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-23: SEC filing-anchoring, HTML text, and answer-key rules (Tutorial 08).
 - 2026-11-23: Added the Markdown list and Mermaid rendering rule (lists on the docs home and
   architecture pages ran together; the architecture diagram showed as code).
+- 2026-11-23: Removed the outdated "generic project contact" SEC rule (section 5 now reads the contact
+  from `LILAVATI_SEC_USER_AGENT`); added connectors and MCP-table rules after a docs/code sweep found
+  a total quoted wrong in four places (64 instead of 71) and an MCP tool table that had drifted.
+- 2026-11-23: Added the no-fabricated-fallbacks rule (search and research agents, XBRL citation page
+  and hash).

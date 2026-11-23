@@ -105,7 +105,7 @@ uv run python scripts/validate_sec_filings.py AAPL MSFT WMT JNJ JPM
 ```
 
 For the five companies above, every extracted value appeared in the filing document at the filing's
-scale (64 of 64), and every identity that could be checked held. What the companies do not report
+scale (71 of 71), and every identity that could be checked held. What the companies do not report
 as a tagged line is listed per company on the [connectors validation page](../validation/connectors.md):
 Walmart has no gross profit line, J&J no operating income line, and JPMorgan, a bank, has
 statements of a different shape altogether.
@@ -170,8 +170,10 @@ than statements) are where to look next.
 
 ## Using this with Claude Code and MCP
 
-- **From an AI assistant:** the `lilavati-mcp-corporate-filings` server exposes the EDGAR connector
-  as tools ([MCP setup](../mcp-setup.md)); set `LILAVATI_SEC_USER_AGENT` in the environment the
+- **From an AI assistant:** the `lilavati-mcp-corporate-filings` server's `get_filing_figures` tool
+  runs the flow of Steps 2 and 3 for any listed company (`form` "10-K" or "10-Q"; `filings_back` 0
+  for the latest) and returns the cited values, the missing items, the identity checks and the
+  ratios ([MCP setup](../mcp-setup.md)). Set `LILAVATI_SEC_USER_AGENT` in the environment the
   server runs in.
 - **Contributing:** the [`lilavati-dev` skill](https://github.com/revendrat/lilavati/blob/main/.claude/skills/lilavati-dev/SKILL.md)
   holds the parsing and data rules learned here (anchor on the filing, list missing items, check a

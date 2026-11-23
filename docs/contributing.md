@@ -38,6 +38,8 @@ These are real open items from the [validation pages](validation/index.md) and t
 | Audit HRP against López de Prado (2016) | `core/execution.py` | reference test, validation page |
 | Add a KPSS stationarity test | `core/econometrics.py` | engine function, reference test against statsmodels and a textbook value, MCP tool |
 | Use `net_income` in the three-statement check (retained-earnings roll-forward) | `core/invariants.py` | new identity, tests including an at-limit case |
+| Add `effective_tax_rate` (income tax / pretax income) to `filing_ratios` | `connectors/sec_filing.py` | function and a test on the Apple fixture with the value from the 10-K |
+| Run the SEC pilot on companies from one sector and report what is missing | `scripts/validate_sec_filings.py` | a row per company on the [connectors page](validation/connectors.md), from the script's output |
 | Improve a tutorial exercise, or add one | `docs/tutorials/` | the code runs under `check_tutorials.py` |
 
 Comment on (or open) an issue before a large change, so work is not duplicated.

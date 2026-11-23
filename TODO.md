@@ -117,7 +117,14 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 
 **Disclosed limitations (follow-up work, not blockers)**
 - [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
-- [ ] Live-data validation of the connectors (7.5); purged cross-validation (7.4).
+- [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
+      10-K PDF parser and Ind AS still open. Purged cross-validation (7.4).
+- [ ] Replace the fiscal-year three-statement path (placeholder fields) with the filing-anchored one.
+- [ ] Ind AS crosswalk: list missing keys instead of 0.0, and check cash reconciliation instead of
+      setting it to True.
+- [ ] Resolve citations against a store of source hashes in `ProvenanceGate` (today it checks form only).
+- [ ] `FinancialResearchAgent` is a workflow demonstration on assumed inputs; replace the assumptions
+      with filing data (prior year, receivables, debt) or retire it.
 - [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).
 - [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22).
 
@@ -134,7 +141,8 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 ## Phase 10 (months 3–6): narrow data commons, driven by the benchmark
 
 - [ ] Licence review per source (see corrections); record the result in a dataset card.
-- [ ] Connectors: SEC EDGAR company facts, ALFRED vintages, World Bank.
+- [ ] Connectors: SEC EDGAR company facts (filing-anchored extraction done, 2026-11-23), ALFRED vintages,
+      World Bank.
 - [ ] Curated India set (about 20 companies) with provenance and licence notes per source.
 - [ ] Minimal ontology: about 30 canonical metrics used by the benchmark and tutorials, mapped
       across US GAAP, IFRS and Ind AS, with consolidated/standalone, audited/unaudited, reported/derived,

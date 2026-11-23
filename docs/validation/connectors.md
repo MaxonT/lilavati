@@ -60,6 +60,26 @@ Revenue is total revenues as reported: the `Revenues` tag first, then contract r
 sales, 706,413, as contract revenue and total revenues including membership income, 713,163, as
 `Revenues`; found when all four models in Tutorial 08 "missed" Walmart's revenue the same way).
 Raw output: `results/connectors/sec_filings_pilot.json`. LLM comparison on the same filings:
-[Tutorial 08](../tutorials/08_real_10k_llm_vs_lilavati.md), raw replies in `results/filings/`. Open items: banks and insurers need their
-own templates; extension (company-specific) tags are reported as missing, not mapped; 10-Q, 10-K/A
-and restated comparatives are not yet covered; five companies is a pilot, not a validation set.
+[Tutorial 08](../tutorials/08_real_10k_llm_vs_lilavati.md), raw replies in `results/filings/`. The same flow is
+the MCP tool `get_filing_figures` (`lilavati-mcp-corporate-filings`), which also resolves any listed
+ticker through SEC's company list.
+
+Open items:
+
+- Banks and insurers need their own templates.
+- Extension (company-specific) tags are reported as missing, not mapped.
+- 10-Q filings are supported but not validated; their cash-flow items are year-to-date, not
+  quarterly, so the quarterly duration rule lists them as missing (seen on Apple's 10-Q for the
+  quarter ended 2026-06-27).
+- 10-K/A and restated comparatives are not covered.
+- The older fiscal-year path (`EdgarClient.extract_three_statement_model`, MCP tool
+  `get_company_filing_statements`) fills untagged statement-model fields with placeholders
+  (inventory 0, missing interest or tax 0, retained earnings set to net income); its cited facts are
+  reported values, the filled fields are not. To be replaced by the filing-anchored path.
+- The Ind AS crosswalk (`IndiaFilingsClient.parse_ind_as_disclosure`) fills missing keys with 0.0 and
+  cites them, and sets `cash_reconciled=True` without a check. Not validated; do not rely on it.
+- Five companies is a pilot, not a validation set.
+
+**Citations.** An XBRL fact's citation carries the SHA-256 of the fact record as SEC serves it
+(canonical JSON, `sec_filing.fact_hash`): re-fetch the company facts, find the record and hash it to
+check. XBRL facts have no page, so `page` is `None` (it used to be a placeholder 1).
