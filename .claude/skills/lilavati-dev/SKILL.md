@@ -240,6 +240,9 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   `langchain-mcp-adapters` requires `mcp<2` but fastmcp 4 needs `mcp>=2.3`, so the LangGraph
   example runs with `uv run --no-project --with ...` and starts the servers as subprocesses. Do
   not pin around such conflicts inside the project; check `uv tree --invert --package <pkg>`.
+- **Every MCP tool declares all four hints** (`readOnlyHint`, `destructiveHint`, `idempotentHint`,
+  `openWorldHint`) as booleans matching what it does; `openWorldHint` is true only for tools that
+  reach the network (the SEC tools). `tests/test_mcp_registry.py` enforces it.
 - **Integration examples must prove tool use**: assert the final answer quotes the tool-returned
   numbers (`examples/integrations/_task.py::check_answer`), and report flaky runs honestly.
 - Free-tier Gemini endpoints return 503 "high demand" often: use generous backoff
@@ -324,3 +327,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   examples added to the derived-inputs rule; `india_filings.py` in the repo map.
 - 2026-11-23: Content-hash rule after building `SourceStore` (identical XBRL records share a hash;
   tolerance for source amounts); repo map lists `SourceStore`.
+- 2026-11-23: MCP tool hints rule (test-enforced) after an external scan of an old commit.

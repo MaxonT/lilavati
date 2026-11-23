@@ -22,6 +22,7 @@ These changes ship in 0.2.0 when it is tagged (the version in `pyproject.toml` i
 - The framework paper said the `ProvenanceGate` resolves citations against a document hash store; it checks only that a citation is well formed.
 - Pilot total quoted as "64 of 64" in the changelog, roadmap, Tutorial 08 and release notes; the pilot table and results file give 71 of 71.
 ### Docs
+- README: verified M8ven publisher badge. A test now requires all four MCP tool hints (read-only, destructive, idempotent, open-world) as booleans on every tool, with open-world true only for the SEC tools (an external scan of a 13 November commit reported the hints missing; they were added since).
 - Lists on the docs home, architecture and paper pages rendered as run-on paragraphs (no blank line before them); the architecture diagram rendered as code (Mermaid fence not configured). The architecture page named local models that do not exist as presets.
 - Install from GitHub until the PyPI release (README, getting-started, release notes); docs site description no longer says "audited"; `site_url` and the package's documentation URL point at the docs site.
 - MCP setup: the SEC contact variable, the new tool, and a test that the tool table matches the servers. Connectors validation page: 10-Q year-to-date cash flows listed as an open item; three-statement model results.
