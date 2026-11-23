@@ -5,8 +5,10 @@ Exposes tools to fetch, parse, and check (Z3, on the reported numbers) company t
 with cryptographic CitationRefs.
 
 `get_filing_figures` is the filing-anchored path validated in Tutorial 08 and
-docs/validation/connectors.md (identify the filing, then use only its own XBRL facts). The two
-fiscal-year tools select by the `fy` tag with an annual-duration and latest-period rule.
+docs/validation/connectors.md (identify the filing, then use only its own XBRL facts).
+`get_company_filing_statements` identifies the fiscal year's 10-K the same way and maps its facts
+into the three-statement model. `extract_single_line_item` selects by the `fy` tag with an
+annual-duration and latest-period rule.
 SEC requires a contact: set LILAVATI_SEC_USER_AGENT="Your Name you@example.org" in the server's
 environment.
 """
@@ -38,18 +40,28 @@ def get_company_filing_statements(
     fiscal_year: int,
 ) -> dict[str, Any]:
     """
-    Fetches structured XBRL 10-K facts from SEC EDGAR for a company and fiscal year and maps them
-    into a three-statement model. The cited facts are in "sourced_facts". The statement model fills
-    items the company does not tag with placeholders (inventory 0, missing interest or tax 0,
-    retained earnings set to net income, operating income set to net income if untagged), so do
-    not read those fields as reported. Prefer get_filing_figures, which lists missing items instead.
+    A company's 10-K for one fiscal year mapped into a three-statement model, from that filing's
+    own XBRL facts (US dollars as reported, not scaled).
+
+    Every statement field is either reported (cited in "sourced_facts", tag in "tags_used"), derived
+    from reported items by the formula given in "derived" (e.g. total_debt, or total_liabilities when
+    the company tags only the liabilities-and-equity total), or listed in "not_reported" (0.0 in the
+    model: receivables, inventory, payables, interest, tax). "sga_expense" is all operating expenses
+    (gross profit minus operating income), not the reported SG&A line. "checks" holds the balance
+    sheet and cash reconciliation checks on the reported numbers. Returns {"error": ...} when the
+    filing lacks an item the model needs (banks report no operating income); get_filing_figures
+    then returns what the filing does report.
     """
-    client = EdgarClient()
-    sourced_model = client.extract_three_statement_model(
-        ticker_or_cik=ticker_or_cik,
-        fiscal_year=fiscal_year,
-    )
-    return sourced_model.model_dump()
+    try:
+        sourced_model = EdgarClient().extract_three_statement_model(
+            ticker_or_cik=ticker_or_cik,
+            fiscal_year=fiscal_year,
+        )
+    except (ValueError, FileNotFoundError, RuntimeError) as e:
+        return {"error": str(e)}
+    out = sourced_model.model_dump(mode="json")
+    out["filing"]["url"] = sourced_model.filing.url
+    return out
 
 
 @mcp.tool(

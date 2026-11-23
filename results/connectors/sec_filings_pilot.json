@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-11-22T18:38:51+00:00",
+  "created_utc": "2026-11-23T07:19:30+00:00",
   "companies": [
     {
       "ticker": "AAPL",
@@ -114,7 +114,47 @@
           "difference": 0.0,
           "detail": "income statement subtotal"
         }
-      ]
+      ],
+      "statement_model": {
+        "fiscal_year": 2026,
+        "reported": 28,
+        "reported_in_document": 28,
+        "not_found_in_document": [],
+        "derived": {
+          "total_debt": "long_term_debt + commercial_paper",
+          "sga_expense": "gross_profit - operating_income (all operating expenses, not the SG&A line)",
+          "net_change_in_cash": "operating + investing + financing cash flow"
+        },
+        "not_reported": [
+          "interest_expense"
+        ],
+        "checks": [
+          {
+            "name": "assets = liabilities + equity",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+          },
+          {
+            "name": "assets = total liabilities and equity",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "both totals as tagged"
+          },
+          {
+            "name": "revenue - cost of revenue = gross profit",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "income statement subtotal"
+          },
+          {
+            "name": "opening cash + cash flows = closing cash",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "cash_incl_restricted; CFO + CFI + CFF + exchange-rate effect (exchange-rate effect not tagged, taken as 0)"
+          }
+        ]
+      }
     },
     {
       "ticker": "MSFT",
@@ -229,7 +269,44 @@
           "difference": 0.0,
           "detail": "income statement subtotal"
         }
-      ]
+      ],
+      "statement_model": {
+        "fiscal_year": 2026,
+        "reported": 29,
+        "reported_in_document": 29,
+        "not_found_in_document": [],
+        "derived": {
+          "sga_expense": "gross_profit - operating_income (all operating expenses, not the SG&A line)",
+          "net_change_in_cash": "operating + investing + financing cash flow"
+        },
+        "not_reported": [],
+        "checks": [
+          {
+            "name": "assets = liabilities + equity",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "Z3 on the reported numbers; equity includes non-controlling interests when tagged"
+          },
+          {
+            "name": "assets = total liabilities and equity",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "both totals as tagged"
+          },
+          {
+            "name": "revenue - cost of revenue = gross profit",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "income statement subtotal"
+          },
+          {
+            "name": "opening cash + cash flows = closing cash",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "cash_incl_restricted; CFO + CFI + CFF + exchange-rate effect"
+          }
+        ]
+      }
     },
     {
       "ticker": "WMT",
@@ -328,7 +405,38 @@
           "difference": 0.0,
           "detail": "both totals as tagged"
         }
-      ]
+      ],
+      "statement_model": {
+        "fiscal_year": 2026,
+        "reported": 29,
+        "reported_in_document": 29,
+        "not_found_in_document": [],
+        "derived": {
+          "total_liabilities": "liabilities_and_equity - total_equity",
+          "gross_profit": "revenue - cost_of_revenue",
+          "common_equity": "common_stock + additional_paid_in_capital",
+          "total_debt": "long_term_debt + short_term_borrowings",
+          "sga_expense": "gross_profit - operating_income (all operating expenses, not the SG&A line)",
+          "net_change_in_cash": "operating + investing + financing cash flow"
+        },
+        "not_reported": [
+          "interest_expense"
+        ],
+        "checks": [
+          {
+            "name": "assets = total liabilities and equity",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "both totals as tagged"
+          },
+          {
+            "name": "opening cash + cash flows = closing cash",
+            "holds": true,
+            "difference": 0.0,
+            "detail": "cash_incl_restricted; CFO + CFI + CFF + exchange-rate effect"
+          }
+        ]
+      }
     },
     {
       "ticker": "JNJ",
@@ -439,7 +547,11 @@
           "difference": 0.0,
           "detail": "income statement subtotal"
         }
-      ]
+      ],
+      "statement_model": {
+        "fiscal_year": 2025,
+        "refused": "JNJ FY2025 (0000200406-26-000016): the filing does not report operating_income, common_stock_and_apic (or common_stock and additional_paid_in_capital), needed for the three-statement model. get_filing_figures returns the items it does report."
+      }
     },
     {
       "ticker": "JPM",
@@ -520,7 +632,11 @@
           "difference": 0.0,
           "detail": "both totals as tagged"
         }
-      ]
+      ],
+      "statement_model": {
+        "fiscal_year": 2025,
+        "refused": "JPM FY2025 (0001628280-26-008131): the filing does not report operating_income, cash, net_ppe, cost_of_revenue or gross_profit, needed for the three-statement model. get_filing_figures returns the items it does report."
+      }
     }
   ]
 }

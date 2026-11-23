@@ -72,13 +72,40 @@ Open items:
   quarterly, so the quarterly duration rule lists them as missing (seen on Apple's 10-Q for the
   quarter ended 2026-06-27).
 - 10-K/A and restated comparatives are not covered.
-- The older fiscal-year path (`EdgarClient.extract_three_statement_model`, MCP tool
-  `get_company_filing_statements`) fills untagged statement-model fields with placeholders
-  (inventory 0, missing interest or tax 0, retained earnings set to net income); its cited facts are
-  reported values, the filled fields are not. To be replaced by the filing-anchored path.
 - The Ind AS crosswalk (`IndiaFilingsClient.parse_ind_as_disclosure`) fills missing keys with 0.0 and
   cites them, and sets `cash_reconciled=True` without a check. Not validated; do not rely on it.
 - Five companies is a pilot, not a validation set.
+
+**Three-statement model** (`EdgarClient.extract_three_statement_model`, MCP tool
+`get_company_filing_statements`). It used to select facts by fiscal year and fill what it did not
+find: inventory 0, missing interest or tax 0, retained earnings set to net income, operating income
+set to net income when untagged, and opening cash back-solved from the cash flows so that
+`cash_reconciled` was always `True`. On Apple's FY2026 10-K it returned retained earnings 132,175
+(net income; the balance sheet says 13,700), common equity −20,082 (104,815), inventory 0 (14,541)
+and total debt 68,208 (non-current term debt only; 80,111 with the current portion and commercial
+paper); J&J's operating income came back as its net income (26,804).
+
+It now identifies the fiscal year's 10-K from the company facts (`sec_filing.filing_for_fiscal_year`;
+the same accession as SEC's submissions index for all 30 fiscal years of the five companies that the
+index lists) and uses only that filing's facts. Each field is reported and cited, derived from
+reported items by a formula recorded in `derived` (for example Walmart's total liabilities: total
+liabilities and equity minus total equity), or, for receivables, inventory, payables, interest and
+tax, listed in `not_reported`. When a required item is not reported it raises and names it. The cash
+check is real: opening cash (the prior period-end comparative in the same filing) plus operating,
+investing and financing cash flow plus the exchange-rate effect must equal closing cash. Balance
+checks use reported totals only, so a derived total cannot confirm itself.
+
+| Company | Fiscal year | Reported values found in the 10-K | Derived | Not reported | Checks |
+| :--- | :--- | ---: | :--- | :--- | :--- |
+| Apple | 2026 | 28 of 28 | total debt, operating expenses, net change in cash | interest expense | 4 of 4 hold |
+| Microsoft | 2026 | 29 of 29 | operating expenses, net change in cash | none | 4 of 4 hold |
+| Walmart | 2026 | 29 of 29 | total liabilities, gross profit, common equity, total debt, operating expenses, net change in cash | interest expense | 2 of 2 hold |
+| Johnson & Johnson | 2025 | refused: no operating income, no paid-in capital line | | | |
+| JPMorgan Chase | 2025 | refused: no operating income, cash, net PP&E or cost of revenue (bank) | | | |
+
+"Operating expenses" fills the schema's `sga_expense` (gross profit minus operating income): it
+includes R&D and is not the reported SG&A line. Source: `scripts/validate_sec_filings.py`, section
+`statement_model` of `results/connectors/sec_filings_pilot.json`.
 
 **Citations.** An XBRL fact's citation carries the SHA-256 of the fact record as SEC serves it
 (canonical JSON, `sec_filing.fact_hash`): re-fetch the company facts, find the record and hash it to

@@ -157,22 +157,27 @@ def mock_aapl_facts() -> dict[str, Any]:
     }
 
 
-def test_mcp_corporate_filings_get_statements(mock_aapl_facts: dict[str, Any]) -> None:
-    client = EdgarClient()
-    real_model = client.extract_three_statement_model(
-        "AAPL", fiscal_year=2024, facts=mock_aapl_facts
-    )
+def test_mcp_corporate_filings_get_statements() -> None:
+    import json
+    from pathlib import Path
+
+    facts = json.loads((Path(__file__).parent / "fixtures" / "aapl_companyfacts_statements_fy2026.json").read_text())
+    real_model = EdgarClient().extract_three_statement_model("AAPL", fiscal_year=2026, facts=facts)
 
     with patch("lilavati.mcp_servers.corporate_filings_server.EdgarClient") as mock_client_cls:
         mock_instance = MagicMock()
         mock_instance.extract_three_statement_model.return_value = real_model
         mock_client_cls.return_value = mock_instance
 
-        res = get_company_filing_statements(ticker_or_cik="AAPL", fiscal_year=2024)
-        assert res["ticker"] == "AAPL"
-        assert res["fiscal_year"] == 2024
-        assert res["is_formally_verified"] is True
-        assert res["statement_model"]["income_statement"]["revenue"] == 391035000000.0
+        res = get_company_filing_statements(ticker_or_cik="AAPL", fiscal_year=2026)
+        json.dumps(res)  # JSON-serialisable for MCP
+        assert res["fiscal_year"] == 2026 and res["is_formally_verified"] is True
+        assert res["statement_model"]["income_statement"]["revenue"] == 478_834_000_000
+        assert res["not_reported"] == ["interest_expense"]
+        assert res["filing"]["url"].endswith("/000032019326000026/")
+
+        mock_instance.extract_three_statement_model.side_effect = ValueError("does not report operating_income")
+        assert "operating_income" in get_company_filing_statements("JNJ", 2025)["error"]
 
 
 def test_mcp_corporate_filings_extract_line_item(mock_aapl_facts: dict[str, Any]) -> None:

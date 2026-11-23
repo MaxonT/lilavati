@@ -4,7 +4,8 @@ For each ticker: resolve the CIK (SEC company list), take the latest 10-K from t
 index, extract the canonical line items from that filing's own XBRL facts
 (`lilavati.connectors.sec_filing`), check the accounting identities, then cross-check every value
 against the filing document itself: the number must appear in the 10-K's text at the scale the
-filing uses (millions or thousands).
+filing uses (millions or thousands). The same check is run on the three-statement model built from
+the filing (`lilavati.connectors.edgar.statement_model_from_filing`), or its refusal is recorded.
 
 Needs a real contact for SEC (fair-access policy), read only from the environment:
 
@@ -27,7 +28,13 @@ from typing import Any
 
 import httpx
 
-from lilavati.connectors.sec_filing import document_text, extract_filing, filings_from_submissions
+from lilavati.connectors.edgar import statement_model_from_filing
+from lilavati.connectors.sec_filing import (
+    FilingRef,
+    document_text,
+    extract_filing,
+    filings_from_submissions,
+)
 
 CACHE = Path("data/cache/sec")
 OUT = Path("results/connectors/sec_filings_pilot.json")
@@ -61,6 +68,22 @@ def appears(value: float, text: str) -> str | None:
     return None
 
 
+def statement_model_check(facts: dict[str, Any], filing: FilingRef, ticker: str, doc: str) -> dict[str, Any]:
+    """The three-statement model for the filing: reported values found in the document, or the refusal."""
+    fy = next(e["fy"] for c in facts["facts"]["us-gaap"].values() for es in c["units"].values() for e in es
+              if e.get("accn") == filing.accession and e.get("fp") == "FY")
+    try:
+        m = statement_model_from_filing(facts, filing, ticker=ticker, fiscal_year=fy)
+    except ValueError as e:
+        return {"fiscal_year": fy, "refused": str(e)}
+    found = {k: appears(sv.value, doc) for k, sv in m.sourced_facts.items()}
+    return {"fiscal_year": fy, "reported": len(found),
+            "reported_in_document": sum(v is not None for v in found.values()),
+            "not_found_in_document": [k for k, v in found.items() if v is None],
+            "derived": m.derived, "not_reported": m.not_reported,
+            "checks": [c.model_dump() for c in m.checks]}
+
+
 def main(tickers: list[str]) -> None:
     companies = json.loads(get("https://www.sec.gov/files/company_tickers.json", "company_tickers.json"))
     by_ticker = {row["ticker"]: str(row["cik_str"]).zfill(10) for row in companies.values()}
@@ -80,13 +103,22 @@ def main(tickers: list[str]) -> None:
             "ticker": ticker, "company": ex.company, "form": filing.form, "accession": filing.accession,
             "period_end": filing.report_date.isoformat(), "filed": filing.filing_date.isoformat(), "url": filing.url,
             "items": items, "missing": ex.missing, "not_found_in_document": not_in_doc,
-            "checks": [c.model_dump() for c in ex.checks]})
+            "checks": [c.model_dump() for c in ex.checks],
+            "statement_model": statement_model_check(facts, filing, ticker, doc)})
         checks = " ".join(f"{'ok' if c.holds else 'FAIL'}" for c in ex.checks)
         print(f"{ticker:5} {ex.company[:28]:28} {filing.report_date} extracted {len(items):2}, missing {len(ex.missing):2}, "
               f"in document {len(items) - len(not_in_doc):2}/{len(items)}, identities [{checks}]")
         if not_in_doc:
             print("      not found in document:", not_in_doc)
         print("      missing:", ex.missing)
+        sm = report["companies"][-1]["statement_model"]
+        if "refused" in sm:
+            print("      statement model refused:", sm["refused"])
+        else:
+            print(f"      statement model FY{sm['fiscal_year']}: reported values in document "
+                  f"{sm['reported_in_document']}/{sm['reported']}, derived {sorted(sm['derived'])}, "
+                  f"not reported {sm['not_reported']}, checks "
+                  + " ".join('ok' if c['holds'] else 'FAIL' for c in sm['checks']))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n")
     print(f"wrote {OUT}")

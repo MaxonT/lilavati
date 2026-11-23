@@ -220,27 +220,6 @@ def test_extract_line_item(mock_aapl_facts: dict[str, Any]) -> None:
     assert len(item.citation.doc_hash) == 64
 
 
-def test_extract_three_statement_model(mock_aapl_facts: dict[str, Any]) -> None:
-    client = EdgarClient()
-    model = client.extract_three_statement_model("AAPL", fiscal_year=2024, facts=mock_aapl_facts)
-
-    assert model.ticker == "AAPL"
-    assert model.fiscal_year == 2024
-    assert model.statement_model.income_statement.revenue == 391035000000.0
-    assert model.statement_model.income_statement.net_income == 93736000000.0
-
-    # Formal Z3 balance verification: Assets (364.98B) == Liabilities (298.15B) + Equity (66.83B)
-    # 298,150,000,000 + 66,830,000,000 = 364,980,000,000
-    assert model.is_formally_verified is True
-    assert model.statement_model.is_balanced is True
-
-    # Every item in sourced_facts carries a valid CitationRef
-    for sourced_val in model.sourced_facts.values():
-        assert len(sourced_val.citation.doc_hash) == 64
-        assert sourced_val.citation.xbrl_tag is not None
-        assert sourced_val.citation.xbrl_tag.startswith("us-gaap:")
-
-
 def test_sec_requests_need_a_user_supplied_contact(monkeypatch) -> None:
     # SEC fair access requires a real contact in the User-Agent (HTTP 403 without one). The
     # client used to send a made-up default; it now reads LILAVATI_SEC_USER_AGENT and refuses
@@ -298,23 +277,7 @@ def test_three_statement_revenue_prefers_total_revenues() -> None:
     item = EdgarClient.extract_line_item(
         facts, ["Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax"], 2026)
     assert item is not None and item.value == 713_163_000_000
-
-    # The three-statement model must ask for the tags in that order.
-    import pytest
-
-    asked: list[list[str]] = []
-
-    def record(facts, candidate_tags, fiscal_year, period="FY"):
-        asked.append(list(candidate_tags))
-        return None
-
-    import unittest.mock
-
-    with (unittest.mock.patch.object(EdgarClient, "extract_line_item", staticmethod(record)),
-          pytest.raises(ValueError, match="Incomplete")):
-        EdgarClient().extract_three_statement_model("0000104169", 2026, facts=facts)
-    revenue_tags = next(t for t in asked if "Revenues" in t)
-    assert revenue_tags.index("Revenues") < revenue_tags.index("RevenueFromContractWithCustomerExcludingAssessedTax")
+    # The three-statement model uses the same order (tests/test_sec_statements.py, Walmart).
 
 
 def test_unknown_ticker_resolves_through_secs_company_list_only_when_online() -> None:

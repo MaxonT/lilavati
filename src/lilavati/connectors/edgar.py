@@ -11,13 +11,23 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from lilavati.core.invariants import SuvarnaEngine
+from lilavati.connectors.sec_filing import (
+    CANONICAL_ITEMS,
+    DURATION_DAYS,
+    FilingRef,
+    IdentityCheck,
+    Kind,
+    check_identities,
+    extract_filing,
+    fact_hash,
+    filing_for_fiscal_year,
+)
 from lilavati.core.provenance import CitationRef, SourcedValue
 from lilavati.schemas.statements import (
     BalanceSheet,
@@ -46,7 +56,12 @@ def _days(start: str, end: str) -> int:
 
 
 class SourcedThreeStatementModel(BaseModel):
-    """A fully integrated ThreeStatementModel where line items carry cryptographic citations."""
+    """One 10-K mapped into the canonical three-statement model, with every input cited.
+
+    Each statement field is reported (in ``sourced_facts``, with its XBRL tag in ``tags_used``),
+    derived from reported items by a stated formula (``derived``), or, for the fields the schema
+    defaults to zero, not reported by the filing (``not_reported``; 0.0 in ``statement_model``).
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -54,12 +69,20 @@ class SourcedThreeStatementModel(BaseModel):
     cik: str
     fiscal_year: int
     form: str
+    filing: FilingRef
     statement_model: ThreeStatementModel
     sourced_facts: dict[str, SourcedValue] = Field(
         ..., description="Map of canonical metric name to its SourcedValue and CitationRef"
     )
+    tags_used: dict[str, str] = Field(default_factory=dict, description="canonical item -> US-GAAP tag")
+    derived: dict[str, str] = Field(
+        default_factory=dict, description="statement field -> formula over reported items")
+    not_reported: list[str] = Field(
+        default_factory=list,
+        description="statement fields the filing does not report; 0.0 in statement_model, not a reported zero")
+    checks: list[IdentityCheck] = Field(default_factory=list, description="identities on the reported numbers")
     is_formally_verified: bool = Field(
-        ..., description="True if Assets == Liabilities + Equity verified via Suvarna Z3 solver"
+        ..., description="True if every check in `checks` holds (Z3 for the balance sheet equation)"
     )
 
 
@@ -249,207 +272,212 @@ class EdgarClient:
         fiscal_year: int,
         facts: dict[str, Any] | None = None,
     ) -> SourcedThreeStatementModel:
-        """
-        Extracts a full canonical Three-Statement Model for a company and fiscal year,
-        attaching a hash-linked citation to every line item, ready for Z3 identity checks.
+        """The fiscal year's 10-K mapped into the canonical three-statement model.
+
+        The filing is identified first (``sec_filing.filing_for_fiscal_year``) and only its own XBRL
+        facts are used, as in ``get_filing_figures``. See ``statement_model_from_filing`` for how each
+        field is filled; it raises ``ValueError`` naming the items a required field needs when the
+        filing does not report them.
         """
         cik = self.resolve_cik(ticker_or_cik, online=facts is None)
         if facts is None:
             facts = self.fetch_company_facts(cik)
+        filing = filing_for_fiscal_year(facts, fiscal_year)
+        return statement_model_from_filing(facts, filing, ticker=ticker_or_cik.upper(), fiscal_year=fiscal_year)
 
-        # 1. Extract Balance Sheet Items
-        assets_item = self.extract_line_item(facts, ["Assets"], fiscal_year)
-        liabilities_item = self.extract_line_item(facts, ["Liabilities"], fiscal_year)
-        equity_item = self.extract_line_item(
-            facts,
-            [
-                "StockholdersEquity",
-                "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-            ],
-            fiscal_year,
-        )
-        cash_item = self.extract_line_item(
-            facts,
-            [
-                "CashAndCashEquivalentsAtCarryingValue",
-                "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
-            ],
-            fiscal_year,
-        )
-        ar_item = self.extract_line_item(facts, ["AccountsReceivableNetCurrent"], fiscal_year)
-        ppe_item = self.extract_line_item(facts, ["PropertyPlantAndEquipmentNet"], fiscal_year)
-        ap_item = self.extract_line_item(facts, ["AccountsPayableCurrent"], fiscal_year)
-        debt_item = self.extract_line_item(
-            facts,
-            [
-                "LongTermDebtNoncurrent",
-                "LongTermDebt",
-                "DebtCurrent",
-            ],
-            fiscal_year,
-        )
 
-        # 2. Extract Income Statement Items
-        rev_item = self.extract_line_item(
-            facts,
-            # Total revenues first, as in sec_filing.CANONICAL_ITEMS (Walmart: Revenues 713,163
-            # includes membership income; contract revenue 706,413 is net sales only).
-            [
-                "Revenues",
-                "RevenueFromContractWithCustomerExcludingAssessedTax",
-                "SalesRevenueNet",
-            ],
-            fiscal_year,
-        )
-        cogs_item = self.extract_line_item(
-            facts,
-            [
-                "CostOfGoodsAndServicesSold",
-                "CostOfRevenue",
-            ],
-            fiscal_year,
-        )
-        gross_profit_item = self.extract_line_item(facts, ["GrossProfit"], fiscal_year)
-        ebit_item = self.extract_line_item(facts, ["OperatingIncomeLoss"], fiscal_year)
-        interest_item = self.extract_line_item(
-            facts,
-            [
-                "InterestExpense",
-                "InterestAndDebtExpense",
-            ],
-            fiscal_year,
-        )
-        tax_item = self.extract_line_item(facts, ["IncomeTaxExpenseBenefit"], fiscal_year)
-        net_income_item = self.extract_line_item(facts, ["NetIncomeLoss"], fiscal_year)
+# Items beyond CANONICAL_ITEMS that the statement model needs (kind, US-GAAP tags in priority order).
+STATEMENT_ITEMS: dict[str, tuple[Kind, list[str]]] = {
+    **CANONICAL_ITEMS,
+    "investing_cash_flow": ("duration", ["NetCashProvidedByUsedInInvestingActivities"]),
+    "financing_cash_flow": ("duration", ["NetCashProvidedByUsedInFinancingActivities"]),
+    "fx_effect_on_cash": ("duration", [
+        "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+        "EffectOfExchangeRateOnCashAndCashEquivalents",
+    ]),
+    "cash_incl_restricted": ("instant", ["CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"]),
+    "accounts_receivable": ("instant", ["AccountsReceivableNetCurrent", "ReceivablesNetCurrent"]),
+    "inventory": ("instant", ["InventoryNet"]),
+    "net_ppe": ("instant", ["PropertyPlantAndEquipmentNet"]),
+    "accounts_payable": ("instant", ["AccountsPayableCurrent"]),
+    "retained_earnings": ("instant", ["RetainedEarningsAccumulatedDeficit"]),
+    "common_stock_and_apic": ("instant", ["CommonStocksIncludingAdditionalPaidInCapital"]),
+    "common_stock": ("instant", ["CommonStockValue"]),
+    "additional_paid_in_capital": ("instant", ["AdditionalPaidInCapitalCommonStock", "AdditionalPaidInCapital"]),
+    "long_term_debt": ("instant", ["LongTermDebt"]),
+    "commercial_paper": ("instant", ["CommercialPaper"]),
+    "short_term_borrowings": ("instant", ["ShortTermBorrowings"]),
+    # Total interest expense only: InterestExpenseDebt excludes lease interest (Walmart).
+    "interest_expense": ("duration", ["InterestExpense", "InterestExpenseNonoperating", "InterestAndDebtExpense"]),
+}
 
-        # 3. Extract Cash Flow Items
-        cfo_item = self.extract_line_item(
-            facts,
-            ["NetCashProvidedByUsedInOperatingActivities"],
-            fiscal_year,
-        )
-        cfi_item = self.extract_line_item(
-            facts,
-            ["NetCashProvidedByUsedInInvestingActivities"],
-            fiscal_year,
-        )
-        cff_item = self.extract_line_item(
-            facts,
-            ["NetCashProvidedByUsedInFinancingActivities"],
-            fiscal_year,
-        )
 
-        # Validate mandatory items
-        if not assets_item or not liabilities_item or not equity_item:
-            raise ValueError(f"Incomplete balance sheet facts for CIK {cik} FY{fiscal_year}.")
-        if not rev_item or not net_income_item:
-            raise ValueError(f"Incomplete income statement facts for CIK {cik} FY{fiscal_year}.")
-        if not cfo_item or not cfi_item or not cff_item:
-            raise ValueError(f"Incomplete cash flow facts for CIK {cik} FY{fiscal_year}.")
+def _opening_balance(facts: dict[str, Any], filing: FilingRef, period_start: str,
+                     tags: list[str]) -> tuple[str, SourcedValue] | None:
+    """The balance at the start of the filing's period (the prior period-end comparative in the filing)."""
+    opening = (date.fromisoformat(period_start) - timedelta(days=1)).isoformat()
+    us_gaap = facts.get("facts", {}).get("us-gaap", {})
+    for tag in tags:
+        for e in us_gaap.get(tag, {}).get("units", {}).get("USD", []):
+            if e.get("accn") == filing.accession and e.get("end") == opening and "start" not in e:
+                return tag, SourcedValue(value=float(e["val"]), unit="USD", scale=1, citation=CitationRef(
+                    doc_hash=fact_hash(e), filing_type=filing.form, filing_date=filing.filing_date,
+                    period_end=date.fromisoformat(opening), page=None, table_id="xbrl",
+                    xbrl_tag=f"us-gaap:{tag}", raw_snippet=f"{float(e['val']):,.0f} USD ({filing.accession})"))
+    return None
 
-        # Sourced facts map
-        sourced_map: dict[str, SourcedValue] = {
-            "total_assets": assets_item,
-            "total_liabilities": liabilities_item,
-            "total_equity": equity_item,
-            "revenue": rev_item,
-            "net_income": net_income_item,
-            "cfo": cfo_item,
-            "cfi": cfi_item,
-            "cff": cff_item,
-        }
-        if cash_item:
-            sourced_map["cash"] = cash_item
-        if ar_item:
-            sourced_map["accounts_receivable"] = ar_item
-        if ppe_item:
-            sourced_map["net_ppe"] = ppe_item
-        if ap_item:
-            sourced_map["accounts_payable"] = ap_item
-        if debt_item:
-            sourced_map["debt"] = debt_item
-        if gross_profit_item:
-            sourced_map["gross_profit"] = gross_profit_item
-        if ebit_item:
-            sourced_map["operating_income"] = ebit_item
 
-        # Compute derived values
-        gross_profit_val = (
-            gross_profit_item.value
-            if gross_profit_item
-            else (rev_item.value - (cogs_item.value if cogs_item else 0.0))
-        )
-        ebit_val = ebit_item.value if ebit_item else net_income_item.value
-        interest_val = interest_item.value if interest_item else 0.0
-        tax_val = tax_item.value if tax_item else 0.0
-        cogs_val = cogs_item.value if cogs_item else (rev_item.value - gross_profit_val)
+def statement_model_from_filing(facts: dict[str, Any], filing: FilingRef, ticker: str,
+                                fiscal_year: int) -> SourcedThreeStatementModel:
+    """Map one 10-K's own XBRL facts into the canonical three-statement model, without placeholders.
 
-        income_stmt = IncomeStatement(
-            revenue=rev_item.value,
-            cogs=cogs_val,
-            gross_profit=gross_profit_val,
-            sga_expense=max(0.0, gross_profit_val - ebit_val),
-            operating_income=ebit_val,
-            interest_expense=interest_val,
-            tax_expense=tax_val,
-            net_income=net_income_item.value,
-        )
+    Required fields come from the filing or from an accounting identity on reported items, recorded
+    in ``derived``:
 
-        net_change_cash = cfo_item.value + cfi_item.value + cff_item.value
-        cash_flow_stmt = CashFlowStatement(
-            cfo=cfo_item.value,
-            cfi=cfi_item.value,
-            cff=cff_item.value,
-            net_change_in_cash=net_change_cash,
-        )
+    - total_liabilities: Liabilities, else LiabilitiesAndStockholdersEquity minus total equity.
+    - total_equity: equity including non-controlling interests when tagged, else StockholdersEquity.
+    - cogs / gross_profit: whichever is missing is revenue minus the other.
+    - sga_expense: gross profit minus operating income (all operating expenses, including R&D; not
+      the reported SG&A line), so that the schema's operating_income = gross_profit - sga holds.
+    - common_equity: CommonStocksIncludingAdditionalPaidInCapital, else common stock plus APIC.
+    - total_debt: LongTermDebt (else its non-current plus current parts) plus commercial paper and
+      short-term borrowings where tagged. Lease liabilities are not included.
+    - net_change_in_cash: CFO + CFI + CFF, as the schema defines it.
 
-        cash_val = cash_item.value if cash_item else 0.0
-        ar_val = ar_item.value if ar_item else 0.0
-        ppe_val = ppe_item.value if ppe_item else 0.0
-        ap_val = ap_item.value if ap_item else 0.0
-        debt_val = debt_item.value if debt_item else 0.0
+    Receivables, inventory, payables, interest and tax are 0.0 when the filing does not report them
+    and are then listed in ``not_reported``. Revenue, operating income, net income, total assets,
+    cash, net PP&E, retained earnings and the three cash flows must be reported: if any is missing,
+    or a derivation lacks an input, this raises ``ValueError`` naming them (banks, for example, report
+    no operating income; use ``get_filing_figures`` for those).
 
-        balance_sheet = BalanceSheet(
-            cash_and_equivalents=cash_val,
-            accounts_receivable=ar_val,
-            inventory=0.0,
-            net_ppe=ppe_val,
-            total_assets=assets_item.value,
-            accounts_payable=ap_val,
-            total_debt=debt_val,
-            total_liabilities=liabilities_item.value,
-            retained_earnings=net_income_item.value,
-            common_equity=equity_item.value - net_income_item.value,
-            total_equity=equity_item.value,
-        )
+    Checks, on reported numbers only (a derived total would make its own check hold by construction):
+    the balance sheet identities of ``sec_filing.check_identities``, and the cash reconciliation
+    opening + CFO + CFI + CFF + exchange-rate effect = closing, on cash including restricted cash
+    (the total the cash flow statement reconciles; plain cash when that is not tagged). An untagged
+    exchange-rate effect is taken as zero and said so in the check.
+    """
+    ex = extract_filing(facts, filing, STATEMENT_ITEMS)
+    v = {k: sv.value for k, sv in ex.values.items()}
+    derived: dict[str, str] = {}
+    lacking: list[str] = []
 
-        # Formal Z3 SMT solver verification check
-        inv_check = SuvarnaEngine.verify_three_statement_invariants(
-            total_assets=assets_item.value,
-            total_liabilities=liabilities_item.value,
-            shareholders_equity=equity_item.value,
-            net_income=net_income_item.value,
-            cash_start=cash_val - net_change_cash,
-            cash_end=cash_val,
-            cfo=cfo_item.value,
-            cfi=cfi_item.value,
-            cff=cff_item.value,
-        )
+    def need(*names: str) -> bool:
+        absent = [n for n in names if n not in v]
+        lacking.extend(absent)
+        return not absent
 
-        three_stmt = ThreeStatementModel(
-            income_statement=income_stmt,
-            cash_flow_statement=cash_flow_stmt,
-            balance_sheet=balance_sheet,
-            is_balanced=inv_check.is_valid,
-            cash_reconciled=True,
-        )
+    need("revenue", "operating_income", "net_income", "total_assets", "cash", "net_ppe",
+         "retained_earnings", "operating_cash_flow", "investing_cash_flow", "financing_cash_flow")
 
-        return SourcedThreeStatementModel(
-            ticker=ticker_or_cik.upper(),
-            cik=cik,
-            fiscal_year=fiscal_year,
-            form="10-K",
-            statement_model=three_stmt,
-            sourced_facts=sourced_map,
-            is_formally_verified=inv_check.is_valid,
-        )
+    equity = v.get("total_equity_incl_nci", v.get("total_equity"))
+    if equity is None:
+        lacking.append("total_equity")
+    liabilities = v.get("total_liabilities")
+    if liabilities is None and equity is not None and need("liabilities_and_equity"):
+        liabilities = v["liabilities_and_equity"] - equity
+        derived["total_liabilities"] = "liabilities_and_equity - total_equity"
+    elif liabilities is None and equity is not None:
+        lacking.append("total_liabilities")
+
+    cogs, gross = v.get("cost_of_revenue"), v.get("gross_profit")
+    if "revenue" in v and cogs is None and gross is not None:
+        cogs = v["revenue"] - gross
+        derived["cogs"] = "revenue - gross_profit"
+    elif "revenue" in v and gross is None and cogs is not None:
+        gross = v["revenue"] - cogs
+        derived["gross_profit"] = "revenue - cost_of_revenue"
+    elif cogs is None and gross is None:
+        lacking.append("cost_of_revenue or gross_profit")
+
+    common = v.get("common_stock_and_apic")
+    if common is None and "common_stock" in v and "additional_paid_in_capital" in v:
+        common = v["common_stock"] + v["additional_paid_in_capital"]
+        derived["common_equity"] = "common_stock + additional_paid_in_capital"
+    elif common is None:
+        lacking.append("common_stock_and_apic (or common_stock and additional_paid_in_capital)")
+
+    if "long_term_debt" in v:
+        debt_parts = ["long_term_debt"]
+    else:
+        debt_parts = [k for k in ("long_term_debt_noncurrent", "long_term_debt_current") if k in v]
+    debt_parts += [k for k in ("commercial_paper", "short_term_borrowings") if k in v]
+    if not debt_parts:
+        lacking.append("long_term_debt (or its parts), commercial_paper or short_term_borrowings")
+
+    if lacking:
+        raise ValueError(
+            f"{ticker} FY{fiscal_year} ({filing.accession}): the filing does not report "
+            f"{', '.join(dict.fromkeys(lacking))}, needed for the three-statement model. "
+            "get_filing_figures returns the items it does report.")
+    assert liabilities is not None and equity is not None and cogs is not None and gross is not None
+    assert common is not None
+
+    total_debt = sum(v[k] for k in debt_parts)
+    if len(debt_parts) > 1:
+        derived["total_debt"] = " + ".join(debt_parts)
+    derived["sga_expense"] = "gross_profit - operating_income (all operating expenses, not the SG&A line)"
+    derived["net_change_in_cash"] = "operating + investing + financing cash flow"
+
+    not_reported = [field for field, item in (
+        ("accounts_receivable", "accounts_receivable"), ("inventory", "inventory"),
+        ("accounts_payable", "accounts_payable"), ("interest_expense", "interest_expense"),
+        ("tax_expense", "income_tax")) if item not in v]
+
+    # ex.values holds reported items only, so no check runs on a derived total.
+    checks = check_identities(ex.values)
+    balance_checks = [c for c in checks if "assets" in c.name]
+    if not balance_checks:
+        raise ValueError(f"{ticker} FY{fiscal_year}: no balance sheet total to check against the reported "
+                         "items (Liabilities or LiabilitiesAndStockholdersEquity)")
+
+    sourced = dict(ex.values)
+    tags_used = dict(ex.tags_used)
+    cash_key = "cash_incl_restricted" if "cash_incl_restricted" in v else "cash"
+    period_start = _period_start(facts, filing, tags_used["operating_cash_flow"])
+    opening = _opening_balance(facts, filing, period_start, [tags_used[cash_key]])
+    if opening is None:
+        raise ValueError(f"{ticker} FY{fiscal_year}: the opening {cash_key} balance is not in the filing's facts")
+    tags_used[f"{cash_key}_opening"], sourced[f"{cash_key}_opening"] = opening
+    fx = v.get("fx_effect_on_cash", 0.0)
+    flows = v["operating_cash_flow"] + v["investing_cash_flow"] + v["financing_cash_flow"]
+    diff = v[cash_key] - (opening[1].value + flows + fx)
+    checks.append(IdentityCheck(
+        name="opening cash + cash flows = closing cash", holds=abs(diff) <= 0.5, difference=diff,
+        detail=f"{cash_key}; CFO + CFI + CFF + exchange-rate effect"
+               + ("" if "fx_effect_on_cash" in v else " (exchange-rate effect not tagged, taken as 0)")))
+    cash_check = checks[-1]
+
+    zero = 0.0
+    model = ThreeStatementModel(
+        income_statement=IncomeStatement(
+            revenue=v["revenue"], cogs=cogs, gross_profit=gross,
+            sga_expense=gross - v["operating_income"], operating_income=v["operating_income"],
+            interest_expense=v.get("interest_expense", zero), tax_expense=v.get("income_tax", zero),
+            net_income=v["net_income"]),
+        cash_flow_statement=CashFlowStatement(
+            cfo=v["operating_cash_flow"], cfi=v["investing_cash_flow"], cff=v["financing_cash_flow"],
+            net_change_in_cash=flows),
+        balance_sheet=BalanceSheet(
+            cash_and_equivalents=v["cash"], accounts_receivable=v.get("accounts_receivable", zero),
+            inventory=v.get("inventory", zero), net_ppe=v["net_ppe"], total_assets=v["total_assets"],
+            accounts_payable=v.get("accounts_payable", zero), total_debt=total_debt,
+            total_liabilities=liabilities, retained_earnings=v["retained_earnings"],
+            common_equity=common, total_equity=equity),
+        is_balanced=all(c.holds for c in balance_checks),
+        cash_reconciled=cash_check.holds,
+    )
+    return SourcedThreeStatementModel(
+        ticker=ticker, cik=filing.cik, fiscal_year=fiscal_year, form=filing.form, filing=filing,
+        statement_model=model, sourced_facts=sourced, tags_used=tags_used, derived=derived,
+        not_reported=not_reported, checks=checks, is_formally_verified=all(c.holds for c in checks))
+
+
+def _period_start(facts: dict[str, Any], filing: FilingRef, tag: str) -> str:
+    """Start date of the filing's own period for a duration tag (the one extract_filing selected)."""
+    for e in facts["facts"]["us-gaap"][tag]["units"]["USD"]:
+        if e.get("accn") == filing.accession and e.get("end") == filing.report_date.isoformat() and "start" in e:
+            lo, hi = DURATION_DAYS[filing.form]
+            if lo <= (filing.report_date - date.fromisoformat(e["start"])).days <= hi:
+                return str(e["start"])
+    raise ValueError(f"no annual period for {tag} in {filing.accession}")

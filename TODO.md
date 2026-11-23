@@ -115,14 +115,15 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot.
 - [x] Branch protection on `main` (2026-11-23): CI jobs test (3.11), test (3.12) and docs-and-evidence
       required, also for admins; no force pushes or deletion.
-- [ ] GitHub repository description and topics.
+- [x] GitHub repository description and topics (2026-11-23): description matches the docs site
+      (no "audited" or "institutional"), homepage is the docs site, 20 topics.
 - [ ] Optionally enable GitHub Discussions for questions.
 
 **Disclosed limitations (follow-up work, not blockers)**
 - [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
 - [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
       10-K PDF parser and Ind AS still open. Purged cross-validation (7.4).
-- [ ] Replace the fiscal-year three-statement path (placeholder fields) with the filing-anchored one.
+- [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
 - [ ] Ind AS crosswalk: list missing keys instead of 0.0, and check cash reconciliation instead of
       setting it to True.
 - [ ] Resolve citations against a store of source hashes in `ProvenanceGate` (today it checks form only).
