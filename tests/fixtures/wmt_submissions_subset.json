@@ -1,0 +1,24 @@
+{
+ "cik": "0000104169",
+ "name": "Walmart Inc.",
+ "_source": "https://data.sec.gov/submissions/CIK0000104169.json (retrieved 2026-11-22); verbatim subset: the 10-K with accession 0000104169-26-000055",
+ "filings": {
+  "recent": {
+   "accessionNumber": [
+    "0000104169-26-000055"
+   ],
+   "filingDate": [
+    "2026-03-13"
+   ],
+   "reportDate": [
+    "2026-01-31"
+   ],
+   "form": [
+    "10-K"
+   ],
+   "primaryDocument": [
+    "wmt-20260131.htm"
+   ]
+  }
+ }
+}

@@ -86,9 +86,10 @@ class ProvenanceGate:
     def __call__(self, state: FinancialState) -> FinancialState:
         for val in state.sourced_values:
             cit = val.citation
-            if len(cit.doc_hash) != 64 or cit.page < 1 or not cit.raw_snippet.strip():
+            # page is None for XBRL facts (no pages); a page number, when given, must be 1 or more
+            if len(cit.doc_hash) != 64 or (cit.page is not None and cit.page < 1) or not cit.raw_snippet.strip():
                 state.fail_gate(
-                    f"Provenance failure on claim '{val.value}': invalid citation hash or missing page."
+                    f"Provenance failure on claim '{val.value}': invalid citation hash, page or snippet."
                 )
 
         return state

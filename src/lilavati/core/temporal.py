@@ -131,7 +131,7 @@ class BiTemporalWarehouse:
             filing_type="PIT-Filing",
             filing_date=s_date,
             period_end=v_date,
-            page=1,
+            page=None,
             table_id="bitemporal_duckdb",
             xbrl_tag=str(x_tag),
             raw_snippet=str(accn),

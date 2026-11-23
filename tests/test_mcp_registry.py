@@ -23,3 +23,25 @@ def test_server_registers_tools_and_has_main(module: str) -> None:
 
 def test_eight_servers() -> None:
     assert len(SERVERS) == 8
+
+
+def test_mcp_setup_tool_table_matches_the_servers() -> None:
+    import re
+    from pathlib import Path
+
+
+    scripts = {}
+    pyproject = Path("pyproject.toml").read_text()
+    for cmd, target in re.findall(r'^"?(lilavati-mcp-[\w-]+)"?\s*=\s*"lilavati\.mcp_servers\.(\w+):main"', pyproject, re.M):
+        scripts[cmd] = target
+    assert len(scripts) == 8
+
+    table = {}
+    for cmd, tools in re.findall(r"^\| `(lilavati-mcp-[\w-]+)` \| (.+) \|$", Path("docs/mcp-setup.md").read_text(), re.M):
+        table[cmd] = sorted(re.findall(r"`(\w+)`", tools))
+    assert set(table) == set(scripts)
+    for cmd, module in scripts.items():
+        mod = importlib.import_module(f"lilavati.mcp_servers.{module}")
+        server = next(v for v in vars(mod).values() if isinstance(v, FastMCP))
+        registered = sorted(t.name for t in asyncio.run(server.list_tools()))
+        assert table[cmd] == registered, cmd

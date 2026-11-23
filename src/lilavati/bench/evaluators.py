@@ -62,7 +62,7 @@ class BenchmarkEvaluator:
             if (
                 len(cit.doc_hash) == 64
                 and cit.doc_hash in ground_truth_hashes
-                and cit.page >= 1
+                and (cit.page is None or cit.page >= 1)  # None: XBRL facts have no page
                 and len(cit.raw_snippet.strip()) > 0
             ):
                 valid_count += 1

@@ -170,11 +170,8 @@ class IndiaFilingsClient:
         )
 
         # Generate CitationRefs for audited line items  # claims-ok: audited financial statements
-        hasher = hashlib.sha256()
-        hasher.update(
-            f"{disclosure.cin}:{disclosure.fiscal_year}:{disclosure.reporting_date}".encode()
-        )
-        doc_hash = hasher.hexdigest()
+        # Hash of the disclosure as supplied (canonical JSON), the only source this parser sees
+        doc_hash = hashlib.sha256(disclosure.model_dump_json().encode()).hexdigest()
 
         sourced_map: dict[str, SourcedValue] = {}
         for metric, val in [
@@ -189,7 +186,7 @@ class IndiaFilingsClient:
                 filing_type="Ind-AS-Annual",
                 filing_date=disclosure.filing_date,
                 period_end=disclosure.reporting_date,
-                page=1,
+                page=None,
                 table_id="mca_standalone_financials",
                 xbrl_tag=f"mca-ind-as:{metric}",
                 raw_snippet=f"{val:,.0f} {disclosure.currency} (CIN: {disclosure.cin})",

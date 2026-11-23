@@ -286,3 +286,53 @@ def test_fiscal_year_selects_the_current_period_not_a_comparative() -> None:
     assert assets.value == 404_548_000_000 and str(assets.citation.period_end) == "2026-09-26"
     assert revenue.value == 478_834_000_000
     assert net_income.value == 132_175_000_000
+
+
+def test_three_statement_revenue_prefers_total_revenues() -> None:
+    # Same rule as sec_filing.CANONICAL_ITEMS: Walmart FY2026 total revenues 713,163 (Revenues),
+    # not net sales 706,413 (contract revenue). Fixture: verbatim SEC subset.
+    import json
+    from pathlib import Path
+
+    facts = json.loads((Path(__file__).parent / "fixtures" / "wmt_companyfacts_revenue_fy2026.json").read_text())
+    item = EdgarClient.extract_line_item(
+        facts, ["Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax"], 2026)
+    assert item is not None and item.value == 713_163_000_000
+
+    # The three-statement model must ask for the tags in that order.
+    import pytest
+
+    asked: list[list[str]] = []
+
+    def record(facts, candidate_tags, fiscal_year, period="FY"):
+        asked.append(list(candidate_tags))
+        return None
+
+    import unittest.mock
+
+    with (unittest.mock.patch.object(EdgarClient, "extract_line_item", staticmethod(record)),
+          pytest.raises(ValueError, match="Incomplete")):
+        EdgarClient().extract_three_statement_model("0000104169", 2026, facts=facts)
+    revenue_tags = next(t for t in asked if "Revenues" in t)
+    assert revenue_tags.index("Revenues") < revenue_tags.index("RevenueFromContractWithCustomerExcludingAssessedTax")
+
+
+def test_unknown_ticker_resolves_through_secs_company_list_only_when_online() -> None:
+    import httpx
+    import pytest
+
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        return httpx.Response(200, json={"0": {"cik_str": 104169, "ticker": "WMT", "title": "Walmart Inc."}})
+
+    client = EdgarClient(user_agent="Example Org contact@example.org", transport=httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="online=True"):
+        client.resolve_cik("WMT")
+    assert calls == []
+    assert client.resolve_cik("wmt", online=True) == "0000104169"
+    assert client.resolve_cik("WMT", online=True) == "0000104169"
+    assert calls == ["/files/company_tickers.json"]  # fetched once, then cached
+    with pytest.raises(ValueError, match="not in SEC's company list"):
+        client.resolve_cik("NOSUCH", online=True)

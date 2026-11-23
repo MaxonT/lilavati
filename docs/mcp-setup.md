@@ -12,6 +12,11 @@ uv sync
 uv run lilavati-mcp-derivatives   # starts a stdio server; Ctrl-C to stop
 ```
 
+If you installed with `pip install "lilavati-finance @ git+https://github.com/revendrat/lilavati@main"`,
+the `lilavati-mcp-*` commands are in that environment's `bin` (or `Scripts`) folder: give the client the
+command directly (for example `claude mcp add lilavati-derivatives -- /path/to/venv/bin/lilavati-mcp-derivatives`)
+instead of `uv run --directory ...`.
+
 Replace `/path/to/lilavati` below with the absolute path of your clone.
 
 ## Claude Code
@@ -53,7 +58,7 @@ Add to the client's MCP configuration (`mcpServers`), keeping only the servers y
 | Server command | Tools |
 | :--- | :--- |
 | `lilavati-mcp-committee` | `compute_forensic_beneish_m_score`, `evaluate_investment_committee_memo` |
-| `lilavati-mcp-corporate-filings` | `extract_single_line_item`, `get_company_filing_statements` |
+| `lilavati-mcp-corporate-filings` | `extract_single_line_item`, `get_company_filing_statements`, `get_filing_figures` |
 | `lilavati-mcp-derivatives` | `calculate_option_greeks`, `calibrate_sabr_volatility_model`, `check_butterfly_arbitrage`, `price_american_option`, `price_european_option` |
 | `lilavati-mcp-econometrics` | `analyze_cointegration`, `analyze_stationarity`, `fit_garch_volatility` |
 | `lilavati-mcp-financial-ml` | `apply_triple_barrier_labels`, `find_optimal_fractional_diff` |
@@ -61,9 +66,14 @@ Add to the client's MCP configuration (`mcpServers`), keeping only the servers y
 | `lilavati-mcp-portfolio-exec` | `analyze_order_book_microstructure`, `compute_almgren_chriss_liquidation_schedule`, `optimize_portfolio_black_litterman`, `optimize_portfolio_hierarchical_risk_parity` |
 | `lilavati-mcp-sustainability` | `calculate_portfolio_carbon_intensity`, `evaluate_sustainability_linked_bond_covenant`, `stress_test_carbon_tax_impact` |
 
-(This table is generated from the code; `tests/test_mcp_registry.py` checks that every server loads.)
+(`tests/test_mcp_registry.py` checks that every server loads and that this table matches the tools
+each server registers.)
 
 ## Notes
 * Results are deterministic calculations, not advice. Engines are alpha and still being validated against
   reference values; see the [roadmap](https://github.com/revendrat/lilavati/blob/main/ROADMAP.md).
-* The servers make no network calls except `corporate-filings`, which can query SEC EDGAR.
+* The servers make no network calls except `corporate-filings`, which queries SEC EDGAR. SEC requires a
+  contact: set `LILAVATI_SEC_USER_AGENT="Your Name you@example.org"` in the server's environment (Claude
+  Code: `claude mcp add -e LILAVATI_SEC_USER_AGENT="Your Name you@example.org" lilavati-corporate-filings -- ...`;
+  JSON clients: an `"env"` entry). Prefer `get_filing_figures`: it takes the figures of one filing and
+  lists items the company does not report ([Tutorial 08](tutorials/08_real_10k_llm_vs_lilavati.md)).

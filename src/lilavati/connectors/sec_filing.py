@@ -22,11 +22,13 @@ accession number, tag and period.
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import date
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from lilavati.connectors.edgar import EdgarClient
 from lilavati.core.invariants import SuvarnaEngine
 from lilavati.core.provenance import CitationRef, SourcedValue
 
@@ -97,6 +99,15 @@ class FilingExtraction(BaseModel):
     checks: list[IdentityCheck]
 
 
+def fact_hash(entry: dict[str, Any]) -> str:
+    """SHA-256 of one XBRL fact record as SEC serves it (canonical JSON: sorted keys, no spaces).
+
+    Re-fetch the company facts, find the entry with the same accession, tag, period and value, and
+    hash it the same way to check a citation.
+    """
+    return hashlib.sha256(json.dumps(entry, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def filings_from_submissions(submissions: dict[str, Any], forms: tuple[str, ...] = ("10-K",)) -> list[FilingRef]:
     """Filings of the given forms from an SEC submissions document, newest first (amendments excluded)."""
     recent = submissions["filings"]["recent"]
@@ -146,10 +157,10 @@ def extract_filing(facts: dict[str, Any], filing: FilingRef,
         if chosen is None:
             missing.append(name)
             continue
-        doc_hash = hashlib.sha256(f"{filing.accession}:{tags_used[name]}:{chosen['end']}".encode()).hexdigest()
+        doc_hash = fact_hash(chosen)
         values[name] = SourcedValue(value=float(chosen["val"]), unit="USD", scale=1, citation=CitationRef(
             doc_hash=doc_hash, filing_type=filing.form, filing_date=filing.filing_date,
-            period_end=filing.report_date, page=1, table_id="xbrl", xbrl_tag=f"us-gaap:{tags_used[name]}",
+            period_end=filing.report_date, page=None, table_id="xbrl", xbrl_tag=f"us-gaap:{tags_used[name]}",
             raw_snippet=f"{float(chosen['val']):,.0f} USD ({filing.accession})"))
     return FilingExtraction(company=str(facts.get("entityName", "")), filing=filing, values=values,
                             tags_used=tags_used, missing=missing, checks=check_identities(values))
@@ -266,3 +277,22 @@ def filing_ratios(values: dict[str, float]) -> dict[str, float]:
     if v.get("total_assets") and "total_liabilities" in v:
         out["liabilities_to_assets"] = v["total_liabilities"] / v["total_assets"]
     return out
+
+
+def fetch_filing_extraction(ticker_or_cik: str, form: str = "10-K", filings_back: int = 0,
+                            client: EdgarClient | None = None) -> FilingExtraction:
+    """Live: the company's ``form`` filing (0 = latest, 1 = the one before, ...) and its own line items.
+
+    Two SEC requests (submissions index and company facts). Needs a contact in
+    ``LILAVATI_SEC_USER_AGENT`` or a client built with ``user_agent=``.
+    """
+    if form not in DURATION_DAYS:
+        raise ValueError(f"form must be one of {sorted(DURATION_DAYS)}, got {form!r}")
+    if filings_back < 0:
+        raise ValueError("filings_back must be 0 (latest) or more")
+    client = client or EdgarClient()
+    filings = filings_from_submissions(client.fetch_submissions(ticker_or_cik), forms=(form,))
+    if filings_back >= len(filings):
+        raise ValueError(f"{ticker_or_cik}: only {len(filings)} {form} filings in SEC's recent submissions index")
+    filing = filings[filings_back]
+    return extract_filing(client.fetch_company_facts(filing.cik), filing)
