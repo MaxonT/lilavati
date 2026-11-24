@@ -1,111 +1,102 @@
 """
-Example 05: Autonomous Financial Research Agent (Search + Deep Reasoning + Forensic Synthesis).
+Example 05: research workflow on one 10-K, every input reported, cited and checked.
 
-Demonstrates:
-1. FinancialSearchAgent: figures from the latest 10-K filed by the as-of date, each with a citation
-   to its SEC XBRL fact (needs LILAVATI_SEC_USER_AGENT; without it, the run says so and uses an
-   illustrative baseline).
-2. DeepFinancialAgent: a bull/base/bear scenario tree with Z3 identity checks on each branch.
-3. FinancialResearchAgent: the steps chained into a dossier that lists its assumed inputs. A workflow
-   demonstration, not research on the company.
+FinancialResearchAgent takes the latest 10-K filed on or before the as-of date and uses only that
+filing's own XBRL facts (this year and the prior-year comparatives it reports): the three-statement
+model with its checks, the rule-based committee (Beneish, Altman, identity checks), a scenario tree
+calibrated from the filing, and a check that every citation resolves against the SEC data read.
+Inputs not taken from the filing are listed. A screen on reported figures, not investment advice.
+
+By default it runs offline on a verbatim SEC subset of Apple's FY2026 10-K (tests/fixtures). For any
+company, live (needs your contact for SEC):
+
+    LILAVATI_SEC_USER_AGENT="Your Name you@example.org" uv run python examples/05_deep_research_agent.py --live MSFT
 """
 
 from __future__ import annotations
 
+import argparse
+import json
 from datetime import date
+from pathlib import Path
 
+import httpx
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 
 from lilavati.agents.research import FinancialResearchAgent
+from lilavati.agents.search import FinancialSearchAgent
+from lilavati.connectors.edgar import EdgarClient
 
 console = Console()
+FIX = Path(__file__).resolve().parents[1] / "tests" / "fixtures"
+
+
+def offline_agent() -> FinancialResearchAgent:
+    """The agent reading Apple's FY2026 10-K from the verbatim fixtures instead of SEC."""
+    subs = json.loads((FIX / "aapl_submissions_subset.json").read_text())
+    facts = json.loads((FIX / "aapl_companyfacts_research_fy2026.json").read_text())
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/submissions/CIK0000320193.json"):
+            return httpx.Response(200, json=subs)
+        if request.url.path.endswith("/companyfacts/CIK0000320193.json"):
+            return httpx.Response(200, json=facts)
+        return httpx.Response(404)
+
+    client = EdgarClient(user_agent="offline fixture", transport=httpx.MockTransport(handler))
+    return FinancialResearchAgent(search_agent=FinancialSearchAgent(edgar_client=client))
 
 
 def main() -> None:
-    console.print(
-        Panel.fit(
-            "[bold cyan]Project Līlāvatī: Autonomous Financial Research Agent[/bold cyan]\n"
-            "Orchestrating statutory filing search, deep scenario trees, and forensic quality audits.",
-            title="Institutional Research Engine",
-        )
-    )
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--live", metavar="TICKER", help="fetch from SEC (needs LILAVATI_SEC_USER_AGENT)")
+    parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="as-of date (default: today)")
+    args = parser.parse_args()
 
-    research_agent = FinancialResearchAgent()
+    if args.live:
+        agent, symbol, as_of = FinancialResearchAgent(), args.live.upper(), args.as_of or date.today()
+    else:
+        agent, symbol, as_of = offline_agent(), "AAPL", args.as_of or date(2026, 11, 3)
+    try:
+        d = agent.conduct_deep_research(symbol=symbol, as_of_date=as_of)
+    except ValueError as err:  # SEC unreachable, no filing by the date, or an input not reported
+        console.print(f"[red]No dossier:[/red] {err}")
+        raise SystemExit(2) from None
 
-    symbol = "AAPL"
-    as_of = date(2024, 11, 1)
+    table = Table(title=f"{d.company_name} ({d.symbol}), as of {d.as_of_date}", show_header=True)
+    table.add_column("Item", style="cyan")
+    table.add_column("Value", justify="right", style="bold")
+    table.add_column("Basis", style="dim")
+    table.add_row("Filing", f"{d.filing.form} {d.filing.accession}", f"filed {d.filing.filing_date}")
+    table.add_row("Revenue (USD m)", f"{d.inputs_usd_millions['revenue']:,.0f}",
+                  f"prior year {d.inputs_usd_millions['revenue_prior']:,.0f}")
+    table.add_row("Beneish M-score", f"{d.forensic_accounting_summary['beneish_m_score']:.2f}",
+                  "above -1.78 flags possible manipulation")
+    table.add_row("Altman Z-score", f"{d.forensic_accounting_summary['altman_z_score']:.2f}",
+                  d.forensic_accounting_summary["altman_zone"])
+    for c in [*d.statement_checks, *d.committee_memo.checks]:
+        table.add_row(c.name, "holds" if c.holds else f"FAILS by {c.difference:,.0f}", "on reported figures")
+    table.add_row("Citations resolved", f"{d.citations_count}" if d.citations_verified else "NO",
+                  "against the SEC data read")
+    table.add_row("Committee (rule-based)", d.recommendation, "Beneish, Altman, identities, growth target")
+    table.add_row("Carbon intensity", "not computed" if d.climate_risk_summary is None
+                  else f"{d.climate_risk_summary['waci']:.1f} tCO2e/$M", "needs emissions and their source")
+    console.print(table)
 
-    console.print(
-        f"\n[bold yellow]Initiating Deep Research on:[/bold yellow] [bold green]{symbol}[/bold green] (as of {as_of})...\n"
-    )
+    scenarios = Table(title="Scenario tree (assumed multipliers; graph calibrated from the filing)")
+    for col in ("Scenario", "Probability", "Revenue (USD m)", "Net income (USD m)"):
+        scenarios.add_column(col, justify="right" if col != "Scenario" else "left")
+    for b in d.scenario_analysis.scenario_branches:
+        scenarios.add_row(b.branch_name, f"{b.probability_weight:.0%}", f"{b.projected_revenue:,.0f}",
+                          f"{b.projected_net_income:,.0f}")
+    console.print(scenarios)
+    console.print("[dim]The scenario graph balances by an equity plug, so its balance flag is not an "
+                  "independent check (statement graph not yet audited).[/dim]")
 
-    dossier = research_agent.conduct_deep_research(symbol=symbol, as_of_date=as_of)
-
-    # 1. Executive Summary Table
-    exec_table = Table(
-        title=f"Institutional Research Dossier: {dossier.company_name} ({dossier.symbol})",
-        show_header=True,
-    )
-    exec_table.add_column("Research Section", style="cyan")
-    exec_table.add_column("Summary / Value", style="bold green", justify="right")
-    exec_table.add_column("Status / Assessment", style="dim")
-
-    exec_table.add_row("Data source", dossier.data_source[:60], "see assumed inputs below")
-    exec_table.add_row("Screen outcome", dossier.recommendation, "from the Beneish flag only")
-    exec_table.add_row(
-        "Expected Net Income (Prob-Weighted)",
-        f"${dossier.scenario_analysis.probability_weighted_net_income:,.1f}M",
-        "Weighted across Bull, Base, and Bear scenarios",
-    )
-    exec_table.add_row(
-        "Beneish M-Score (Earnings Quality)",
-        f"{dossier.forensic_accounting_summary['beneish_m_score']:.2f}",
-        "above -1.78 flags possible manipulation"
-        if dossier.forensic_accounting_summary["is_manipulator"]
-        else "below the -1.78 threshold",
-    )
-    exec_table.add_row(
-        "Portfolio WACI (Carbon Intensity)",
-        f"{dossier.climate_risk_summary['waci']:.1f} tCO2e/$M",
-        "assumed emissions",
-    )
-    exec_table.add_row(
-        "Cited filing facts", str(dossier.citations_count), "each with an XBRL fact hash"
-    )
-
-    console.print(exec_table)
-
-    # 2. Scenario Tree Table
-    scenario_table = Table(
-        title="Deep Reasoning Scenario Tree (Z3 Invariant Verified)", show_header=True
-    )
-    scenario_table.add_column("Scenario Branch", style="cyan")
-    scenario_table.add_column("Probability", justify="right")
-    scenario_table.add_column("Projected Revenue ($M)", justify="right")
-    scenario_table.add_column("Projected Net Income ($M)", justify="right", style="bold")
-    scenario_table.add_column("SMT Invariant", justify="center")
-
-    for branch in dossier.scenario_analysis.scenario_branches:
-        scenario_table.add_row(
-            branch.branch_name,
-            f"{branch.probability_weight * 100:.0f}%",
-            f"${branch.projected_revenue:,.1f}",
-            f"${branch.projected_net_income:,.1f}",
-            "[bold green]SAT (VERIFIED)[/bold green]"
-            if branch.smt_invariant_verified
-            else "[bold red]UNSAT[/bold red]",
-        )
-
-    console.print(scenario_table)
-
-    # 3. Executive Thesis
-    console.print(
-        f"\n[bold yellow]Executive Research Thesis:[/bold yellow]\n{dossier.executive_thesis}\n"
-    )
-    console.print("[bold yellow]Assumed inputs:[/bold yellow]")
-    for item in dossier.assumed_inputs:
+    console.print(f"\n[bold]Thesis:[/bold] {d.executive_thesis}\n")
+    console.print("[bold]Inputs not taken from the filing:[/bold]")
+    for item in d.assumed_inputs:
         console.print(f"  - {item}")
 
 

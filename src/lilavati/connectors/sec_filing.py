@@ -21,7 +21,7 @@ accession number, tag and period.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -158,6 +158,36 @@ def filing_for_fiscal_year(facts: dict[str, Any], fiscal_year: int, form: str = 
     end, filed = found[accession]
     return FilingRef(cik=str(facts["cik"]).zfill(10), form=form, accession=accession,
                      filing_date=date.fromisoformat(filed), report_date=date.fromisoformat(end))
+
+
+def fiscal_year_of(facts: dict[str, Any], filing: FilingRef) -> int:
+    """The fiscal year (``fy``) the filing's own facts carry."""
+    for concept in facts.get("facts", {}).get("us-gaap", {}).values():
+        for entries in concept.get("units", {}).values():
+            for e in entries:
+                if e.get("accn") == filing.accession and e.get("fp") == "FY" and "fy" in e:
+                    return int(e["fy"])
+    raise ValueError(f"no annual facts for {filing.accession} in the company facts")
+
+
+def prior_period_view(facts: dict[str, Any], filing: FilingRef) -> FilingRef:
+    """The filing's prior-year comparatives as a ``FilingRef`` for ``extract_filing``.
+
+    A 10-K reports last year's figures next to this year's under the same accession. Their period end
+    is the day before the current annual period starts (read from the filing's own duration facts).
+    These are the comparatives as published in this filing (restated if the company restated them),
+    so they are point-in-time correct for the filing date.
+    """
+    lo, hi = DURATION_DAYS.get(filing.form, (350, 380))
+    end = filing.report_date.isoformat()
+    for concept in facts.get("facts", {}).get("us-gaap", {}).values():
+        for entries in concept.get("units", {}).values():
+            for e in entries:
+                if (e.get("accn") == filing.accession and e.get("end") == end and "start" in e
+                        and lo <= _days(e["start"], e["end"]) <= hi):
+                    prior_end = date.fromisoformat(e["start"]) - timedelta(days=1)
+                    return filing.model_copy(update={"report_date": prior_end})
+    raise ValueError(f"no {filing.form} period found for {filing.accession}")
 
 
 def _select(entries: list[dict[str, Any]], filing: FilingRef, kind: Kind) -> dict[str, Any] | None:

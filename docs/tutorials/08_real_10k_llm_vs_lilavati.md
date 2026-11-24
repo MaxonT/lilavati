@@ -189,6 +189,60 @@ Read this as a pilot: four companies, one filing each, one provider. It does not
 read every filing correctly; harder filings (scale in thousands, restatements, banks, notes rather
 than statements) are where to look next.
 
+## Step 6: From the filing to a rule-based verdict
+
+`FinancialResearchAgent` chains the steps above for one company and date: the latest 10-K filed by
+the as-of date, its own facts for this year and the prior-year comparatives, the three-statement
+model with its checks, the rule-based committee (Beneish, Altman, identity checks), a scenario tree
+calibrated from the filing, and the citation check of Step 3b. Anything not taken from the filing is
+listed; if the filing lacks an input, it refuses and names it.
+
+```python
+import json
+from datetime import date
+
+import httpx
+
+from lilavati.agents.research import FinancialResearchAgent
+from lilavati.agents.search import FinancialSearchAgent
+from lilavati.connectors.edgar import EdgarClient
+
+# Serve the verbatim SEC excerpts instead of the network (drop `transport=` to go live).
+files = {"/submissions/CIK0000320193.json": "tests/fixtures/aapl_submissions_subset.json",
+         "/api/xbrl/companyfacts/CIK0000320193.json": "tests/fixtures/aapl_companyfacts_research_fy2026.json"}
+sec = httpx.MockTransport(lambda r: httpx.Response(200, json=json.load(open(files[r.url.path]))))
+edgar = EdgarClient(user_agent="offline excerpt", transport=sec)
+agent = FinancialResearchAgent(search_agent=FinancialSearchAgent(edgar_client=edgar))
+
+d = agent.conduct_deep_research("AAPL", as_of_date=date(2026, 11, 3))
+print(d.filing.accession, d.filing.report_date)
+print(f"Beneish {d.committee_memo.beneish_m_score.m_score:.2f}  Altman {d.committee_memo.altman_z_score.z_score:.2f}")
+print("identities hold:", all(c.holds for c in d.statement_checks + d.committee_memo.checks))
+print("citations resolved:", d.citations_verified, d.citations_count)
+print("committee:", d.recommendation)
+for item in d.assumed_inputs:
+    print("assumed:", item[:70])
+```
+
+```text
+0000320193-26-000026 2026-09-26
+Beneish -2.52  Altman 10.01
+identities hold: True
+citations resolved: True 91
+committee: APPROVED_BUY
+assumed: revenue growth target 5% (caller's choice)
+assumed: scenario tree: Bull revenue x1.15 and margin +2 pts (p 0.25), Base x1.
+assumed: market value of equity: public float 3,647,099 (USD millions) as of 20
+assumed: interest rate 0 in the scenario graph: the filing reports no interest
+```
+
+Live on other 10-Ks (run 2026-11-24): Walmart is a hold (revenue growth below the 5% target),
+Microsoft approved, and Nvidia **rejected**: its revenue grew 65%, and the Beneish sales-growth index
+alone (1.65) lifts the M-score to −1.15, above −1.78. Its identities hold and its citations resolve.
+Beneish treats rapid growth as pressure to manipulate; a fast grower can fail the screen without any
+sign of manipulation. The rule did what it says; reading the result is the analyst's job. J&J is
+refused (no operating income line).
+
 ## What can go wrong (all found while building this tutorial)
 
 - **Comparative periods returned as current.** Selecting by fiscal-year tag returned prior years'
@@ -210,6 +264,13 @@ than statements) are where to look next.
   The stored replies were re-scored with the corrected definition (`--rescore`), not re-asked.
 - **A fake contact.** The connector sent a made-up contact address to SEC. It now reads yours from
   `LILAVATI_SEC_USER_AGENT`.
+- **Assumptions dressed as research.** The research agent used to take revenue and assets from a
+  filing and assume the rest (receivables, debt, prior year, emissions of 50,000 t), and fell back to
+  an illustrative baseline without SEC. It now uses the filing for every input, takes market value
+  from the cover-page public float (labelled as a proxy), computes carbon intensity only from
+  emissions you supply with a source, and refuses when an input is missing. Microsoft reports SG&A as
+  two lines (sales and marketing, general and administrative) with no total: the sum is used and
+  recorded. Nvidia's capex tag includes intangible assets: used and labelled.
 - **A gate that checked only the form.** `ProvenanceGate` passed any 64-character hash, so a typo
   in a figure or a citation to an unread source went through. With a `SourceStore` it resolves each
   citation (Step 3b). Building the store showed that an XBRL fact record has no concept name: Apple
@@ -239,6 +300,9 @@ than statements) are where to look next.
 5. In Step 3b, change a citation's `period_end` to the prior year, then its `xbrl_tag` to
    `us-gaap:Assets`. What does the gate report for each? Which check would catch a model that quotes
    the right number for the wrong year?
+6. Run Step 6 live (`examples/05_deep_research_agent.py --live NVDA`). Which Beneish indices push
+   the score over the threshold? Argue for or against a growth-adjusted threshold, citing Beneish
+   (1999).
 
 ## For instructors
 
