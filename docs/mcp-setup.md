@@ -72,6 +72,10 @@ each server registers.)
 ## Notes
 * Results are deterministic calculations, not advice. Engines are alpha and still being validated against
   reference values; see the [roadmap](https://github.com/revendrat/lilavati/blob/main/ROADMAP.md).
+* Every tool result has a `validation` field: the engine's status (`reference-checked`, `piloted on
+  real data`, `rule-based` or `not reference-checked`), what it means, open items and the validation
+  page. An agent should treat a `not reference-checked` result as unvalidated and say so. All engines:
+  [validation status](validation/status.md).
 * The servers make no network calls except `corporate-filings`, which queries SEC EDGAR. SEC requires a
   contact: set `LILAVATI_SEC_USER_AGENT="Your Name you@example.org"` in the server's environment (Claude
   Code: `claude mcp add -e LILAVATI_SEC_USER_AGENT="Your Name you@example.org" lilavati-corporate-filings -- ...`;

@@ -12,6 +12,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from lilavati.core.econometrics import EconometricEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-econometrics",
@@ -26,6 +27,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def analyze_stationarity(
     series: list[float],
     significance_level: float = 0.05,
@@ -53,6 +55,7 @@ def analyze_stationarity(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def analyze_cointegration(
     series_a: list[float],
     series_b: list[float],
@@ -83,6 +86,7 @@ def analyze_cointegration(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def fit_garch_volatility(
     returns: list[float],
     p: int = 1,

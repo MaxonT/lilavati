@@ -13,6 +13,7 @@ from fastmcp import FastMCP
 
 from lilavati.agents.committee import AdversarialCommittee
 from lilavati.agents.forensics import ForensicEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-adversarial-committee",
@@ -27,6 +28,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def evaluate_investment_committee_memo(
     symbol: str,
     fiscal_year: int,
@@ -123,6 +125,7 @@ def evaluate_investment_committee_memo(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def compute_forensic_beneish_m_score(
     revenue_t: float,
     revenue_t_minus_1: float,

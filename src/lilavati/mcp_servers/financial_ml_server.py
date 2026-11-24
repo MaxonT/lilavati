@@ -13,6 +13,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from lilavati.core.financial_ml import FinancialMLEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-financial-ml",
@@ -27,6 +28,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def find_optimal_fractional_diff(
     series: list[float],
     step: float = 0.05,
@@ -57,6 +59,7 @@ def find_optimal_fractional_diff(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def apply_triple_barrier_labels(
     prices: list[float],
     holding_horizon: int,

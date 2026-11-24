@@ -45,6 +45,33 @@ researchers and AI engineers.
 - **Added:** contamination control (private held-out seed; keep it off free tiers that train on
   prompts) and project sustainability (domain reviewers, contributor ladder, funding).
 
+## External review of 2026-11-25: decisions
+
+An outside review (written from the docs site, the README and a file listing, not the code) was
+checked against the repository. Adopted items are placed in the phases below; the rest, with reasons:
+
+| Suggestion | Decision |
+| :--- | :--- |
+| One machine-readable capability and validation manifest rendered into README and docs | **Adopted** (Phase 8): the docs home pillar table shows no validation status while the README table does |
+| Validation status returned by every MCP tool | **Adopted** (Phase 8), with our own status levels tied to the validation pages |
+| Validation page for execution | **Adopted** (Phase 8): Almgren-Chriss was checked against the paper but has no page |
+| Typed quantities (scale, instant or duration, accounting basis, consolidation scope) | **Adopted** into the `VerifiedResult` contract (Phase 9) |
+| Provenance of derived outputs (inputs' citations, engine version, checks run) | **Adopted** into the evidence ledger (Phase 9) |
+| Z3 beyond point checks: unsat cores fed back to the agent; symbolic covenant cure with `z3.Optimize` | **Adopted** (Phase 9). Point checks on concrete numbers do not need an SMT solver; Z3 earns its place on symbolic questions |
+| Purged and combinatorial purged CV with Deflated Sharpe Ratio and probability of backtest overfitting | **Adopted** (Phase 9, with 7.4) |
+| Calendar and Durrleman density conditions for volatility surfaces | **Adopted** (Phase 9) |
+| Process-level benchmark metrics: tool-output faithfulness, unit traps, injected instructions in filing text, cost and latency | **Adopted** (Phase 9) |
+| Counterfactual twins to estimate parametric look-ahead; restatement cases; a post-cutoff split | **Adopted** (Phase 10) |
+| US GAAP and Ind AS comparability adjustments (leases, cash-flow classification) | **Adopted** (Phase 10), after checking the standards' text |
+| Macro-financial pillar on vintage data | **Adopted** as a staged track after the vintage connectors (Phases 10–11) |
+| Static trace viewer for teaching and audit | **Adopted** (Phase 12) |
+| Common filing-connector interface across XBRL, HTML and PDF | **Adopted** with roadmap 1.5 |
+| Move raw benchmark replies out of Git | **Not adopted**: they are the published evidence (1.1 MB, checked against the manifest in CI); the Zenodo snapshot will archive them as well |
+| Merge `runtime/` into `framework/` | **Not adopted**: not a duplicate; `framework.FinancialAgent` wraps `runtime.NeuroSymbolicAgent`. Document the layering instead |
+| Move result models into `schemas/` | **Not adopted**: cosmetic; the Pydantic result models exist in each engine module |
+| README still says "Five Pillars" | Not found in the README; the real drift is covered by the manifest item |
+| PyPI release now | Deferred by the maintainer until reviewer feedback |
+
 ## Gap analysis (brainstorm item → what exists → gap)
 
 | Item | Exists | Gap |
@@ -76,9 +103,16 @@ researchers and AI engineers.
 - [x] Paired tool/no-tool runs on four Groq models, recorded in the benchmark paper §5.3 (2026-11-22).
 - [x] Units in every MCP tool description (2026-11-24; `tests/test_mcp_registry.py` checks it).
 - [ ] Tool prompt t3: re-run the tool arm with 3+ samples on the new descriptions; analyse
-      `rejected_output` of malformed calls (vega per vol point caused a double division).
+      `rejected_output` of malformed calls (vega per vol point caused a double division). *Needs API
+      budget; after reviewer feedback, together with benchmark v2 (Phase 9).*
 - [ ] Zenodo DOI for the release (7.13b).
 - [ ] External review: one practitioner, one software reviewer (7.17).
+- [x] One machine-readable validation-status manifest for every engine and MCP tool
+      (`lilavati.validation_status`); the docs home pillar table and `docs/validation/status.md` are
+      generated from it; tests check README rows agree (2026-11-25, review 2026-11-25).
+- [x] Every MCP tool result carries its engine's validation status, open items and page (2026-11-25).
+- [x] Validation page for execution: the Almgren-Chriss checks against Almgren and Chriss (2000) and the
+      fixes; order book, Black-Litterman and HRP listed as open (#14–#16) (2026-11-25).
 - **Gate:** v0.2 tagged; every number in README, docs and papers traceable to `results/manifest.json`
   or a validation page.
 
@@ -132,7 +166,8 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [x] Ind AS crosswalk and 10-K PDF parser: no zero-fill or substitutes; real cash and balance checks
       (2026-11-23).
 - [ ] Pluggable PDF parser connectors (roadmap 1.5): a backend interface so pypdf, pdfplumber, layout and
-      OCR parsers share the statement mapping and checks; per-backend validation on the same filings.
+      OCR parsers share the statement mapping and checks; per-backend validation on the same filings; one
+      filing-connector interface across XBRL, HTML and PDF. *After reviewer feedback.*
 - [x] Ind AS crosswalk on real audited results, line by line against the printed statements (7.5;
       2026-11-24: Maruti Suzuki FY2025-26 consolidated; all checks hold; the exchange filing folds
       right-of-use assets into PP&E).
@@ -150,9 +185,28 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 
 ## Phase 9 (months 1–3): contracts and evidence
 
-- [ ] `VerifiedResult` contract on top of `SourcedValue`; adopt it in all MCP servers.
-- [ ] Evidence ledger built from tool traces; replay of a recorded trace with tolerance comparison.
+- [ ] `VerifiedResult` contract on top of `SourcedValue`; adopt it in all MCP servers. Typed quantities:
+      currency, scale, instant or duration, accounting basis (US GAAP, Ind AS, IFRS, non-GAAP) and
+      consolidation scope; adding a stock to a flow, or mixing scales or currencies without a dated FX
+      citation, raises. (The Maruti exchange filing and Walmart's two revenue totals are the motivating
+      cases.)
+- [ ] Evidence ledger built from tool traces; replay of a recorded trace with tolerance comparison. Derived
+      outputs carry their inputs' citations, the engine version and commit, and the checks run (a
+      provenance graph; W3C PROV serialisation optional).
+- [ ] Z3 beyond point checks: tracked assertions so a failed identity returns its unsat core (the
+      conflicting line items), fed to the reflection prompt; symbolic covenant questions with
+      `z3.Optimize` (smallest debt paydown or equity cure meeting leverage and coverage together, or
+      proof that none exists within a guidance range). Reference tests with hand-solved cases.
+- [ ] Financial ML: purged and embargoed K-fold and combinatorial purged CV (7.4), with the Deflated
+      Sharpe Ratio and the probability of backtest overfitting (verify Bailey and López de Prado's papers
+      before citing).
+- [ ] Derivatives: static no-arbitrage across a surface: total implied variance non-decreasing in
+      maturity (calendar) and the Durrleman density condition (verify Gatheral and Jacquier before citing).
+- [ ] Benchmark process metrics: whether the final answer quotes tool outputs unchanged (no re-rounding or
+      unit drift), unit-trap and mixed-scale tables, instructions injected into filing text, and tokens,
+      tool rounds and latency in the manifest (accuracy against cost).
 - [ ] Benchmark v2: all 7 tracks generated, 20+ cases per track, 3+ samples per model, private seed.
+      *The bigger benchmark run: needs API budget; after reviewer feedback.*
 - [ ] Abstention cases (missing or contradictory inputs, where the right answer is "cannot conclude").
 - [ ] Real-document cases: SEC EDGAR for 2 issuers and one Ind AS annual report (7.5, 7.14).
 - **Gate:** a paired tool/no-tool result whose CI excludes zero on non-saturated cases, written up
@@ -162,13 +216,37 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 
 - [ ] Licence review per source (see corrections); record the result in a dataset card.
 - [ ] Connectors: SEC EDGAR company facts (filing-anchored extraction done, 2026-11-23), ALFRED vintages,
-      World Bank.
+      World Bank, RBI DBIE and MOSPI release snapshots (licence check first). *After reviewer feedback.*
+- [ ] Typed macro series (frequency, unit, nominal or real, base year, seasonal adjustment,
+      transformation, stock or flow, release time) and conversion tools (rebasing, SAAR and year-on-year,
+      deflating); a release calendar so an observation is usable only after its publication time.
+- [ ] Restatement cases: one period, two filing dates (10-K/A, Ind AS prior-period adjustments), as
+      reported against as restated.
+- [ ] Counterfactual twins for look-ahead: anonymised names, shifted dates, controlled perturbations; the
+      accuracy gap between originals and twins estimates parametric leakage. A split built only from
+      filings published after the evaluated models' cutoffs.
+- [ ] Comparability adjustments between US GAAP and Ind AS where they differ (leases; classification of
+      interest and dividends in the cash flow statement), checked against the standards' text first.
 - [ ] Curated India set (about 20 companies) with provenance and licence notes per source.
 - [ ] Minimal ontology: about 30 canonical metrics used by the benchmark and tutorials, mapped
       across US GAAP, IFRS and Ind AS, with consolidated/standalone, audited/unaudited, reported/derived,
       restatement links.
 - [ ] Point-in-time track with a poisoned corpus (7.15).
 - **Gate:** a point-in-time leak measured on a real vintage dataset.
+
+## Macro-financial track (after the vintage connectors; Phases 10–11)
+
+- [ ] Identity checks on macro scenarios: sectoral balances, balance of payments, and government debt
+      dynamics, with `z3.Optimize` for the debt-stabilising primary balance.
+- [ ] Engines with reference checks (statsmodels and the original papers): Hamilton (2018) regression
+      filter, local projections (Jordà 2005) with HAC errors, Taylor rules.
+- [ ] Transmission into existing engines: a rate or inflation shock moves the Nelson-Siegel curve, then
+      bond prices, covenant headroom and Merton default probability; a tutorial from a central-bank
+      shock to a covenant breach.
+- [ ] Benchmark track on vintages: questions whose answer changed between the first and a revised
+      estimate.
+- **Gate:** a look-ahead leak measured on real ALFRED or RBI vintages; each engine checked against a
+  reference.
 
 ## Phase 11 (months 6–9): multi-agent reliability as research
 
@@ -184,6 +262,7 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       tutorials and course; executable lessons with a deliberately wrong AI answer to correct.
 - [ ] Pilot the course with one university; collect instructor feedback.
 - [ ] Student benchmark competition on a private seed.
+- [ ] Static trace viewer (HTML from recorded tool traces) for grading student agents and for audit.
 - **Gate:** outside contributors landing validated engines through the skills and review process.
 
 ## Enterprise-quality track (runs alongside all phases)

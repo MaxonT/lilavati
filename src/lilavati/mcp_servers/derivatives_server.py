@@ -12,6 +12,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from lilavati.core.derivatives import DerivativesEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-derivatives",
@@ -26,6 +27,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def price_european_option(
     spot: float,
     strike: float,
@@ -61,6 +63,7 @@ def price_european_option(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def price_american_option(
     spot: float,
     strike: float,
@@ -99,6 +102,7 @@ def price_american_option(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def calculate_option_greeks(
     spot: float,
     strike: float,
@@ -133,6 +137,7 @@ def calculate_option_greeks(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def calibrate_sabr_volatility_model(
     forward: float,
     strikes: list[float],
@@ -163,6 +168,7 @@ def calibrate_sabr_volatility_model(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def check_butterfly_arbitrage(
     strikes: list[float],
     call_prices: list[float],

@@ -72,15 +72,20 @@ uv run lilavati-bench list-cases
 
 ## Flagship Pillars
 
-| Pillar | Capability | Key Technologies |
+<!-- BEGIN generated: pillar table (scripts/render_validation_status.py) -->
+| Pillar | Capability | Engines and validation status |
 | :--- | :--- | :--- |
-| **Pillar I** | Three-Statement Modeling & Accounting Checks | Reactive DAG, Polars, Z3 SMT Solver |
-| **Pillar II** | Fixed Income, Credit & Debt Indentures | Bond Analytics (DV01, Convexity), Nelson-Siegel, Merton Structural Model |
-| **Pillar III** | Financial Econometrics & Stationarity | ADF Unit Root, Engle-Granger Cointegration, OU Half-Life, GARCH(p,q) |
-| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional Differentiation ($d^*$), Triple-Barrier Labeling (purged CV planned) |
-| **Pillar V** | Derivatives, Volatility Surfaces & Greeks | Black-Scholes-Merton, CRR Binomial Trees, SABR Calibration, Arbitrage Invariants |
-| **Pillar VI** | Market Microstructure & Optimal Execution | LOB Microprice, OFI, Almgren-Chriss Liquidation, Black-Litterman, HRP |
-| **Pillar VII** | Sustainable Finance & Climate Risk | Scope 1+2 WACI, Shadow Carbon Tax Stress Testing, SLB Step-Up Covenants |
+| **Pillar I** | Three-Statement Modeling & Accounting Checks | Accounting identities and covenant checks (Z3) ✅ [reference-checked](validation/invariants.md); Statement graph with driver shocks 🟡 [not reference-checked](validation/index.md) |
+| **Pillar II** | Fixed Income, Credit & Debt Covenants | Bond price, durations, convexity, DV01 ✅ [reference-checked](validation/fixed_income.md); Nelson-Siegel curve fit ✅ [reference-checked](validation/fixed_income.md); Merton structural default model ✅ [reference-checked](validation/fixed_income.md) |
+| **Pillar III** | Financial Econometrics & Stationarity | ADF, Engle-Granger with OU half-life, GARCH(p, q) ✅ [reference-checked](validation/econometrics.md) |
+| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional differencing, minimal-d search, triple barrier ✅ [reference-checked](validation/financial_ml.md) |
+| **Pillar V** | Derivatives, Volatility Surfaces & Greeks | Black-Scholes-Merton, Greeks, CRR, implied vol, SABR, butterfly check ✅ [reference-checked](validation/derivatives.md) |
+| **Pillar VI** | Market Microstructure, Execution & Portfolio | Almgren-Chriss liquidation schedule ✅ [reference-checked](validation/execution.md); Order-book snapshot (spread, microprice, order-flow imbalance) 🟡 [not reference-checked](validation/execution.md); Black-Litterman posterior and weights 🟡 [not reference-checked](validation/execution.md); Hierarchical risk parity 🟡 [not reference-checked](validation/execution.md) |
+| **Pillar VII** | Sustainable Finance & Climate Risk | WACI, carbon-tax stress test, sustainability-linked bond ✅ [reference-checked](validation/sustainability.md) |
+| **Filings & agents** | Filing Connectors, Forensics & Agents | Beneish M-score, Altman Z-score ✅ [reference-checked](validation/forensics.md); Rule-based investment committee ✅ [rule-based](validation/forensics.md); SEC XBRL filing-anchored extraction and three-statement model 🟡 [piloted on real data](validation/connectors.md); 10-K PDF parser 🟡 [piloted on real data](validation/connectors.md); Ind AS crosswalk 🟡 [piloted on real data](validation/connectors.md) |
+
+Status meanings and every MCP tool: [validation status](validation/status.md).
+<!-- END generated: pillar table -->
 
 ---
 

@@ -270,10 +270,11 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 Each phase ends in a gate: measurable evidence before the next phase starts.*
 
 - [ ] **Phase 8 (about 4 weeks): credibility, v0.2.** Phase 7 blocking items, tutorials 02–04 retrofit, paired runs in the paper, DOI, external review. *Gate:* every published number traceable to the manifest or a validation page.
-- [ ] **Phase 9 (months 1–3): contracts and evidence.** `VerifiedResult` contract, evidence ledger, trace replay, benchmark v2 (7 tracks, 20+ cases each, 3+ samples, private seed), abstention and real-document cases. *Gate:* a paired tool/no-tool result whose CI excludes zero on non-saturated cases.
-- [ ] **Phase 10 (months 3–6): narrow data commons.** Licence review per source; EDGAR company facts, ALFRED, World Bank; curated India set; minimal ontology; point-in-time track. *Gate:* a measured point-in-time leak on a real vintage dataset.
+- [ ] **Phase 9 (months 1–3): contracts and evidence.** `VerifiedResult` contract with typed quantities, evidence ledger with derived provenance, trace replay, Z3 unsat cores and symbolic covenant questions, purged CV with Deflated Sharpe Ratio, surface no-arbitrage, benchmark v2 (7 tracks, 20+ cases each, 3+ samples, private seed; needs API budget) with process metrics, abstention and real-document cases. *Gate:* a paired tool/no-tool result whose CI excludes zero on non-saturated cases.
+- [ ] **Phase 10 (months 3–6): narrow data commons.** Licence review per source; EDGAR company facts, ALFRED, World Bank, RBI DBIE and MOSPI vintages; typed macro series; curated India set; minimal ontology with US GAAP and Ind AS comparability adjustments; point-in-time track with restatement cases and counterfactual twins.
+- [ ] **Macro-financial track (Phases 10–11).** Macro identity checks (sectoral balances, balance of payments, debt dynamics), reference-checked engines (Hamilton filter, local projections, Taylor rules), transmission into curve, covenant and default-probability engines, a vintage benchmark track. *Gate:* a look-ahead leak measured on real vintages. *Gate:* a measured point-in-time leak on a real vintage dataset.
 - [ ] **Phase 11 (months 6–9): multi-agent reliability research.** Architecture ladder on LangGraph at constant model, data and budget. *Gate:* pilot Financial AI Reliability Report v0.
-- [ ] **Phase 12 (months 9–12): Academy and community.** Learning pathways, university pilot, student competition. *Gate:* outside contributors landing validated engines.
+- [ ] **Phase 12 (months 9–12): Academy and community.** Learning pathways, university pilot, student competition, static trace viewer. *Gate:* outside contributors landing validated engines.
 - [ ] **Enterprise-quality track (alongside):** semantic versioning and API policy, coverage and full CI, vulnerability scanning and SBOM, signed releases, API authentication, CODEOWNERS and maintainer team, independent audit.
 
 ---
