@@ -119,3 +119,38 @@ def test_missing_items_are_listed_or_refused_never_zero() -> None:
     for key in ("ProfitForThePeriod", "TotalExpenses", "CashAndCashEquivalentsAtBeginningOfPeriod"):
         with pytest.raises(ValueError, match="does not give"):
             IndiaFilingsClient.parse_ind_as_disclosure(_disclosure({k: v for k, v in FACTS.items() if k != key}))
+
+
+def test_real_annual_results_maruti_suzuki_fy2026() -> None:
+    # Maruti Suzuki India, consolidated audited results, year ended 2026-03-31 (INR million), typed
+    # from the printed statements filed with NSE and BSE on 2026-04-28 (see the fixture's _source).
+    # Expected values are the Schedule III arithmetic on those printed figures.
+    import json
+    from pathlib import Path
+
+    raw = json.loads((Path(__file__).parent / "fixtures" / "maruti_indas_consolidated_fy2026.json").read_text())
+    d = IndASCompanyDisclosure(**{k: v for k, v in raw.items() if not k.startswith(("_", "exchange"))})
+    res = IndiaFilingsClient.parse_ind_as_disclosure(d)
+    m = 1_000_000
+    inc, bs, cf = (res.statement_model.income_statement, res.statement_model.balance_sheet,
+                   res.statement_model.cash_flow_statement)
+    assert inc.cogs == (1_116_635 + 231_845 - 22_725) * m  # 1,325,755
+    assert inc.gross_profit == 507_405 * m
+    assert inc.operating_income == (1_833_160 - (1_688_402 - 2_387)) * m  # 147,145
+    # Employee 90,497 + D&A 67,417 + other expenses 205,233 - vehicles/dies for own use 2,887
+    assert inc.sga_expense == 360_260 * m
+    assert (inc.tax_expense, inc.net_income, inc.interest_expense) == (44_390 * m, 146_795 * m, 2_387 * m)
+    assert (bs.total_assets, bs.total_liabilities, bs.total_equity) == (1_488_810 * m, 417_247 * m, 1_071_563 * m)
+    assert (bs.inventory, bs.accounts_receivable, bs.accounts_payable) == (113_206 * m, 53_420 * m, 221_338 * m)
+    assert cf.net_change_in_cash == -1_176 * m
+    assert res.not_reported == ["total_debt"]  # no borrowings line is printed
+    assert "OtherEquity" in res.derived["retained_earnings"]
+    assert [c.name for c in res.checks] == ["assets = liabilities + equity", "assets = total equity and liabilities",
+                                            "opening cash + cash flows = closing cash"]
+    assert all(c.holds and c.difference == 0 for c in res.checks)
+    # The exchange's Ind AS filing (INR lakhs) agrees on every line but PP&E, where it adds the
+    # right-of-use assets that the printed balance sheet shows separately (340,195 = 334,197 + 5,998).
+    exchange = raw["exchange_filing_lakhs"]
+    differs = {k for k, v in exchange.items() if v / 10 != raw["facts"][k]}
+    assert differs == {"PropertyPlantAndEquipment"}
+    assert exchange["PropertyPlantAndEquipment"] / 10 - raw["facts"]["PropertyPlantAndEquipment"] == 5_998

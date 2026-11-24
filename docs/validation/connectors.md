@@ -122,9 +122,33 @@ check. XBRL facts have no page, so `page` is `None` (it used to be a placeholder
 ## Ind AS crosswalk
 
 `IndiaFilingsClient.parse_ind_as_disclosure` maps Schedule III (Division II) line items, supplied by
-the caller, into the canonical model. It does not fetch filings, and it has not been run on a real
-annual report yet; the tests use a fictional company built to satisfy the Schedule III and Ind AS 7
-arithmetic.
+the caller, into the canonical model. It does not fetch filings.
+
+**Real results: Maruti Suzuki India, consolidated, year ended 31 March 2026** (checked 2026-11-24).
+Source: the annual results filed with NSE and BSE on 28 April 2026 (statement of profit and loss,
+assets and liabilities, cash flows; pages 6–8, INR million), typed line by line from the printed,
+signed pages (the PDF is a scan; its text layer is unusable). The crosswalk needed no change.
+
+| Item | Printed figures | Crosswalk | Check |
+| :--- | :--- | ---: | :--- |
+| Cost of goods sold | materials 1,116,635 + purchases 231,845 − change in inventories 22,725 | 1,325,755 | pass |
+| Operating income | revenue 1,833,160 − (total expenses 1,688,402 − finance costs 2,387) | 147,145 | pass |
+| Other operating expenses | employee 90,497 + D&A 67,417 + other 205,233 − vehicles/dies for own use 2,887 | 360,260 | pass (= gross profit − operating income) |
+| Assets = liabilities + equity | 1,488,810 = 417,247 + 1,071,563 | holds | pass (Z3) |
+| Assets = total equity and liabilities | 1,488,810 | holds | pass |
+| Opening cash + flows = closing cash | 1,845 + 190,999 − 147,335 − 44,840 = 669 | holds | pass |
+| Borrowings | no line printed | listed in `not_reported` | pass |
+
+Cross-check against the exchange's Ind AS filing of the same results (NSE integrated filing, INR
+lakhs): every line agrees except property, plant and equipment, 340,195 in the filing against
+334,197 printed. The difference, 5,998, is the right-of-use assets, a separate printed line that the
+exchange format folds into PP&E. Its "total profit before tax" (188,330) also excludes the share of
+profit of associates and joint ventures (2,855), which the printed "profit before tax" (191,185)
+includes. The same label can mean different numbers in two presentations of one set of results: say
+which one a figure comes from. Test: `tests/test_india_filings.py::test_real_annual_results_maruti_suzuki_fy2026`;
+figures in `tests/fixtures/maruti_indas_consolidated_fy2026.json` (with sources and notes).
+
+The other tests use a fictional company built to satisfy the Schedule III and Ind AS 7 arithmetic.
 
 Fixed (2026-11-23), on that test disclosure: cost of goods sold took only the first cost line found
 (4,000 instead of 4,800, the sum of materials consumed, purchases of stock-in-trade and the change in
@@ -136,6 +160,7 @@ income 0.0 when profit was missing); opening cash was back-solved from the cash 
 cash + cash flows + exchange-rate effect = closing cash, Ind AS 7), raises naming any required item
 not given, and cites only the items in the disclosure.
 
-Open items: no live annual report yet; consolidated vs standalone and the "other equity" breakdown
-(retained earnings is "other equity" unless given separately, and recorded as such) depend on what
-the caller supplies.
+Open items: one company and one year (consolidated); a standalone statement and a second company;
+no retrieval (the caller types or supplies the figures; the exchange filing is HTML rendered from
+XBRL and could be read directly); the "other equity" breakdown (retained earnings is "other equity"
+unless given separately, and recorded as such) depends on what the caller supplies.
