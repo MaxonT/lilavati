@@ -12,6 +12,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from lilavati.core.fixed_income import FixedIncomeEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-fixed-income",
@@ -26,6 +27,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def analyze_bond(
     face_value: float,
     coupon_rate: float,
@@ -58,6 +60,7 @@ def analyze_bond(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def fit_yield_curve(
     maturities: list[float],
     yields: list[float],
@@ -83,6 +86,7 @@ def fit_yield_curve(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def evaluate_credit_risk_merton(
     equity_value: float,
     equity_volatility: float,

@@ -12,6 +12,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from lilavati.core.execution import ExecutionEngine
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-portfolio-execution",
@@ -26,6 +27,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def analyze_order_book_microstructure(
     best_bid: float,
     best_ask: float,
@@ -62,6 +64,7 @@ def analyze_order_book_microstructure(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def compute_almgren_chriss_liquidation_schedule(
     total_shares: float,
     time_horizon_hours: float,
@@ -104,6 +107,7 @@ def compute_almgren_chriss_liquidation_schedule(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def optimize_portfolio_black_litterman(
     assets: list[str],
     covariance_matrix: list[list[float]],
@@ -145,6 +149,7 @@ def optimize_portfolio_black_litterman(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def optimize_portfolio_hierarchical_risk_parity(
     assets: list[str],
     returns_matrix: list[list[float]],

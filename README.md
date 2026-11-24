@@ -177,7 +177,7 @@ Substantial parts of the *Līlāvatī* deal with commercial mathematics:
 
 ## 🏛️ What is implemented today
 
-Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (see [ROADMAP.md](ROADMAP.md)). Numerical validation against independent references is in progress ([docs/validation](docs/validation/index.md)); engines not yet audited should be treated as unvalidated.
+Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (see [ROADMAP.md](ROADMAP.md)). Per-engine validation status, also returned by every MCP tool: [validation status](docs/validation/status.md). Numerical validation against independent references is in progress ([docs/validation](docs/validation/index.md)); engines not yet audited should be treated as unvalidated.
 
 | Area | Capability | Status | Module |
 | :--- | :--- | :---: | :--- |
@@ -196,14 +196,14 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | **Derivatives** | Black-Scholes price and Greeks, CRR American options, implied vol | ✅ | `core/derivatives.py` |
 | | SABR smile calibration, butterfly arbitrage check (Z3) | ✅ | `core/derivatives.py` |
 | | Heston, local vol, full-surface no-arbitrage | 🗺️ | n/a |
-| **Execution & portfolio** | Order-book snapshot (spread, microprice, imbalance) | ✅ | `core/execution.py` |
+| **Execution & portfolio** | Order-book snapshot (spread, microprice, imbalance) | 🟡 not yet checked against a reference (#14) | `core/execution.py` |
 | | Almgren-Chriss schedule (discrete, Almgren & Chriss 2000) | ✅ | `core/execution.py` |
 | | Black-Litterman (weights by CVXPY with Clarabel, solver status checked), hierarchical risk parity | 🟡 not yet checked against a reference (#15, #16) | `core/execution.py` |
 | | VPIN, TWAP/VWAP/POV | 🗺️ | n/a |
 | **Sustainable finance** | WACI, carbon-tax stress test, SLB step-up covenant | ✅ | `core/sustainability.py` |
 | | Full NGFS scenario pathways | 🟡 enum only | `schemas/sustainability.py` |
 | **Verification & data** | Z3 three-statement invariants | ✅ | `core/invariants.py` |
-| | Statement DAG with driver shocks | ✅ | `core/graph.py` |
+| | Statement DAG with driver shocks | 🟡 not yet checked against a reference (balances by an equity plug) | `core/graph.py` |
 | | Bi-temporal DuckDB store, `CitationRef` provenance | ✅ | `core/temporal.py`, `core/provenance.py` |
 | | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk each checked on one company) | ✅ | `connectors/` |
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |

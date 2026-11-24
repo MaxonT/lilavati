@@ -13,6 +13,7 @@ from fastmcp import FastMCP
 
 from lilavati.core.sustainability import SustainabilityEngine
 from lilavati.schemas.sustainability import SustainabilityLinkedBond
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-sustainability",
@@ -27,6 +28,7 @@ mcp = FastMCP(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def calculate_portfolio_carbon_intensity(
     weights: list[float],
     emissions: list[float],
@@ -58,6 +60,7 @@ def calculate_portfolio_carbon_intensity(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def stress_test_carbon_tax_impact(
     revenue: float,
     ebit: float,
@@ -100,6 +103,7 @@ def stress_test_carbon_tax_impact(
         "openWorldHint": False,
     }
 )
+@with_validation_status
 def evaluate_sustainability_linked_bond_covenant(
     isin: str,
     notional: float,

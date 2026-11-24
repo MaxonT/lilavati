@@ -246,6 +246,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   `langchain-mcp-adapters` requires `mcp<2` but fastmcp 4 needs `mcp>=2.3`, so the LangGraph
   example runs with `uv run --no-project --with ...` and starts the servers as subprocesses. Do
   not pin around such conflicts inside the project; check `uv tree --invert --package <pkg>`.
+- **Every engine has one validation status** in `src/lilavati/validation_status.py` (reference-checked,
+  piloted on real data, rule-based, not reference-checked), and every MCP tool is decorated with
+  `@with_validation_status` under `@mcp.tool`. A new tool without an entry fails at import. After
+  changing a status, run `scripts/render_validation_status.py`; tests check the docs and README agree.
 - **Every MCP tool declares all four hints** (`readOnlyHint`, `destructiveHint`, `idempotentHint`,
   `openWorldHint`) as booleans matching what it does; `openWorldHint` is true only for tools that
   reach the network (the SEC tools). `tests/test_mcp_registry.py` enforces it.
@@ -338,3 +342,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-24: Research agent rebuilt on one 10-K (prior year from the same filing's comparatives;
   SG&A summed from its lines when no total is tagged; refuses on missing inputs).
 - 2026-11-25: CVXPY status check added to the solver-output rule (Black-Litterman equal-weight fallback).
+- 2026-11-25: Validation-status manifest rule (status per engine, returned by every MCP tool).

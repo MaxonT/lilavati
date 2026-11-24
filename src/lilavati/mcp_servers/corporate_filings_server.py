@@ -21,6 +21,7 @@ from fastmcp import FastMCP
 
 from lilavati.connectors.edgar import EdgarClient
 from lilavati.connectors.sec_filing import fetch_filing_extraction, filing_ratios
+from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
     name="lilavati-corporate-filings",
@@ -35,6 +36,7 @@ mcp = FastMCP(
         "openWorldHint": True,
     }
 )
+@with_validation_status
 def get_company_filing_statements(
     ticker_or_cik: str,
     fiscal_year: int,
@@ -72,6 +74,7 @@ def get_company_filing_statements(
         "openWorldHint": True,
     }
 )
+@with_validation_status
 def extract_single_line_item(
     ticker_or_cik: str,
     metric_name: str,
@@ -105,6 +108,7 @@ def extract_single_line_item(
         "openWorldHint": True,
     }
 )
+@with_validation_status
 def get_filing_figures(
     ticker_or_cik: str,
     form: str = "10-K",

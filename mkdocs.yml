@@ -82,6 +82,7 @@ nav:
   - Integrations (LangGraph, ADK, A2A): integrations.md
   - Numerical Validation:
       - Overview: validation/index.md
+      - Status of every engine and tool: validation/status.md
       - Fixed Income: validation/fixed_income.md
       - Derivatives: validation/derivatives.md
       - Invariants: validation/invariants.md
@@ -89,6 +90,7 @@ nav:
       - Forensics: validation/forensics.md
       - Econometrics: validation/econometrics.md
       - Financial ML: validation/financial_ml.md
+      - Execution & portfolio: validation/execution.md
       - Filing connectors: validation/connectors.md
       - Libraries, solvers & citations: validation/libraries.md
   - Līlāvatī-Bench: benchmarks.md
