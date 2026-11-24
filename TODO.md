@@ -110,6 +110,8 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       known limitations.
 - [x] First-contribution tasks opened as GitHub issues (2026-11-23): #6–#13 `good first issue`,
       #14–#16 `help wanted` (engine audits).
+- [x] First outside contributions merged (2026-11-24): #6 and #7 fixed in PRs #23 and #24; tasks
+      removed from the contributing guide's list.
 
 **Recommended at or soon after the announcement**
 - [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot.
