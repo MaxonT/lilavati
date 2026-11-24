@@ -157,7 +157,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] **4.8 Advanced Autonomous Financial Agents (Search, Deep, Research) (`src/lilavati/agents/`):**
   * **FinancialSearchAgent:** Autonomous multi-source discovery across SEC EDGAR, India BSE/NSE Ind AS, and macro feeds with SHA-256 cryptographic provenance.
   * **DeepFinancialAgent:** Deep reasoning hypothesis tree search (Bull, Base, Bear) evaluated through reactive DAGs and Z3 SMT invariant pruning.
-  * **FinancialResearchAgent:** End-to-end equity and credit research dossier synthesis integrating filing retrieval, forensic audits, deep scenario trees, and carbon WACI.
+  * **FinancialResearchAgent:** dossier from one 10-K (latest filed by the as-of date): this year and the prior-year comparatives from the filing's own XBRL facts, the three-statement model with checks, the rule-based committee (Beneish, Altman, identities), a scenario tree calibrated from the filing (assumed multipliers, listed), carbon WACI only from supplied emissions, and every citation resolved against the SEC data read. Refuses when an input is not reported. Checked live on Apple, Microsoft, Walmart and Nvidia (2026-11-24); J&J refused.
 - [x] **4.9 Verification:** unit tests across committee deliberation, model connectivity, tracing, runtime loops, and agents. Note: the default LLM is a mock; real-model agent runs are not yet part of the test suite.
 
 ---

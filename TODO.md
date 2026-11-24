@@ -123,7 +123,9 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Optionally enable GitHub Discussions for questions.
 
 **Disclosed limitations (follow-up work, not blockers)**
-- [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
+- [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3). The
+      statement graph plugs equity to balance, so each scenario branch's `smt_invariant_verified` holds by
+      construction (found 2026-11-24); its retained earnings are one year's net income.
 - [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
       10-K PDF parser and Ind AS still open. Purged cross-validation (7.4).
 - [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
@@ -138,8 +140,9 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       read as −1.
 - [x] `ProvenanceGate(store)` resolves citations against a `SourceStore` of the sources read (2026-11-23);
       without a store it still checks the form only.
-- [ ] `FinancialResearchAgent` is a workflow demonstration on assumed inputs; replace the assumptions
-      with filing data (prior year, receivables, debt) or retire it.
+- [x] `FinancialResearchAgent` builds its dossier from one 10-K's reported figures (2026-11-24); live on
+      Apple, Microsoft, Walmart and Nvidia (Nvidia rejected by the Beneish growth effect; see
+      docs/validation/forensics.md).
 - [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).
 - [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22).
 

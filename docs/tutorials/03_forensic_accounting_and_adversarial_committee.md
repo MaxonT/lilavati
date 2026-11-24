@@ -14,8 +14,11 @@
 ## Where this fits
 
 The "bull" and "bear" here are rule-based text written from computed numbers, so you can see every
-step. In an LLM committee the same structure holds: models argue, tools compute, and the decision
-rule reads tool outputs (see `lilavati.agents.committee` and the `lilavati-mcp-committee` server).
+step. The library's committee (`lilavati.agents.committee`, MCP server `lilavati-mcp-committee`) is
+rule-based in the same way: no language model is called, and the verdict follows fixed rules over
+the Beneish, Altman and identity-check outputs. If you put language models in the roles, keep the
+structure: models argue, tools compute, and the decision rule reads tool outputs, never a model's
+arithmetic. Tutorial 08, Step 6 runs the library's committee on a real 10-K.
 Steps 1–3 form one module; save them as `forensic_committee.py`. The firm is synthetic.
 
 ```bash
