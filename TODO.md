@@ -74,8 +74,9 @@ researchers and AI engineers.
     - [x] All 27 unique reference entries verified against primary sources; 9 corrected or removed (7.8).
 - [x] Tutorials 02–04 retrofitted and executed in CI (7.24, 2026-11-22).
 - [x] Paired tool/no-tool runs on four Groq models, recorded in the benchmark paper §5.3 (2026-11-22).
-- [ ] Tool prompt t3: state output units in every tool description (vega per vol point caused a
-      double division); re-run the tool arm with 3+ samples; analyse `rejected_output` of malformed calls.
+- [x] Units in every MCP tool description (2026-11-24; `tests/test_mcp_registry.py` checks it).
+- [ ] Tool prompt t3: re-run the tool arm with 3+ samples on the new descriptions; analyse
+      `rejected_output` of malformed calls (vega per vol point caused a double division).
 - [ ] Zenodo DOI for the release (7.13b).
 - [ ] External review: one practitioner, one software reviewer (7.17).
 - **Gate:** v0.2 tagged; every number in README, docs and papers traceable to `results/manifest.json`
@@ -122,7 +123,9 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Optionally enable GitHub Discussions for questions.
 
 **Disclosed limitations (follow-up work, not blockers)**
-- [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
+- [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3). The
+      statement graph plugs equity to balance, so each scenario branch's `smt_invariant_verified` holds by
+      construction (found 2026-11-24); its retained earnings are one year's net income.
 - [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
       10-K PDF parser (second issuer) and a second Ind AS company open. Purged cross-validation (7.4).
 - [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
@@ -139,8 +142,9 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       read as −1.
 - [x] `ProvenanceGate(store)` resolves citations against a `SourceStore` of the sources read (2026-11-23);
       without a store it still checks the form only.
-- [ ] `FinancialResearchAgent` is a workflow demonstration on assumed inputs; replace the assumptions
-      with filing data (prior year, receivables, debt) or retire it.
+- [x] `FinancialResearchAgent` builds its dossier from one 10-K's reported figures (2026-11-24); live on
+      Apple, Microsoft, Walmart and Nvidia (Nvidia rejected by the Beneish growth effect; see
+      docs/validation/forensics.md).
 - [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).
 - [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22).
 

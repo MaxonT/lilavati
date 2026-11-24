@@ -147,7 +147,16 @@ def compute_forensic_beneish_m_score(
     net_income_t: float,
     cfo_t: float,
 ) -> dict[str, Any]:
-    """Calculates the 8-variable Beneish M-Score to detect earnings manipulation."""
+    """
+    Beneish (1999) 8-variable M-score for earnings manipulation.
+
+    Amounts in one currency unit for every input (e.g. USD millions); suffix _t is the current year,
+    _t_minus_1 the prior year. depreciation is depreciation and amortisation expense; long_term_debt is
+    non-current debt. Returns m_score (dimensionless; above -1.78 sets is_likely_manipulator) and the
+    eight indices dsri, gmi, aqi, sgi, depi, sgai, lvgi (ratios near 1.0) and tata ((net income - CFO)
+    / total assets, a simplification of Beneish's accruals). Fast-growing companies can exceed -1.78
+    through the sales growth index alone; read the indices behind a flag.
+    """
     res = ForensicEngine.calculate_beneish_m_score(
         revenue_t=revenue_t,
         revenue_t_minus_1=revenue_t_minus_1,
