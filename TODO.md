@@ -124,14 +124,16 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 **Disclosed limitations (follow-up work, not blockers)**
 - [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3).
 - [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
-      10-K PDF parser and Ind AS still open. Purged cross-validation (7.4).
+      10-K PDF parser (second issuer) and a second Ind AS company open. Purged cross-validation (7.4).
 - [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
 - [x] Ind AS crosswalk and 10-K PDF parser: no zero-fill or substitutes; real cash and balance checks
-      (2026-11-23). Ind AS still untested on a real annual report.
+      (2026-11-23).
 - [ ] Pluggable PDF parser connectors (roadmap 1.5): a backend interface so pypdf, pdfplumber, layout and
       OCR parsers share the statement mapping and checks; per-backend validation on the same filings.
-- [ ] Ind AS crosswalk on one real annual report (a manufacturer, so the Schedule III cost lines exist),
-      line by line against the printed statements (7.5).
+- [x] Ind AS crosswalk on real audited results, line by line against the printed statements (7.5;
+      2026-11-24: Maruti Suzuki FY2025-26 consolidated; all checks hold; the exchange filing folds
+      right-of-use assets into PP&E).
+- [ ] Ind AS: a standalone statement and a second company; read the exchange's Ind AS filing directly.
 - [ ] 10-K PDF parser on a second issuer (labels are Apple's today) (7.5); list prior-year items not found
       (only current-year items are in `missing_items`); footnote markers such as "(1)" after a label are
       read as −1.
