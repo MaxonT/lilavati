@@ -198,14 +198,44 @@ class ExecutionEngine:
         """
         Solves the Black-Litterman model fusing market equilibrium priors with views.
         E[R] = [ (tau*Sigma)^(-1) + P^T Omega^(-1) P ]^(-1) * [ (tau*Sigma)^(-1) Pi + P^T Omega^(-1) Q ]
+
+        Weights maximise w'E[R] - 0.5 * risk_aversion * w' Sigma w, long-only and summing to 1, solved
+        with CVXPY (Diamond and Boyd, 2016) and the Clarabel solver (Goulart and Chen, 2024). Raises ``ValueError`` for inconsistent shapes, non-finite
+        values, a covariance that is not symmetric positive definite (tau * Sigma is inverted), market
+        weights that are negative or do not sum to 1, a non-positive view standard deviation, tau or
+        risk aversion; raises ``RuntimeError`` when the solver does not report an optimal solution.
+        Not yet checked against a published worked example (issue #15).
         """
         n = len(assets)
         sigma = np.asarray(covariance_matrix, dtype=np.float64)
         w_mkt = np.asarray(market_prior_weights, dtype=np.float64)
         p = np.asarray(views_matrix, dtype=np.float64)
         q = np.asarray(views_returns, dtype=np.float64)
-        omega_diag = np.asarray(views_confidence_std, dtype=np.float64) ** 2
-        omega = np.diag(omega_diag)
+        view_std = np.asarray(views_confidence_std, dtype=np.float64)
+        k = p.shape[0] if p.ndim == 2 else -1
+        if (n == 0 or sigma.shape != (n, n) or w_mkt.shape != (n,) or p.ndim != 2 or p.shape[1] != n
+                or q.shape != (k,) or view_std.shape != (k,)):
+            raise ValueError(
+                f"Shapes must agree: {n} assets need an {n}x{n} covariance and {n} market weights; "
+                f"views_matrix must be k x {n} with k views_returns and k views_confidence_std "
+                f"(got covariance {sigma.shape}, weights {w_mkt.shape}, views {p.shape}, returns {q.shape}, "
+                f"std {view_std.shape})."
+            )
+        if not all(np.all(np.isfinite(a)) for a in (sigma, w_mkt, p, q, view_std)):
+            raise ValueError("All inputs must be finite numbers.")
+        if not np.allclose(sigma, sigma.T, rtol=0.0, atol=1e-12):
+            raise ValueError("covariance_matrix must be symmetric.")
+        try:
+            np.linalg.cholesky(sigma)
+        except np.linalg.LinAlgError:
+            raise ValueError("covariance_matrix must be positive definite (tau * Sigma is inverted).") from None
+        if np.any(w_mkt < 0) or abs(float(w_mkt.sum()) - 1.0) > 1e-9:
+            raise ValueError(f"market_prior_weights must be non-negative and sum to 1 (sum {w_mkt.sum():.12g}).")
+        if np.any(view_std <= 0):
+            raise ValueError("views_confidence_std must be positive (Omega is inverted).")
+        if risk_aversion <= 0 or tau <= 0:
+            raise ValueError("risk_aversion and tau must be positive.")
+        omega = np.diag(view_std**2)
 
         # 1. Reverse-engineer implied equilibrium returns (Pi = delta * Sigma * w_mkt)
         pi = risk_aversion * (sigma @ w_mkt)
@@ -226,16 +256,18 @@ class ExecutionEngine:
         constraints = [cp.sum(w_var) == 1.0, w_var >= 0.0]  # type: ignore[attr-defined]
 
         problem = cp.Problem(objective, constraints)
-        problem.solve()  # type: ignore[no-untyped-call]
+        # Clarabel (interior point; a required CVXPY dependency) is named explicitly: left to choose,
+        # CVXPY picks among the installed solvers (here OSQP), so weights could differ by environment.
+        problem.solve(solver=cp.CLARABEL)  # type: ignore[no-untyped-call]
 
-        if w_var.value is not None:
-            optimal_weights = [max(0.0, float(wi)) for wi in w_var.value]
-        else:
-            optimal_weights = [1.0 / n] * n
-
-        # Renormalize to exact 1.0 sum
-        s = sum(optimal_weights)
-        optimal_weights = [w / s for w in optimal_weights]
+        # A failed solve used to return equal weights as if they were the optimum.
+        if problem.status != cp.OPTIMAL or w_var.value is None:
+            raise RuntimeError(f"Black-Litterman weight optimisation did not solve (solver status {problem.status!r}).")
+        raw = np.asarray(w_var.value, dtype=np.float64)
+        if raw.min() < -1e-6:  # beyond solver tolerance, the long-only constraint was not met
+            raise RuntimeError(f"Solver returned a negative weight ({raw.min():.3g}) despite the long-only constraint.")
+        clipped = np.clip(raw, 0.0, None)  # remove solver-tolerance noise only
+        optimal_weights = [float(w) for w in clipped / clipped.sum()]
 
         return BlackLittermanResult(
             assets=assets,
@@ -243,6 +275,7 @@ class ExecutionEngine:
             optimal_weights=optimal_weights,
             expected_returns=[float(r) for r in post_er],
             implied_prior_returns=[float(r) for r in pi],
+            solver=str(problem.solver_stats.solver_name),
         )
 
     @staticmethod

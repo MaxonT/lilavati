@@ -51,7 +51,11 @@ right and every claim being true. These rules come from real bugs found in this 
   (fractional vol used where price-unit vol was required).
 - **Check solver output.** A root-finder or optimiser result must be validated (residual check)
   before returning it; raise instead of returning a non-solution. The Merton solver silently
-  returned points with 10–90% equation error because convergence was never checked.
+  returned points with 10–90% equation error because convergence was never checked. For CVXPY,
+  check `problem.status == cp.OPTIMAL`: Black-Litterman returned equal weights when the solve failed.
+  Name the solver (`solver=cp.CLARABEL`): left to choose, CVXPY picks among whatever is installed.
+- **Cite the libraries you rely on** in `docs/validation/libraries.md` (method, check, licence, citation
+  confirmed against the publisher or the project's citing page; versions from `uv.lock`).
 - **Never return a placeholder that looks computed.** If a search or solver finds nothing, raise.
   Do not fill result fields with defaults: the fractional-d search returned `optimal_d=1.0,
   adf_p_value=1.0` and the undifferenced input as if they were results.
@@ -333,3 +337,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-23: Committee example added to the derived-inputs rule (identity checks that could not fail).
 - 2026-11-24: Research agent rebuilt on one 10-K (prior year from the same filing's comparatives;
   SG&A summed from its lines when no total is tagged; refuses on missing inputs).
+- 2026-11-25: CVXPY status check added to the solver-output rule (Black-Litterman equal-weight fallback).

@@ -90,7 +90,7 @@ commercial software. Where it stands:
 | In place | Still needed (tracked in [ROADMAP](ROADMAP.md) and [TODO](TODO.md)) |
 | :--- | :--- |
 | Apache-2.0; typed Pydantic APIs checked with mypy | PyPI release with semantic versioning and an API stability and deprecation policy |
-| 500+ tests, including reference tests against textbooks, papers and QuantLib | Coverage reporting |
+| 600+ tests, including reference tests against textbooks, papers and QuantLib | Coverage reporting |
 | CI on Python 3.11 and 3.12: lint, type check, tests; strict docs build, every example, tutorial code, claims linter, results manifest | Dependency vulnerability scanning and SBOM |
 | Release workflow with PyPI Trusted Publishing and a clean-install smoke test (ready; awaiting PyPI setup) | First PyPI release (deferred until reviewer feedback; install from GitHub meanwhile) |
 | Validation pages per audited engine; published benchmark evidence with a manifest; documentation site on GitHub Pages | Audits of the remaining engines; wider live-filing validation (more companies, 10-Q, banks); independent review |
@@ -198,7 +198,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | Heston, local vol, full-surface no-arbitrage | 🗺️ | n/a |
 | **Execution & portfolio** | Order-book snapshot (spread, microprice, imbalance) | ✅ | `core/execution.py` |
 | | Almgren-Chriss schedule (discrete, Almgren & Chriss 2000) | ✅ | `core/execution.py` |
-| | Black-Litterman, hierarchical risk parity | ✅ | `core/execution.py` |
+| | Black-Litterman (weights by CVXPY with Clarabel, solver status checked), hierarchical risk parity | 🟡 not yet checked against a reference (#15, #16) | `core/execution.py` |
 | | VPIN, TWAP/VWAP/POV | 🗺️ | n/a |
 | **Sustainable finance** | WACI, carbon-tax stress test, SLB step-up covenant | ✅ | `core/sustainability.py` |
 | | Full NGFS scenario pathways | 🟡 enum only | `schemas/sustainability.py` |
@@ -208,7 +208,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk each checked on one company) | ✅ | `connectors/` |
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
-| **Agents** | Neuro-symbolic runtime, adversarial committee, forensics (Beneish, Altman) | ✅ | `runtime/`, `agents/` |
+| **Agents** | Neuro-symbolic runtime; rule-based committee (Beneish, Altman, identity checks on reported inputs); research dossier from one 10-K with every input cited and checked against the SEC data read | ✅ | `runtime/`, `agents/` |
 | | LLM tool calling: OpenAI-compatible (incl. Groq presets), Gemini, Anthropic, with retries on 429/5xx | ✅ live-tested on Gemini API (Gemma 4 31B, Gemini 4 Hydrogen) and Groq (gpt-oss-120b, gpt-oss-20b, qwen3.6-27b: 3/3 runs; qwen3.8-27b: 1/3, malformed tool calls); Anthropic format-tested only | `llm/client.py`, `llm/providers.py` |
 | | Checkpointing, streaming, async, human-in-the-loop | not in core by design: use LangGraph / Google ADK with Līlāvatī's MCP servers | n/a |
 | **Integrations** | LangGraph, Google ADK and A2A examples, run end to end on a real model | ✅ | `examples/integrations/` |
@@ -328,6 +328,14 @@ If you use Līlāvatī in your research or applications, please cite:
   note    = {Alpha release. ORCID 0000-0003-0549-4022}
 }
 ```
+
+### Built on
+
+Līlāvatī wraps mature open-source libraries rather than reimplementing them: NumPy, SciPy,
+statsmodels, arch, CVXPY with the Clarabel solver, Z3, DuckDB, Polars, pypdf, FastMCP, Pydantic and
+httpx (QuantLib for test reference values). If your work relies on a result from one of them, please
+cite it too: [libraries, solvers and citations](docs/validation/libraries.md) lists what each library
+does here, how its output is checked, its licence and its preferred citation.
 
 ---
 
