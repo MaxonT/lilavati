@@ -22,6 +22,7 @@ These changes ship in 0.2.0 when it is tagged (the version in `pyproject.toml` i
 - Golden case LILAVATI-T1-001 cited "Item 8, pp. 48-52" of Apple's FY2024 10-K; its cash-flow figures are constructed for the exercise (operating cash flow 118,264 against the filed 118,254). The citation now says so; the question, and so its content hash, is unchanged.
 - The framework paper said the `ProvenanceGate` resolves citations against a document hash store; it checks only that a citation is well formed.
 - Pilot total quoted as "64 of 64" in the changelog, roadmap, Tutorial 08 and release notes; the pilot table and results file give 71 of 71.
+- `calculate_altman_z_score` raised a bare `ZeroDivisionError` for zero total assets or zero total liabilities; it now raises a `ValueError` naming the input.
 - `FixedIncomeEngine.analyze_bond` raised a bare `ZeroDivisionError` for a maturity of half a coupon period or less (zero whole periods); it now raises a `ValueError`.
 ### Docs
 - README: verified M8ven publisher badge. A test now requires all four MCP tool hints (read-only, destructive, idempotent, open-world) as booleans on every tool, with open-world true only for the SEC tools (an external scan of a 13 November commit reported the hints missing; they were added since).
