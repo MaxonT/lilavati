@@ -200,7 +200,7 @@ class ExecutionEngine:
         E[R] = [ (tau*Sigma)^(-1) + P^T Omega^(-1) P ]^(-1) * [ (tau*Sigma)^(-1) Pi + P^T Omega^(-1) Q ]
 
         Weights maximise w'E[R] - 0.5 * risk_aversion * w' Sigma w, long-only and summing to 1, solved
-        with CVXPY (Diamond and Boyd, 2016). Raises ``ValueError`` for inconsistent shapes, non-finite
+        with CVXPY (Diamond and Boyd, 2016) and the Clarabel solver (Goulart and Chen, 2024). Raises ``ValueError`` for inconsistent shapes, non-finite
         values, a covariance that is not symmetric positive definite (tau * Sigma is inverted), market
         weights that are negative or do not sum to 1, a non-positive view standard deviation, tau or
         risk aversion; raises ``RuntimeError`` when the solver does not report an optimal solution.
@@ -256,7 +256,9 @@ class ExecutionEngine:
         constraints = [cp.sum(w_var) == 1.0, w_var >= 0.0]  # type: ignore[attr-defined]
 
         problem = cp.Problem(objective, constraints)
-        problem.solve()  # type: ignore[no-untyped-call]
+        # Clarabel (interior point; a required CVXPY dependency) is named explicitly: left to choose,
+        # CVXPY picks among the installed solvers (here OSQP), so weights could differ by environment.
+        problem.solve(solver=cp.CLARABEL)  # type: ignore[no-untyped-call]
 
         # A failed solve used to return equal weights as if they were the optimum.
         if problem.status != cp.OPTIMAL or w_var.value is None:
@@ -273,6 +275,7 @@ class ExecutionEngine:
             optimal_weights=optimal_weights,
             expected_returns=[float(r) for r in post_er],
             implied_prior_returns=[float(r) for r in pi],
+            solver=str(problem.solver_stats.solver_name),
         )
 
     @staticmethod

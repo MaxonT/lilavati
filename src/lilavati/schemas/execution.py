@@ -55,6 +55,7 @@ class BlackLittermanResult(BaseModel):
     optimal_weights: list[float]
     expected_returns: list[float]
     implied_prior_returns: list[float]
+    solver: str = Field(default="", description="the solver CVXPY used for the weights")
 
 
 class HRPAllocationResult(BaseModel):

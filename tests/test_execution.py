@@ -130,6 +130,7 @@ def test_black_litterman_weights_match_the_budget_constrained_closed_form() -> N
     closed = inv @ (mu - lam * ones) / d
     assert np.all(closed > 0)  # the long-only bound does not bind, so the formula applies
     assert np.allclose(res.optimal_weights, closed, atol=1e-6)
+    assert res.solver == "CLARABEL"  # named explicitly, so the result does not depend on what is installed
 
 
 def test_black_litterman_raises_when_the_solver_fails(monkeypatch) -> None:

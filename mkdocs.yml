@@ -90,6 +90,7 @@ nav:
       - Econometrics: validation/econometrics.md
       - Financial ML: validation/financial_ml.md
       - Filing connectors: validation/connectors.md
+      - Libraries, solvers & citations: validation/libraries.md
   - Līlāvatī-Bench: benchmarks.md
   - Academic Pre-Prints:
       - "Framework Paper (Pre-Print 1)": papers/01_framework_paper.md

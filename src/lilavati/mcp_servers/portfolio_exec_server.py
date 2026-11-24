@@ -121,7 +121,7 @@ def optimize_portfolio_black_litterman(
     (decimals, same period as the covariance), views_confidence_std (standard deviation of each view;
     Omega is their squares on the diagonal). tau = 0.05. Returns implied_prior_returns (Pi = risk_aversion
     * Sigma * w_mkt), expected_returns (posterior, decimals) and optimal_weights (fractions, long-only,
-    summing to 1, from maximising return - 0.5 * risk_aversion * variance, solved with CVXPY; an error is
+    summing to 1, from maximising return - 0.5 * risk_aversion * variance, solved with CVXPY and the Clarabel solver, named in 'solver'; an error is
     returned if the solver does not reach an optimum, never a default allocation). Not yet checked against a
     published example (issue #15).
     """
