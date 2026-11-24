@@ -107,3 +107,48 @@ def test_hierarchical_risk_parity() -> None:
 
     # Low vol assets (A & B) should receive higher allocations than high vol assets (C & D)
     assert (res.weights[0] + res.weights[1]) > (res.weights[2] + res.weights[3])
+
+
+_BL = {
+    "assets": ["AAPL", "MSFT", "GOOG"],
+    "covariance_matrix": [[0.04, 0.01, 0.01], [0.01, 0.04, 0.01], [0.01, 0.01, 0.04]],
+    "market_prior_weights": [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
+    "views_matrix": [[0.0, 1.0, 0.0]],
+    "views_returns": [0.10],
+    "views_confidence_std": [0.02],
+}
+
+
+def test_black_litterman_weights_match_the_budget_constrained_closed_form() -> None:
+    # When no weight is at the long-only bound, maximising w'mu - (d/2) w'Sigma w subject to
+    # sum(w) = 1 has the Lagrangian solution w = Sigma^-1 (mu - lam 1) / d with
+    # lam = (1'Sigma^-1 mu - d) / (1'Sigma^-1 1) (mean-variance with a budget constraint).
+    res = ExecutionEngine.optimize_black_litterman(**_BL)
+    sigma, mu, d = np.array(_BL["covariance_matrix"]), np.array(res.expected_returns), 2.5
+    inv, ones = np.linalg.inv(sigma), np.ones(3)
+    lam = (ones @ inv @ mu - d) / (ones @ inv @ ones)
+    closed = inv @ (mu - lam * ones) / d
+    assert np.all(closed > 0)  # the long-only bound does not bind, so the formula applies
+    assert np.allclose(res.optimal_weights, closed, atol=1e-6)
+
+
+def test_black_litterman_raises_when_the_solver_fails(monkeypatch) -> None:
+    # A failed solve used to return equal weights (1/3 each) as if they were the optimum.
+    import cvxpy as cp
+
+    monkeypatch.setattr(cp.Problem, "solve", lambda self, *a, **k: None)  # no solution, status unset
+    with pytest.raises(RuntimeError, match="did not solve"):
+        ExecutionEngine.optimize_black_litterman(**_BL)
+
+
+@pytest.mark.parametrize(("field", "value", "match"), [
+    ("covariance_matrix", [[0.04, 0.04, 0.0], [0.04, 0.04, 0.0], [0.0, 0.0, 0.04]], "positive definite"),
+    ("covariance_matrix", [[0.04, 0.02, 0.0], [0.01, 0.04, 0.0], [0.0, 0.0, 0.04]], "symmetric"),
+    ("market_prior_weights", [0.5, 0.5, 0.5], "sum to 1"),
+    ("views_confidence_std", [0.0], "positive"),
+    ("views_returns", [0.1, 0.2], "Shapes must agree"),
+    ("views_returns", [float("nan")], "finite"),
+])
+def test_black_litterman_rejects_invalid_inputs(field: str, value: object, match: str) -> None:
+    with pytest.raises(ValueError, match=match):
+        ExecutionEngine.optimize_black_litterman(**{**_BL, field: value})
