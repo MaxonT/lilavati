@@ -74,8 +74,9 @@ researchers and AI engineers.
     - [x] All 27 unique reference entries verified against primary sources; 9 corrected or removed (7.8).
 - [x] Tutorials 02–04 retrofitted and executed in CI (7.24, 2026-11-22).
 - [x] Paired tool/no-tool runs on four Groq models, recorded in the benchmark paper §5.3 (2026-11-22).
-- [ ] Tool prompt t3: state output units in every tool description (vega per vol point caused a
-      double division); re-run the tool arm with 3+ samples; analyse `rejected_output` of malformed calls.
+- [x] Units in every MCP tool description (2026-11-24; `tests/test_mcp_registry.py` checks it).
+- [ ] Tool prompt t3: re-run the tool arm with 3+ samples on the new descriptions; analyse
+      `rejected_output` of malformed calls (vega per vol point caused a double division).
 - [ ] Zenodo DOI for the release (7.13b).
 - [ ] External review: one practitioner, one software reviewer (7.17).
 - **Gate:** v0.2 tagged; every number in README, docs and papers traceable to `results/manifest.json`
