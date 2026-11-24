@@ -21,6 +21,32 @@ def test_bond_analytics() -> None:
     assert result.convexity > 0.0
 
 
+@pytest.mark.parametrize(
+    ("years_to_maturity", "frequency"),
+    [(0.2, 2), (0.25, 2), (0.0, 2), (0.04, 12)],
+)
+def test_bond_analytics_rejects_maturity_below_one_period(
+    years_to_maturity: float, frequency: int
+) -> None:
+    # Fewer than one whole coupon period rounds to n_periods = 0, which used to end in ZeroDivisionError.
+    with pytest.raises(ValueError, match="no whole coupon period"):
+        FixedIncomeEngine.analyze_bond(
+            face_value=100.0,
+            coupon_rate=0.05,
+            ytm=0.06,
+            years_to_maturity=years_to_maturity,
+            frequency=frequency,
+        )
+
+
+def test_bond_analytics_accepts_one_period_maturity() -> None:
+    # 0.5 years at frequency 2 is exactly one period: price = (100 + 2.5) / (1 + 0.06 / 2).
+    result = FixedIncomeEngine.analyze_bond(
+        face_value=100.0, coupon_rate=0.05, ytm=0.06, years_to_maturity=0.5, frequency=2
+    )
+    assert result.clean_price == pytest.approx(102.5 / 1.03, rel=1e-12)
+
+
 def test_nelson_siegel_curve_fit() -> None:
     # Upward-sloping yield curve points: 1y, 2y, 5y, 10y, 30y
     maturities = [1.0, 2.0, 5.0, 10.0, 30.0]

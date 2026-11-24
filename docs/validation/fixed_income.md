@@ -25,7 +25,7 @@ D_mod · P · 1e-4, positive.
 | 0 < D_mod < D_mac < maturity; price and DV01 scale linearly with `face_value` | property | 1.5e-16 rel | pass |
 | Field descriptions said "per 100 par" for price and DV01 | n/a | n/a | **fixed** (docs): values are in `face_value` units |
 | Off-cycle maturity (e.g. 5.2y semiannual is priced as 5.0y) | n/a | n/a | **open**: rounded silently; no stub/accrued model |
-| Maturity below half a period (`n_periods = 0`) | n/a | n/a | **open**: raises `ZeroDivisionError`, not a clear `ValueError` |
+| Maturity of half a period or less (`n_periods = 0`) | n/a | n/a | **fixed**: previously raised `ZeroDivisionError`; now a `ValueError` saying no whole coupon period is left (`tests/test_fixed_income.py`) |
 
 ## `fit_nelson_siegel`
 
