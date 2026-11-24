@@ -331,3 +331,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   tolerance for source amounts); repo map lists `SourceStore`.
 - 2026-11-23: MCP tool hints rule (test-enforced) after an external scan of an old commit.
 - 2026-11-23: Committee example added to the derived-inputs rule (identity checks that could not fail).
+- 2026-11-24: Research agent rebuilt on one 10-K (prior year from the same filing's comparatives;
+  SG&A summed from its lines when no total is tagged; refuses on missing inputs).
