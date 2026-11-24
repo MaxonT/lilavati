@@ -73,8 +73,10 @@ def price_american_option(
 ) -> dict[str, Any]:
     """Prices an American option with early exercise via Cox-Ross-Rubinstein (CRR) binomial tree.
 
-    Same units as price_european_option. The returned greeks are European Black-Scholes-Merton
-    Greeks for the same inputs, not tree Greeks of the American option.
+    Units: time_to_maturity in years; risk_free_rate, dividend_yield (continuous) and volatility as
+    decimals (0.05 = 5%); price in the currency of spot and strike. The returned greeks are European
+    Black-Scholes-Merton Greeks for the same inputs, not tree Greeks of the American option (vega per
+    1 vol point, theta per calendar day, rho per 1% rate move).
     """
     result = DerivativesEngine.price_american_option_crr(
         spot=spot,
@@ -165,9 +167,13 @@ def check_butterfly_arbitrage(
     strikes: list[float],
     call_prices: list[float],
 ) -> dict[str, Any]:
-    """Checks butterfly spread convexity across the given option prices via the Z3 SMT solver.
+    """
+    Butterfly (strike-convexity) no-arbitrage check of call prices with the Z3 solver.
 
-    Points are sorted by strike; strikes must be distinct and all values finite.
+    strikes and call_prices are in the same currency, for European calls on one underlying and one
+    expiry. Points are sorted by strike; for each consecutive triple K1 < K2 < K3 the slope difference
+    (C3 - C2)/(K3 - K2) - (C2 - C1)/(K2 - K1) must be >= -1e-4 (dimensionless). Call-spread bounds
+    are not checked. Strikes must be distinct and all values finite.
     """
     result = DerivativesEngine.verify_butterfly_arbitrage(
         strikes=strikes,

@@ -34,7 +34,15 @@ def analyze_order_book_microstructure(
     prev_bid_size: float | None = None,
     prev_ask_size: float | None = None,
 ) -> dict[str, Any]:
-    """Computes microprice, spread, and Order Flow Imbalance (OFI) from order book quotes."""
+    """
+    Spread, mid price, microprice and a simplified order-flow imbalance from a top-of-book quote.
+
+    Prices in one currency per share; sizes in shares (or contracts). spread = ask - bid (price
+    units); microprice = (bid_size * ask + ask_size * bid) / (bid_size + ask_size). order_flow_imbalance
+    = (bid_size - prev_bid_size) - (ask_size - prev_ask_size), in shares, assuming unchanged prices
+    (a simplification of Cont et al. 2014); 0.0 when previous sizes are not given. Raises if the book
+    is crossed or a size is not positive.
+    """
     result = ExecutionEngine.analyze_lob_snapshot(
         best_bid=best_bid,
         best_ask=best_ask,
@@ -105,7 +113,17 @@ def optimize_portfolio_black_litterman(
     views_confidence_std: list[float],
     risk_aversion: float = 2.5,
 ) -> dict[str, Any]:
-    """Solves Black-Litterman optimal asset allocation combining market priors with agent views."""
+    """
+    Black-Litterman posterior returns and long-only weights.
+
+    covariance_matrix: covariance of asset returns (decimals, e.g. annual). market_prior_weights:
+    fractions summing to 1. views_matrix P (one row per view, one column per asset), views_returns Q
+    (decimals, same period as the covariance), views_confidence_std (standard deviation of each view;
+    Omega is their squares on the diagonal). tau = 0.05. Returns implied_prior_returns (Pi = risk_aversion
+    * Sigma * w_mkt), expected_returns (posterior, decimals) and optimal_weights (fractions, long-only,
+    summing to 1, from maximising return - 0.5 * risk_aversion * variance). Not yet checked against a
+    published example (issue #15).
+    """
     result = ExecutionEngine.optimize_black_litterman(
         assets=assets,
         covariance_matrix=covariance_matrix,
@@ -130,7 +148,15 @@ def optimize_portfolio_hierarchical_risk_parity(
     assets: list[str],
     returns_matrix: list[list[float]],
 ) -> dict[str, Any]:
-    """Solves Hierarchical Risk Parity (HRP) allocation using clustering without matrix inversion."""
+    """
+    Hierarchical Risk Parity weights (after López de Prado 2016).
+
+    returns_matrix: one row per period, one column per asset (periodic returns as decimals). Single-
+    linkage clustering on the distance sqrt(0.5 * (1 - correlation)), quasi-diagonal ordering, then
+    recursive bisection; each split is weighted by inverse cluster variance, approximated here by the
+    trace of the cluster's covariance. Returns weights (fractions summing to 1) and ordered_indices.
+    Not yet checked against the paper (issue #16).
+    """
     result = ExecutionEngine.optimize_hierarchical_risk_parity(
         assets=assets,
         returns_matrix=returns_matrix,

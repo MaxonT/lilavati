@@ -65,3 +65,16 @@ def test_every_tool_declares_all_four_hints_truthfully() -> None:
             assert a.open_world_hint == (tool.name in network), tool.name
             seen += 1
     assert seen == 25
+
+
+def test_every_tool_description_states_units() -> None:
+    # A model reads only the description. A vega already per volatility point was divided by 100
+    # again at the tool boundary in the tool-augmented benchmark arm; units must be stated.
+    unit_words = ("decimal", "fraction", "dimensionless", "currency", "dollars", "usd", "in years",
+                  "tco2e", "basis points", "shares", "sampling periods", "per ")
+    for module in SERVERS:
+        mod = importlib.import_module(f"lilavati.mcp_servers.{module}")
+        server = next(v for v in vars(mod).values() if isinstance(v, FastMCP))
+        for tool in asyncio.run(server.list_tools()):
+            text = " ".join((tool.description or "").lower().split())
+            assert any(w in text for w in unit_words), f"{tool.name}: no units in its description"

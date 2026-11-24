@@ -78,8 +78,12 @@ def extract_single_line_item(
     fiscal_year: int,
 ) -> dict[str, Any]:
     """
-    Extracts a specific reported metric (e.g. 'Assets', 'Revenues', 'NetIncomeLoss')
-    from SEC EDGAR with verbatim citation and accession number.
+    One reported US-GAAP value from SEC EDGAR, with its citation.
+
+    metric_name is a US-GAAP concept name (e.g. 'Assets', 'Revenues', 'NetIncomeLoss'). The value is
+    in US dollars as reported (not scaled; only USD facts). The fiscal year's 10-K period is selected
+    by the fy tag, the annual duration and the latest period end. Returns {"error": ...} if the concept
+    is not reported. For a filing's full set of line items, prefer get_filing_figures.
     """
     client = EdgarClient()
     facts = client.fetch_company_facts(ticker_or_cik)
