@@ -30,8 +30,6 @@ These are real open items from the [validation pages](validation/index.md) and t
 
 | Task | Where | What "done" means |
 | :--- | :--- | :--- |
-| Clear error for zero total assets or liabilities in the Altman Z-score (it raises `ZeroDivisionError`) | `agents/forensics.py` | a `ValueError` with a clear message, and a test |
-| Clear error for a bond maturity below half a coupon period (`ZeroDivisionError`) | `core/fixed_income.py` | `ValueError` and a test |
 | Clear error when the Nelson-Siegel start guess is out of bounds (opaque scipy error) | `core/fixed_income.py` | `ValueError` naming the bad input, and a test |
 | Audit the order-book metrics (spread, microprice, order-flow imbalance) | `core/execution.py` | reference tests citing the definitions, a validation page |
 | Audit Black-Litterman against a published worked example | `core/execution.py` | reference test with the source cited, validation page |
