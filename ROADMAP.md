@@ -150,7 +150,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Multi-model abstraction supporting Google DeepMind Gemini, Anthropic Claude, OpenAI, and local OSS financial models (via vLLM / Ollama).
   * FastMCP tool schema binding, function calling, and Pydantic structured output validation.
 - [x] **4.6 Neuro-Symbolic Agent Runtime & Reflection Loop (`src/lilavati/runtime/`):**
-  * Autonomous execution loop: LLM planning -> sandboxed tool execution -> Z3 formal invariant check -> unsatisfiable core reflection loop -> verified synthesis.
+  * Autonomous execution loop: LLM planning -> sandboxed tool execution -> Z3 identity check -> reflection prompt with a diagnosis of which figures could be wrong (MaxSMT, from 2026-11-25) -> synthesis.
 - [x] **4.7 Institutional Tracing & OpenTelemetry Audit Trail (`src/lilavati/tracing/`):**
   * OpenTelemetry-compatible span models capturing agent runs, model calls, tool executions, SMT verification results, and citation checks.
   * Immutable JSONL audit trail exporter and compliance summaries.

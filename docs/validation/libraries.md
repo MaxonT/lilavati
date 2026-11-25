@@ -17,7 +17,9 @@ is checked, and how to cite the libraries if you use Līlāvatī in published wo
 | ADF, Engle-Granger (`core/econometrics.py`) | unit-root and cointegration tests | statsmodels `adfuller`, `coint` | settings passed explicitly (trend, lag selection) |
 | Black-Litterman weights (`core/execution.py`) | convex quadratic program (long-only, weights sum to 1) | CVXPY with the Clarabel solver | solver status must be optimal, else `RuntimeError`; tests compare with the closed-form optimum when no bound binds. Not yet checked against a published example (#15) |
 | Hierarchical risk parity (`core/execution.py`) | single-linkage clustering, recursive bisection | SciPy `cluster.hierarchy` | not yet checked against the paper (#16) |
-| Accounting identities, butterfly check (`core/invariants.py`, `core/derivatives.py`) | satisfiability of linear constraints on the given numbers | Z3 | exact rational arithmetic on the concrete inputs; it checks those numbers, not a model over ranges of inputs ([invariants](invariants.md)) |
+| Accounting identities, butterfly check (`core/invariants.py`, `core/derivatives.py`) | satisfiability of linear constraints on the given numbers | Z3 | exact rational arithmetic on the concrete inputs; it checks those numbers ([invariants](invariants.md)) |
+| Diagnosis of failed identities; smallest debt repayment; covenants over ranges (`core/invariants.py`) | MaxSMT (soft constraints); linear optimisation; satisfiability over a box | Z3 (`Optimize`, `Solver`) | closed-form and worst-corner reference tests; hand-solved diagnoses on Apple's 10-K figures ([invariants](invariants.md)) |
+| Multi-year covenant paths (`core/covenant_paths.py`) | satisfiability over ranges with case splits (sweep grid); exists-forall by counterexample-guided optimisation and quantified bisection | Z3 (`Solver`, `Optimize`, `ForAll`), fresh context per call | every counterexample replayed in plain exact arithmetic; worst-corner and bisection reference tests ([invariants](invariants.md)) |
 | Point-in-time store (`core/temporal.py`) | as-of queries | DuckDB | look-ahead tests in `tests/` |
 | 10-K PDF text (`connectors/pdf_10k.py`) | text extraction | pypdf | identity checks on the parsed statements ([connectors](connectors.md)) |
 
@@ -42,7 +44,7 @@ Versions as locked in `uv.lock` on 2026-11-25; licences as declared on PyPI.
 | arch | GARCH estimation | 9.0.0 | NCSA | Sheppard et al., software |
 | CVXPY | convex optimisation (Black-Litterman weights) | 1.9.3 | Apache-2.0 | Diamond and Boyd (2016) |
 | Clarabel | interior-point solver used through CVXPY | 0.11.1 | Apache-2.0 | Goulart and Chen (2024) |
-| Z3 (`z3-solver`) | identity and arbitrage checks | 5.4.1.0 | MIT | de Moura and Bjørner (2008) |
+| Z3 (`z3-solver`) | identity and arbitrage checks; diagnosis and covenant optimisation | 5.4.1.0 | MIT | de Moura and Bjørner (2008); Bjørner, Phan and Fleckenstein (2015) for `Optimize` |
 | DuckDB | bi-temporal store | 2.0.0 | MIT | Raasveldt and Mühleisen (2019) |
 | Polars | market-data normalisation | 2.1.0 | MIT | software |
 | pypdf | PDF text extraction | 7.0.1 | BSD-3-Clause | software |
@@ -53,6 +55,8 @@ Versions as locked in `uv.lock` on 2026-11-25; licences as declared on PyPI.
 
 ### References
 
+- Bjørner, N., Phan, A.-D., and Fleckenstein, L. (2015). νZ - An optimizing SMT solver. *TACAS 2015*,
+  LNCS 9035, 194–199. <https://doi.org/10.1007/978-3-662-46681-0_14>
 - de Moura, L., and Bjørner, N. (2008). Z3: An efficient SMT solver. *TACAS 2008*, LNCS 4963,
   337–340. <https://doi.org/10.1007/978-3-540-78800-3_24>
 - Diamond, S., and Boyd, S. (2016). CVXPY: A Python-embedded modeling language for convex

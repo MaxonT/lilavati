@@ -123,9 +123,21 @@ right and every claim being true. These rules come from real bugs found in this 
 
 ## 3. Z3 and "verification" language
 
-All Z3 variables here are bound to concrete inputs, so a `SAT` result equals exact rational
-arithmetic on the decimal inputs. It verifies the given numbers; it does not prove a model over
-ranges of inputs, and there is no unsat-core extraction. Covenant checks are plain arithmetic.
+In the `verify_*` checks every Z3 variable is bound to a concrete input, so `SAT` equals exact rational
+arithmetic on the decimal inputs: it verifies the given numbers. `verify_debt_covenant` is plain
+arithmetic. Three functions go further and must be described as such, no more:
+`diagnose_identities` (smallest sets of figures that explain failed identities, MaxSMT),
+`minimum_debt_repayment` (exact optimum under a stated model) and `check_covenants_over_ranges`
+(no breach for any input in the given box). Point checks do not need an SMT solver; put Z3 on
+questions about sets of values. Inputs are read as exact decimals: `100/3` entered as a float is not
+one third, so a limit built from it is not met exactly.
+- **Keep solver optima exact until reported.** An optimum usually sits exactly at a constraint; a float
+  conversion before re-checking pushed a covenant repayment over its limit by 1e-15 and the solver
+  rejected its own answer. Pass `Fraction`s internally; round a reported value in the safe direction.
+- **One fresh `z3.Context()` per call** for anything non-trivial: heuristics depend on term creation
+  order, so the same covenant-path problem took 9 s alone and 53 s after other Z3 work in the process.
+- **Corners are not ranges.** Check a property over a range with a solver unless monotonicity is shown;
+  a leverage-based cash sweep made a mid-range EBITDA the worst case while all four corners complied.
 Describe this accurately; never write "proven", "formally guaranteed", "audited" or
 "zero hallucination" about this behaviour.
 
@@ -343,3 +355,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
   SG&A summed from its lines when no total is tagged; refuses on missing inputs).
 - 2026-11-25: CVXPY status check added to the solver-output rule (Black-Litterman equal-weight fallback).
 - 2026-11-25: Validation-status manifest rule (status per engine, returned by every MCP tool).
+- 2026-11-25: Rules from the covenant-path work (exact optima, fresh Z3 contexts, corners vs ranges).

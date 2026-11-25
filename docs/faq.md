@@ -16,8 +16,10 @@ Black-Litterman and HRP engines, the statement graph and the data connectors are
 
 **Does the Z3 check prove my financial model is correct?** <!-- claims-ok: the answer is no -->
 No. Z3 checks the numbers you give it (for example, assets equal liabilities plus equity, exactly,
-in rational arithmetic). It says nothing about whether those numbers are true, and it is not a
-proof over ranges of inputs. Covenant checks are plain arithmetic with an at-limit tolerance.
+in rational arithmetic). It says nothing about whether those numbers are true. Two narrower things go
+further: when identities fail, `diagnose_identities` names the smallest sets of figures that could be
+wrong; and `check_covenants_over_ranges` decides whether two covenants hold for every input within
+given ranges. Neither says your model or your source figures are right.
 
 **Why does `lilavati-bench run` score 100%?**
 It runs the deterministic reference solver, which uses the same engines as the checks, so it passes

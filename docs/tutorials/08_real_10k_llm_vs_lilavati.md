@@ -137,6 +137,46 @@ Provenance failure on claim '478834000001.0': 4d099cb271f7...: value 478,834,000
 The same store takes a PDF or HTML filing (`PDF10KParser.register_in(store)`: the snippet must be on
 the cited page) and an Ind AS disclosure (`india_filings.register_disclosure`).
 
+## Step 3c: Which figure is wrong?
+
+An identity that fails says something is wrong, not what. `diagnose_identities` checks every identity
+the figures allow and finds the smallest sets of figures that, if wrong, would explain every failure,
+with the values they would need (Z3's MaxSMT optimiser; in diagnosis terms, the minimal hitting sets of
+the conflicts, Reiter 1987). A figure used by two failing identities is singled out; when one identity
+fails, all of its figures explain it equally well, and the diagnosis lists them all rather than guess.
+
+```python
+from lilavati.core.invariants import diagnose_identities
+
+# Apple FY2026 10-K (USD millions), as extracted in Step 2, with one figure mistyped.
+figures = {"total_assets": 404_458, "total_liabilities": 292_455, "total_equity": 112_093,
+           "liabilities_and_equity": 404_548, "revenue": 478_834, "cost_of_revenue": 245_232,
+           "gross_profit": 233_602}
+d = diagnose_identities(figures)
+print(d.failed_identities)
+for c in d.candidates:
+    print("re-check:", c.figures, "implied:", c.implied_values)
+
+# The same typo in a figure that only one identity uses: the arithmetic cannot say which was misread.
+d = diagnose_identities({**figures, "total_assets": 404_548, "gross_profit": 233_620})
+print(d.detail)
+for c in d.candidates:
+    print("re-check:", c.figures, "implied:", c.implied_values)
+```
+
+```text
+['assets = liabilities + equity', 'assets = total liabilities and equity']
+re-check: ['total_assets'] implied: {'total_assets': 404548.0}
+1 identity failed; 3 equally small explanations; the identities cannot tell them apart
+re-check: ['cost_of_revenue'] implied: {'cost_of_revenue': 245214.0}
+re-check: ['gross_profit'] implied: {'gross_profit': 233602.0}
+re-check: ['revenue'] implied: {'revenue': 478852.0}
+```
+
+In an agent, `SMTBalanceGate` puts this list into the reflection prompt, and tells the model to check
+each candidate against the source rather than pick the one whose implied value looks plausible. The
+MCP tool is `diagnose_accounting_identities` (`lilavati-mcp-corporate-filings`).
+
 ## Step 4: Any company, live
 
 The SEC asks every client for a real contact. Put yours in your shell profile (never in a file in
@@ -303,6 +343,9 @@ refused (no operating income line).
 6. Run Step 6 live (`examples/05_deep_research_agent.py --live NVDA`). Which Beneish indices push
    the score over the threshold? Argue for or against a growth-adjusted threshold, citing Beneish
    (1999).
+7. In Step 3c, add the cash roll-forward figures (opening cash 35,934, CFO 145,097, CFI −17,280, CFF
+   −127,446, closing cash 36,305) and mistype closing cash. How many candidates are there, and which
+   extra identity would single out the right one?
 
 ## For instructors
 

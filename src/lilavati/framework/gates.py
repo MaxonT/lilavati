@@ -7,14 +7,19 @@ formal SMT equilibrium, credit covenant limits, cryptographic provenance, and te
 
 from __future__ import annotations
 
-from lilavati.core.invariants import SuvarnaEngine
+from lilavati.core.invariants import SuvarnaEngine, diagnose_identities
 from lilavati.core.provenance import SourceStore
 from lilavati.framework.state import FinancialState
 from lilavati.prompts.reflection import generate_smt_reflection_prompt
 
 
 class SMTBalanceGate:
-    """Formal Z3 SMT gate verifying that Assets == Liabilities + Equity."""
+    """Z3 check that Assets == Liabilities + Equity; on failure, a diagnosis of which figures to re-check.
+
+    The diagnosis (``core.invariants.diagnose_identities``) uses every statement identity the
+    extracted facts allow (e.g. a liabilities-and-equity total, a cash roll-forward), so a figure that
+    breaks two identities is singled out; it is passed to the reflection prompt.
+    """
 
     def __init__(self, tolerance: float = 1e-4) -> None:
         self.tolerance = tolerance
@@ -37,11 +42,16 @@ class SMTBalanceGate:
             for v in res.violations:
                 state.fail_gate(v)
 
+            # Which figures could be wrong: every statement identity the extracted facts allow.
+            numeric = {k: float(v) for k, v in facts.items()
+                       if isinstance(v, int | float) and not isinstance(v, bool)}
+            diagnosis = diagnose_identities(numeric, tolerance=self.tolerance)
             # Auto-inject SMT reflection prompt into conversation history
             reflection = generate_smt_reflection_prompt(
                 invariant_name="Assets = Liabilities + Equity",
                 violations=res.violations,
                 current_values={k: facts[k] for k in req_keys},
+                diagnosis=diagnosis,
             )
             state.add_message(role="user", content=reflection)
 
