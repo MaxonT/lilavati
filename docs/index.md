@@ -78,11 +78,11 @@ uv run lilavati-bench list-cases
 | **Pillar I** | Three-Statement Modeling & Accounting Checks | Accounting identities, diagnosis and covenant checks (Z3) ✅ [reference-checked](validation/invariants.md); Statement graph with driver shocks 🟡 [not reference-checked](validation/index.md) |
 | **Pillar II** | Fixed Income, Credit & Debt Covenants | Bond price, durations, convexity, DV01 ✅ [reference-checked](validation/fixed_income.md); Nelson-Siegel curve fit ✅ [reference-checked](validation/fixed_income.md); Merton structural default model ✅ [reference-checked](validation/fixed_income.md); Multi-period covenant paths (linked interest, cash sweep), over ranges (Z3) ✅ [reference-checked](validation/invariants.md) |
 | **Pillar III** | Financial Econometrics & Stationarity | ADF, Engle-Granger with OU half-life, GARCH(p, q) ✅ [reference-checked](validation/econometrics.md) |
-| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional differencing, minimal-d search, triple barrier ✅ [reference-checked](validation/financial_ml.md) |
+| **Pillar IV** | Financial ML (de Prado Paradigm) | Fractional differencing, minimal-d search, triple barrier ✅ [reference-checked](validation/financial_ml.md); Probabilistic and Deflated Sharpe ratios, probability of backtest overfitting ✅ [reference-checked](validation/financial_ml.md); Purged and embargoed K-fold, combinatorial purged cross-validation 🟡 [not reference-checked](validation/financial_ml.md) |
 | **Pillar V** | Derivatives, Volatility Surfaces & Greeks | Black-Scholes-Merton, Greeks, CRR, implied vol, SABR, butterfly check ✅ [reference-checked](validation/derivatives.md) |
 | **Pillar VI** | Market Microstructure, Execution & Portfolio | Almgren-Chriss liquidation schedule ✅ [reference-checked](validation/execution.md); Order-book snapshot (spread, microprice, order-flow imbalance) 🟡 [not reference-checked](validation/execution.md); Black-Litterman posterior and weights 🟡 [not reference-checked](validation/execution.md); Hierarchical risk parity 🟡 [not reference-checked](validation/execution.md) |
 | **Pillar VII** | Sustainable Finance & Climate Risk | WACI, carbon-tax stress test, sustainability-linked bond ✅ [reference-checked](validation/sustainability.md) |
-| **Filings & agents** | Filing Connectors, Forensics & Agents | Beneish M-score, Altman Z-score ✅ [reference-checked](validation/forensics.md); Rule-based investment committee ✅ [rule-based](validation/forensics.md); SEC XBRL filing-anchored extraction and three-statement model 🟡 [piloted on real data](validation/connectors.md); 10-K PDF parser 🟡 [piloted on real data](validation/connectors.md); Ind AS crosswalk 🟡 [piloted on real data](validation/connectors.md) |
+| **Filings & agents** | Filing Connectors, Forensics & Agents | Beneish M-score, Altman Z-score ✅ [reference-checked](validation/forensics.md); Rule-based investment committee ✅ [rule-based](validation/forensics.md); SEC XBRL filing-anchored extraction and three-statement model 🟡 [piloted on real data](validation/connectors.md); 10-K PDF parser 🟡 [piloted on real data](validation/connectors.md); Ind AS crosswalk 🟡 [piloted on real data](validation/connectors.md); NSE Integrated Filing (Financial) page reader, Ind AS 🟡 [piloted on real data](validation/connectors.md) |
 
 Status meanings and every MCP tool: [validation status](validation/status.md).
 <!-- END generated: pillar table -->
@@ -115,3 +115,7 @@ it guards against, exercises and instructor notes.
    questions with and without deterministic tools, and tool grounding.
 8. [Tutorial 08: A Real 10-K, Three Ways](tutorials/08_real_10k_llm_vs_lilavati.md): SEC figures
    taken from the filing itself, compared across an LLM alone, an LLM with Līlāvatī and Līlāvatī alone.
+9. [Tutorial 09: Is This Backtest Real?](tutorials/09_is_this_backtest_real.md): the Deflated Sharpe
+   Ratio, the probability of backtest overfitting and purged cross-validation, on a rule tried 400 ways.
+10. [Tutorial 10: An Indian Company from Its Exchange Filing](tutorials/10_indian_company_from_exchange_filing.md):
+   NSE's Integrated Filing read into the Ind AS crosswalk, checked against the printed statements.

@@ -15,7 +15,8 @@
 
 Tutorials [05](05_benchmarking_llms_with_open_models.md)–[07](07_tools_versus_mental_math.md) use
 generated cases. This one uses real filings, and it was the first real test of Līlāvatī's own filing
-connectors: six bugs were found and fixed on the way (see "What can go wrong").
+connectors: six bugs were found and fixed on the way (see "What can go wrong"). For an Indian listed
+company, see [Tutorial 10](10_indian_company_from_exchange_filing.md).
 
 ## Step 1: The flow, and the trap it avoids
 

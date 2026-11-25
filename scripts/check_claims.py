@@ -39,7 +39,10 @@ ALLOW = re.compile(
 )
 
 
-BIBLIOGRAPHY = re.compile(r"^\* \*\*[^*]+\*\* \((19|20)\d\d")  # "* **Author, A.** (2015). Title ..."
+BIBLIOGRAPHY = re.compile(
+    r"^\* \*\*[^*]+\*\* \((19|20)\d\d"  # "* **Author, A.** (2015). Title ..."
+    r"|^[A-Za-zÀ-ž'-]+(?: [A-Za-zÀ-ž'-]+)*, [A-Z]\.[^\n]{0,240}?\((?:19|20)\d\d(?:/\d{4})?[a-z]?\)\. "
+)  # APA: "Surname, A. B., & Other, C. (2015). Title ..." (the year in parentheses, then a full stop)
 
 
 def targets(root: Path) -> list[Path]:

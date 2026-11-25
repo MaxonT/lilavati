@@ -8,7 +8,8 @@ Learning* (AFML):
 2. The triple-barrier method (AFML ch. 3): path-dependent labels from take-profit, stop-loss and
    expiration barriers.
 
-Purged and embargoed cross-validation (AFML ch. 7) is not implemented yet.
+Purged and embargoed cross-validation (AFML ch. 7 and 12) and the backtest-overfitting statistics are in
+``lilavati.core.backtest_overfitting``.
 """
 
 from __future__ import annotations

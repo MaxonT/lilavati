@@ -76,3 +76,16 @@ def test_paired_ci_does_not_depend_on_the_hash_scheme() -> None:
     d1 = paired_difference(a, b, CASES)
     d2 = paired_difference(list(reversed(a)), list(reversed(b)), CASES)
     assert d1["diff_ci95"] == d2["diff_ci95"]
+
+
+def test_analysis_files_are_current() -> None:
+    # results/ANALYSIS.md must regenerate from the manifest unchanged; every case set in the manifest
+    # must be handled (the extraction evaluation's files once raised KeyError: 'seed').
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    r = subprocess.run([sys.executable, "scripts/analyse_results.py", "--check"], cwd=root,
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr

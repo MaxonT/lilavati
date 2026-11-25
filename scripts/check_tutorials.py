@@ -9,6 +9,8 @@ Conventions in `docs/tutorials/*.md`:
 - Titled files named `tests/test_*.py` are run with pytest.
 - Blocks that need an API key or the SEC contact (they mention `*_API_KEY` or
   `LILAVATI_SEC_USER_AGENT`) are skipped and reported, never run.
+- Blocks that read a file the reader downloads by hand (they mention `data/raw/`, which is git-ignored)
+  are skipped and reported; the tutorial shows their output from a local run.
 
 Tutorials not yet retrofitted to the tutorial standard are listed in PENDING and skipped.
 
@@ -29,6 +31,7 @@ EXTRA_DOCS = ["getting-started.md", "faq.md", "contributing.md", "agent-workflow
 PENDING: set[str] = set()  # tutorials not yet at the tutorial standard (all retrofitted 2026-11-22)
 FENCE = re.compile(r'```python(?:\s+title="(?P<title>[^"]+)")?\n(?P<code>.*?)```', re.S)
 NEEDS_KEY = re.compile(r"\b[A-Z]+_API_KEY\b|\bLILAVATI_SEC_USER_AGENT\b")  # keys or network contacts
+NEEDS_DOWNLOAD = re.compile(r"\bdata/raw/")  # files the reader downloads by hand (git-ignored)
 
 
 def check(tutorial: Path) -> list[str]:
@@ -40,6 +43,9 @@ def check(tutorial: Path) -> list[str]:
             code, title = m.group("code"), m.group("title")
             if NEEDS_KEY.search(code):
                 print(f"  SKIP block {i} (needs an API key or SEC contact)")
+                continue
+            if NEEDS_DOWNLOAD.search(code):
+                print(f"  SKIP block {i} (reads a file downloaded by hand into data/raw/)")
                 continue
             if title:
                 target = work / title

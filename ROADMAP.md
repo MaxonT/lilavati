@@ -80,7 +80,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * Not implemented: data fetching (OHLCV download, FRED connector for SOFR, Treasury yields, CPI, Fed Funds).
 - [~] **1.3 India Ind AS Crosswalk (🟡 partial):**
   * Implemented: `IndiaFilingsClient.parse_ind_as_disclosure` maps Schedule III (Division II) line items, supplied by the caller, into the canonical `ThreeStatementModel`, with `derived` formulas, `not_reported` items and checks (balance sheet totals; Ind AS 7 cash reconciliation).
-  * Not implemented: fetching disclosures from BSE, NSE or MCA.
+  * Reads NSE's Integrated Filing (Financial) page, supplied by the user (`connectors/nse_integrated_filing.py`, 2026-11-26; piloted on one filing, Tutorial 10). Not implemented: fetching from BSE, NSE or MCA (NSE's terms prohibit automated collection without consent), the XBRL instance itself, BRSR.
   * *Validation:* checked on Maruti Suzuki's audited consolidated results for FY2025-26, line by line against the printed statements (cost of goods sold, operating income, balance sheet and cash checks all hold; the exchange filing folds right-of-use assets into PP&E), plus a fictional disclosure for edge cases (`docs/validation/connectors.md`). 🟡 One company and year; no retrieval.
 - [x] **1.4 Bi-Temporal DuckDB Local Data Warehouse:**
   * DuckDB storage layer implementing dual-time indexing: `valid_time` (period described) vs `as_of_timestamp` (filing date).
@@ -222,7 +222,7 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 - [x] 7.1 Fix Beneish M-score coefficients (TATA 4.679, LVGI −0.327) with tests against Beneish (1999).
 - [x] 7.2 Fix Almgren-Chriss schedule (clipping bug, price units, discrete solution) with reference tests.
 - [~] 7.3 Reference-value audit of every engine, published in `docs/validation/`. 🟡 Done: fixed income, derivatives, invariants, sustainability, forensics, Almgren-Chriss, econometrics, financial ML (33 bugs fixed). Pending: LOB / Black-Litterman / HRP, statement graph, connectors.
-- [ ] 7.4 Implement purged & embargoed cross-validation (López de Prado 2018, ch. 7), or remove it from all guidance.
+- [x] 7.4 Purged and embargoed K-fold and combinatorial purged CV (López de Prado 2018, ch. 7 and 12), with the Probabilistic and Deflated Sharpe ratios and the probability of backtest overfitting (CSCV), in `core/backtest_overfitting.py` (2026-11-26). DSR and PBO checked against the authors' worked example and Algorithm 2.3; the CV splits against an independent implementation of the definitions (not yet against AFML's code). Tutorial 09.
 - [~] 7.5 Live-data validation: EDGAR company facts for at least 2 real issuers; the 10-K parser on at least 2 filings; one real Ind AS annual report. 🟡 Started 2026-11-22: 10-K parser checked line by line on Apple's FY2026 10-K (4 bugs fixed; `docs/validation/connectors.md`); EDGAR client contact fixed. Done 2026-11-23: filing-anchored XBRL extraction validated on 5 companies (71 of 71 values found in the filing documents; comparative-period bug fixed); LLM comparison on 4 real 10-Ks (Tutorial 08). Also 2026-11-23: the same flow as the MCP tool `get_filing_figures`, with ticker lookup through SEC's company list. Done 2026-11-24: Ind AS crosswalk on Maruti Suzuki's FY2025-26 audited results. Pending: banks and insurers, 10-Q validation (cash-flow items are year-to-date) and restatements, a second Ind AS company.
 
 **7B. Honest documentation (blocking)**
@@ -282,7 +282,7 @@ Each phase ends in a gate: measurable evidence before the next phase starts.*
 
 ## Not yet implemented (previously advertised; tracked honestly)
 
-- [ ] Purged & embargoed cross-validation, meta-labeling, information-driven bars (dollar/volume/imbalance)
+- [ ] Meta-labeling, information-driven bars (dollar/volume/imbalance); purged and embargoed CV done (7.4)
 - [ ] Johansen/VECM, KPSS, Phillips-Perron, EGARCH, DCC-GARCH, Markov-switching/HMM
 - [ ] Heston, local volatility, full-surface no-arbitrage checks
 - [ ] Key-rate durations, Nelson-Siegel-Svensson, CDS hazard-rate bootstrapping, debt tranche waterfalls

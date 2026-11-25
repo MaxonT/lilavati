@@ -147,6 +147,12 @@ one third, so a limit built from it is not met exactly.
 - **An unread optional figure is not a zero.** The cash roll-forward without the exchange-rate line
   failed by Microsoft's 196 on true values. In the extraction agent the identity waits for
   `fx_effect_on_cash` unless the caller says the statement has no such line (`fx_line_absent=True`).
+- **Combine variances from centred moments, not sums of squares.** PBO's half-sample Sharpe ratios
+  built from Σx and Σx² gave a constant trial a variance of 1e-19 instead of 0, which passed the
+  zero-variance check; per-block means and centred sums of squares combine exactly.
+- **A statistic that needs a count of independent trials says so.** The DSR's threshold is the
+  maximum of N independent trials; 400 mirrored and overlapping rules counted as 400 failed a planted
+  real effect (Tutorial 09). Put the caveat in the docstring and the tool description.
 - **Corners are not ranges.** Check a property over a range with a solver unless monotonicity is shown;
   a leverage-based cash sweep made a mid-range EBITDA the worst case while all four corners complied.
 Describe this accurately; never write "proven", "formally guaranteed", "audited" or
@@ -237,12 +243,101 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   or a validation page instead of copying them, so they cannot drift. Run every code block that
   needs no API key before publishing the tutorial.
 - **Before rewriting an example, grep `tests/` for importers** (`tests/test_tutorial_agents.py` imports examples 07–09).
+- **When an engine's output changes, grep the papers for it.** After the Altman fix the framework paper
+  still quoted Apple's Z-score as 12.02 (it is 9.71), and the benchmark paper quoted a content-free
+  baseline (15.7%) that no script reproduced (15.0%). Re-derive every number in `docs/papers/` from a
+  script before a revision, and keep the script.
 - **When you correct a claim, grep tutorials and examples too.** "Z3 proves covenants", an "equity
   cure" that was really debt paydown, and `serve_agent(host="0.0.0.0")` were corrected in the docs and
   code but survived in Tutorial 01 and `examples/06` until 2026-11-22. Search `docs/tutorials/`,
   `examples/` and `docs/index.md` for the retired wording in the same change.
 - User-facing workflows also get a skill (`.claude/skills/<name>/SKILL.md`) so AI agents follow
   the same rules as the tutorial (example: `lilavati-bench` for running and analysing benchmarks).
+- **Data downloaded by hand stays in `data/raw/`; tests find it by hash.** NSE's terms forbid automated
+  collection, so the Maruti filing is git-ignored, its test looks it up by SHA-256 and skips without it,
+  and tutorial blocks that read `data/raw/` are skipped in CI and show the output of a local run.
+- **A page named "iXBRL" may not be inline XBRL.** NSE's `_iXBRL_WEB.html` is a rendering: labels and
+  values, no `ix:` tags. Check the markup before choosing a parser; match labels within their section,
+  and use the nearest heading to separate repeated labels ("Total Trade payable", "Interest paid").
+
+## 4b. Keeping docs, tutorials and use cases current (process)
+
+**Every feature, in the same pull request** (a feature is not done until all apply):
+
+1. Docstrings state units, conventions and what is not done.
+2. Validation: a section in `docs/validation/<engine>.md` (check, reference, measured result, status),
+   a row in `docs/validation/index.md`, and an `Engine` in `lilavati/validation_status.py` (status,
+   README row, tools); then `uv run python scripts/render_validation_status.py`.
+3. README: the capability row (✅ / 🟡 / 🗺️; "pilot" or "not yet checked against a reference" where the
+   status requires it, which a test checks); the use-case row ("Who it's for") of every persona the
+   feature serves, with its tutorial; the tutorials table and count.
+4. Tutorial: a new `docs/tutorials/NN_<topic>.md` or a new step in an existing one, with the standard
+   sections (who and time; learning objectives; where this fits; steps whose output you ran; what can
+   go wrong; using this with Claude Code and MCP; exercises; for instructors). List it in
+   `mkdocs.yml`, the README table, `docs/index.md` and a week of `docs/course/index.md`, and link it
+   from related tutorials' "Where this fits".
+5. MCP tools: `docs/mcp-setup.md` and the tool count in `tests/test_mcp_registry.py`.
+6. CHANGELOG (Added, Fixed, Docs), the ROADMAP item and the TODO item (what is done, what is open).
+7. This skill: a rule for each general lesson, the repository map, a change-log line.
+8. Papers: if the feature completes or advances a ROADMAP or TODO item, revise the paper it belongs to
+   (section 4c).
+9. Checks: ruff, mypy, pytest (including `tests/test_docs_coverage.py`), `mkdocs build --strict`,
+   `check_claims.py`, `check_tutorials.py`, `check_papers_current.py`.
+
+**Regular sweep** (in every pull request that changes behaviour, before any release, and at least
+monthly):
+
+- Grep `README.md`, `docs/`, `docs/tutorials/`, `examples/` and `docs/papers/` for the changed module and
+  for "not implemented", "planned", "not yet" and "open" near it: the change may have made them stale
+  (README said "eight tutorials" after the ninth was added).
+- Re-run the tutorials and the examples they quote; refresh quoted output from the run, never by hand.
+- Read the README use-case table and the course schedule as a newcomer: does each persona's row list
+  what exists today, with its status and tutorial?
+- Recheck the open items on validation pages and move what is done from TODO to CHANGELOG.
+
+`tests/test_docs_coverage.py`, `tests/test_validation_status.py` and `tests/test_mcp_registry.py`
+enforce the mechanical parts; the sweep is judgement and is part of review.
+
+## 4c. Papers: revise at each milestone
+
+The two working papers (`docs/papers/01_framework_paper.md`, the system; `02_benchmark_paper.md`, the
+benchmark) describe the project as it is, so they fall behind whenever a milestone lands. On
+2026-11-26 the framework paper still quoted an Altman Z-score from before a fix, described a Johansen
+test that does not exist and called a risk-neutral default probability physical.
+
+**When.** Revise the paper a milestone belongs to in the same pull request, or the next one:
+
+- a ROADMAP or TODO item is completed (`[x]`) or advanced (`[~]`) with a date:
+  `uv run python scripts/check_papers_current.py` lists the dated items newer than each paper's
+  "Version of" line, and suggests which paper each concerns;
+- an engine's validation status changes, or a fix changes an output a paper quotes;
+- new measured results land in `results/` (benchmark runs, real-filing pilots, evaluations);
+- before a release, a tag, or an arXiv or journal submission.
+
+The framework paper covers engines, checks, connectors, agents, case studies and latency; the benchmark
+paper covers cases, tracks, metrics, runs, results and error analysis.
+
+**How.**
+
+1. Load the `academic-journal-writing` skill if it is available (the author's style, British English,
+   APA citations, the pre-submission checklist); otherwise apply these rules directly.
+2. Re-derive every number the revision touches from a script, test or results file, never by hand, and
+   name the source. A number no script reproduces is removed or corrected, not kept (the content-free
+   baseline was 15.7% in the paper and 15.0% from `scripts/trivial_baseline.py`).
+3. Describe what is implemented and measured; mark proposed or unchecked parts as such, with the
+   engine's validation status, and update the limitations section.
+4. References: add only sources you have read (title, venue, year and DOI checked). Mark anything
+   unconfirmed with `<!-- VERIFY: ... -->` and list it for the author; never complete author lists from
+   memory.
+5. Consistency: counted lists are true counts ("four contributions"); every section, table and figure
+   reference resolves and every table is cited; abstract, body and conclusion report the same numbers.
+6. Bump the "Version of <day> <Month> <year>" line (the script reads it) and add a CHANGELOG "Docs"
+   entry naming what changed.
+7. Checks: `check_claims.py` (APA reference entries count as other authors' titles), `mkdocs build
+   --strict`, `analyse_results.py --check` when results are quoted, and `check_papers_current.py` showing
+   no milestone newer than the version.
+8. Readiness for arXiv is the author's call. List what remains (the author's read-through, VERIFY flags,
+   the AI-use statement, endorsement, LaTeX or PDF, a pinned release) instead of declaring a paper ready.
 
 ## 5. Secrets, network and LLM clients
 
@@ -296,13 +391,13 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 | Fixed income | `core/fixed_income.py` | bonds (price, durations, convexity, DV01), Nelson-Siegel, Merton |
 | Derivatives | `core/derivatives.py` | BSM + Greeks, CRR, implied vol, SABR (Hagan 2002), butterfly check |
 | Econometrics | `core/econometrics.py` | ADF, Engle-Granger + OU half-life, GARCH(p,q) (audited) |
-| Financial ML | `core/financial_ml.py` | fractional differencing, d* search, triple barrier (audited); no purged CV yet |
+| Financial ML | `core/financial_ml.py`, `core/backtest_overfitting.py` | fractional differencing, d* search, triple barrier (audited); DSR, PSR, PBO (reference-checked); purged K-fold and CPCV (tested against definitions only) |
 | Execution / portfolio | `core/execution.py` | LOB snapshot, Almgren-Chriss (audited), Black-Litterman, HRP (not yet audited) |
 | Sustainability | `core/sustainability.py` | WACI, carbon-tax stress, SLB step-up |
 | Forensics | `agents/forensics.py` | Beneish (1999), Altman (1968) |
 | Agents | `agents/`, `runtime/`, `framework/` | extraction with repair, research dossier, rule-based committee, search, scenario tree; what each does: `docs/agents.md`; workflows: `docs/agent-workflows.md` |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
-| Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py`, `connectors/india_filings.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); validation `docs/validation/connectors.md` |
+| Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py`, `connectors/india_filings.py`, `connectors/nse_integrated_filing.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); Ind AS crosswalk and NSE's Integrated Filing page reader (user-supplied page, pilot on one filing); validation `docs/validation/connectors.md` |
 | Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
 | Benchmark | `bench/` | golden cases, seeded generator (`case_content_hash`, `legacy_case_id`), runner, evaluators. `lilavati-bench run` only runs the reference solver (`--model` is a label) |
 | LLM evaluation | `bench/llm_eval.py`, `bench/tool_eval.py`, `bench/analysis.py` | prompts (`PROMPT_VERSION`), parsing, outcome classes; tool arm with grounding; summaries, bootstrap CIs, paired differences. Scripts: `run_llm_baseline.py`, `run_tool_baseline.py`, `build_results_manifest.py`, `analyse_results.py` |
@@ -370,3 +465,7 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-25: Rules from the covenant-path work (exact optima, fresh Z3 contexts, corners vs ranges).
 - 2026-11-25: Agent rules (no implied values to the model; prompts name only registered tools); repo map row for agents.
 - 2026-11-25: Quote checks ignore whitespace; unread optional figures are not zeros (extraction evaluation).
+- 2026-11-26: Backtest-overfitting module (DSR, PBO, purged CV); rules on centred moments and trial counts.
+- 2026-11-26: Documentation process (section 4b, enforced by `tests/test_docs_coverage.py`); NSE page reader rules (manual downloads found by hash; a rendered "iXBRL" page).
+- 2026-11-26: Papers revised; rule to re-derive paper numbers when an engine changes.
+- 2026-11-26: Section 4c (revise the papers at each milestone; `scripts/check_papers_current.py`).

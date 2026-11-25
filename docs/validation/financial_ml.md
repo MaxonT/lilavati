@@ -7,7 +7,8 @@ Machine Learning* (AFML), ch. 3 and 5; Hosking (1981), "Fractional differencing"
 68(1). The test file has its own implementations: closed-form binomial weights with
 `np.convolve` for FFD, a pandas transcription of AFML snippets 3.2-3.4 for the barriers, and a
 direct statsmodels ADF grid search for d*. All random series use fixed seeds. Purged
-cross-validation (AFML ch. 7) is not implemented and was not audited.
+cross-validation and the backtest-overfitting statistics are in `core/backtest_overfitting.py`
+([below](#backtest-statistics-corebacktest_overfittingpy), added 2026-11-26).
 
 ## `get_fractional_weights`
 
@@ -99,3 +100,71 @@ algorithm is unchanged apart from input checks.
 **Open.** (1) No volatility-target, side or meta-labelling inputs for the barriers (AFML §3.5-3.6).
 (2) The d* search tests d > 0 on a shorter sample than d = 0 (see the table). (3) Purged and
 embargoed cross-validation (AFML ch. 7) is a separate task.
+
+## Backtest statistics (`core/backtest_overfitting.py`)
+
+Added 2026-11-26. Tests: `tests/reference/test_backtest_overfitting_reference.py`. Status:
+reference-checked. References: the Deflated Sharpe Ratio formula as printed in Bailey, Borwein,
+López de Prado, Salehipour and Zhu (2015), "Online tools for demonstration of backtest overfitting",
+eq. (2)-(3); the expected maximum Sharpe ratio from López de Prado and Bailey (2021), "The false
+strategy theorem", *American Mathematical Monthly* 128(9), eq. (1); the worked example of Bailey and
+López de Prado (2014), *Journal of Portfolio Management* 40(5), as presented in López de Prado (2015),
+"Advances in quantitative meta-strategies" (slides 11-14); and Bailey, Borwein, López de Prado and Zhu
+(2017), "The probability of backtest overfitting", *Journal of Computational Finance* 20(4),
+Algorithm 2.3 and section 3. The 2014 paper itself was not read; its example was.
+
+Conventions: Sharpe ratios per observation period, or annualised with `periods_per_year` (divided by
+√q, variances by q); kurtosis raw (3 for normal); PSR = Z[(SR − SR\*)√(T − 1)/√(1 − γ₃SR + (γ₄ − 1)/4·SR²)];
+DSR = PSR at SR₀ = √V·[(1 − γ)Z⁻¹(1 − 1/N) + γZ⁻¹(1 − 1/(Ne))], γ the Euler-Mascheroni constant.
+PBO: T rows cut into S equal blocks (T must be a multiple of S, S even); for each of the C(S, S/2)
+in-sample halves, the in-sample best trial n\* (lowest index on a tie) gets its out-of-sample rank r
+(1 = worst; ties averaged), ω = r/(N + 1), logit ln(ω/(1 − ω)); PBO is the share of logits ≤ 0 (the
+paper's φ = ∫ f(λ) dλ from −∞ to 0). The statistic is the Sharpe ratio (mean/std, ddof 1) or the mean.
+
+| Check | Reference | Tolerance achieved | Status |
+| :--- | :--- | :--- | :--- |
+| Worked example: daily, annualised SR 2.5, N = 100, V = 1/2, T = 1,250, skewness −3, kurtosis 10 → SR₀ ≈ 0.1132, DSR ≈ 0.9004 | slides 13 | SR₀ 0.113172, DSR 0.900397 (printed to four decimals) | pass |
+| N = 46 → 0.9505; skewness 0, kurtosis 3, N = 88 → 0.9505 | slides 14 | 0.950502; 0.950491 | pass |
+| Normal returns fall below 0.95 confidence after 89 trials | false strategy theorem, section 3 | N = 88: 0.950491; N = 89: 0.949839 | pass |
+| Expected maximum against the exact E[max of N standard normals] (numerical integration) | theorem eq. (1), an approximation for large N | +2.33% (N = 10), +0.92% (N = 100), +0.42% (N = 1,000) | pass (approximation error stated in the docstring) |
+| PSR denominator is the sampling variance of the estimated SR for skewed returns (skewness −2, kurtosis 9, SR 0.1, T = 500, 20,000 samples) | eq. (2) denominator | Monte Carlo spread / formula = 1.011; the normal formula is 11% too narrow | pass |
+| DSR equals the PSR at SR₀; DSR falls as N grows | definition | 1e-15 | pass |
+| Kurtosis below 1 + skewness², N < 2, T < 2, negative variance, non-finite input | n/a | `ValueError` | pass |
+| Ranking convention: R = (0.5, 1.1, 0.7) ranks (1, 3, 2) | PBO paper, section 2.1 | exact | pass |
+| Hand example, 4 one-row blocks, 3 trials: every in-sample winner is the out-of-sample loser → all logits ln(1/3), PBO 1; a persistent winner → ln 3, PBO 0 | Algorithm 2.3 by hand | 1e-15 | pass |
+| Logits equal a direct transcription of Algorithm 2.3 (4 random matrices; Sharpe and mean; S = 4, 8, 10) | Algorithm 2.3 | 1e-10 abs | pass |
+| Combinations C(S, S/2): S = 4 → 6, 12 → 924, 24 → 2,704,156 | eq. (2.3), section 4 | exact. The paper prints 12,780 for S = 16; C(16, 8) = 12,870 | pass |
+| Pure noise: mean PBO over 60 seeds (N = 20, T = 160, S = 8) is near 1/2; one trial with a real edge gives PBO 0 | section 3.1 | 0.474 (asserted within 0.08 of 0.5); 0 | pass |
+| A trial with zero variance in a half-sample | n/a | `ValueError` | **fixed during development**: variance from sums of squares left 1e-19 instead of 0 and passed the check; blocks are now combined from centred moments |
+
+Open: the number of independent trials N is the caller's estimate; correlated trials count for
+fewer, and a wrong N makes the DSR too strict or too lenient
+([Tutorial 09](../tutorials/09_is_this_backtest_real.md), section 6). Not implemented: estimating the
+effective number of trials, the minimum track record length, stochastic dominance.
+
+## Purged and embargoed cross-validation (`core/backtest_overfitting.py`)
+
+Added 2026-11-26. Status: **not reference-checked**. The rules follow López de Prado (2018), AFML
+ch. 7 (purging, embargo) and ch. 12 (combinatorial purged CV), but the book's code was not available
+in this session, so the tests compare with an independent per-observation implementation of the
+definitions and with hand-worked cases.
+
+Conventions: observations sorted by label start; label intervals inclusive (numbers or datetime64);
+test folds are `np.array_split` of the positions. A training observation is purged if its interval
+meets a test block's labels; after each contiguous test block, the `embargo` observations following
+the first observation that meets no test label are dropped. No embargo before a test block. A split
+with no training observations left raises. Combinatorial splits: every choice of k of N groups, in
+`itertools.combinations` order; path p takes, for each group, the p-th split that tests it, giving
+C(N − 1, k − 1) paths.
+
+| Check | Reference | Tolerance achieved | Status |
+| :--- | :--- | :--- | :--- |
+| Labels [i, i + 2], 10 observations, 5 folds, embargo 1: fold 2 tests 2-3, purges 0, 1, 4, 5, embargoes 6, trains on 7-9 | hand calculation | exact | pass |
+| Labels with no span: plain contiguous K-fold | definition | exact | pass |
+| Random labels (200 observations, ties, horizons 0 to 10; embargo 0, 3, 7) and combinatorial splits (240 observations, 6 groups, 2 tested, embargo 4) | independent per-observation implementation of purging and embargo | identical sets | pass |
+| Split and path counts: (6, 2) → 15 and 5; (10, 8) → 45 and 36; (9, 7) → 36 and 28; every path covers each group once, every (split, tested group) pair used once | C(N, k) and k/N·C(N, k) | exact | pass |
+| datetime64 labels | definition | exact | pass |
+| Unsorted starts, a label ending before it starts, too many folds, negative embargo, no training left | n/a | `ValueError` | pass |
+
+Open: compare with AFML snippets 7.1-7.3 and with a reference implementation (skfolio's
+`CombinatorialPurgedCV` would need a test-only dependency; check its licence first), then mark reference-checked.
