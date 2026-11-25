@@ -208,7 +208,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk each checked on one company) | ✅ | `connectors/` |
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
-| **Agents** | Neuro-symbolic runtime; rule-based committee (Beneish, Altman, identity checks on reported inputs); research dossier from one 10-K with every input cited and checked against the SEC data read | ✅ | `runtime/`, `agents/` |
+| **Agents** | Neuro-symbolic runtime (identity checks with diagnosis on answers); filing extraction with diagnosis-driven repair; rule-based committee (Beneish, Altman, identity checks on reported inputs); research dossier from one 10-K with every input cited and checked against the SEC data read | ✅ | `runtime/`, `agents/` |
 | | LLM tool calling: OpenAI-compatible (incl. Groq presets), Gemini, Anthropic, with retries on 429/5xx | ✅ live-tested on Gemini API (Gemma 4 31B, Gemini 4 Hydrogen) and Groq (gpt-oss-120b, gpt-oss-20b, qwen3.6-27b: 3/3 runs; qwen3.8-27b: 1/3, malformed tool calls); Anthropic format-tested only | `llm/client.py`, `llm/providers.py` |
 | | Checkpointing, streaming, async, human-in-the-loop | not in core by design: use LangGraph / Google ADK with Līlāvatī's MCP servers | n/a |
 | **Integrations** | LangGraph, Google ADK and A2A examples, run end to end on a real model | ✅ | `examples/integrations/` |
@@ -258,7 +258,7 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
                                      │ Dispatches Tool Execution via MCP
 ┌────────────────────────────────────▼───────────────────────────────────┐
 │                       STANDARDIZED FAST-MCP BUS                        │
-│   mcp-filings-xbrl  │  mcp-fixed-income  │  mcp-econometrics-quant     │
+│  corporate-filings │ fixed-income │ econometrics │ 5 more MCP servers  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │ Normalizes Ingestion
 ┌────────────────────────────────────▼───────────────────────────────────┐
@@ -267,10 +267,12 @@ Līlāvatī separates the cognitive reasoning of LLMs from deterministic mathema
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Zero LLM Arithmetic Policy (design goal):** Agents are designed so that calculated numbers originate from deterministic FastMCP tools, and runtime gates flag numbers lacking tool provenance. This reduces, but cannot mathematically eliminate, arithmetic in model prose.
+1. **Zero LLM Arithmetic Policy (design goal):** Agents are designed so that calculated numbers originate from deterministic tools. Prompts require it and the integration examples check that answers quote tool outputs; no gate yet rejects a number in prose that no tool or source produced (proposed: [agent workflows](docs/agent-workflows.md), workflow 4).
 2. **`CitationRef` Provenance:** Every extracted line item carries a citation, `CitationRef(doc_hash, page, table_id, xbrl_tag)`: a SHA-256 of the source document, or for XBRL of the fact record SEC serves (XBRL facts have no page).
 3. **Bi-Temporal Point-in-Time Isolation:** Using DuckDB bi-temporal semantics, queries specify `valid_time` and `as_of_timestamp` to prevent look-ahead bias and restatement contamination.
-4. **Z3 SMT Invariant Verification (`Suvarna` Engine):** Financial statement identities ($A = L + E$) and no-arbitrage bounds are encoded in first-order logic. Infeasible projections trigger automatic agent self-correction.
+4. **Z3 checks (`Suvarna` engine):** statement identities ($A = L + E$, the cash roll-forward) and no-arbitrage bounds are checked on the given numbers; when they fail, a diagnosis names the smallest sets of figures that could be wrong, and the agent re-checks those. Covenants are also checked over ranges and multi-year paths.
+
+The agents (what each does and does not do) are described in [docs/agents.md](docs/agents.md); new workflows built from these parts, one implemented and four designed, in [docs/agent-workflows.md](docs/agent-workflows.md).
 
 ---
 

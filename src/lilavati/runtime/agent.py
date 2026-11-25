@@ -1,25 +1,34 @@
 """
-Neuro-Symbolic Agent Runtime and Execution Loop for Project Līlāvatī.
+Agent runtime: a language-model tool loop with an identity check on the final answer.
 
-Implements the institutional agent lifecycle:
-1. Perception & Planning (LLM reasoning over task and context)
-2. Deterministic Tool Execution (FastMCP sandboxed tools)
-3. Formal Invariant Verification (Z3 SMT solver)
-4. SMT-Driven Reflection & Self-Correction (Iterative repair when invariants fail)
-5. Cryptographic Provenance Verification (CitationRef checks)
-6. Comprehensive OpenTelemetry Tracing (Audit trail generation)
+One run:
+
+1. The model plans and requests tool calls; registered Python tools execute them (deterministic
+   engines; MCP servers expose the same engines to other frameworks). Tool rounds are capped
+   (``max_tool_rounds``); hitting the cap returns ``completed=False``.
+2. When the model answers, a JSON object in the answer is checked against every statement identity its
+   figures allow (``core.invariants.applicable_identities``: assets = liabilities + equity, the
+   liabilities-and-equity total, gross profit, the cash roll-forward).
+3. If an identity fails, the answer goes back to the model with a reflection prompt naming the failed
+   identities and the diagnosis (``diagnose_identities``: the smallest sets of figures that could be
+   wrong), and the loop continues, up to ``max_reflection_iterations``.
+4. Every step is recorded as a span (``tracing``).
+
+Not done here: citation checks (use ``framework.ProvenanceGate`` with a ``SourceStore`` in a graph) and
+detecting arithmetic written in prose.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import time
 from collections.abc import Callable
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from lilavati.core.invariants import SuvarnaEngine
+from lilavati.core.invariants import applicable_identities, diagnose_identities
 from lilavati.core.provenance import SourcedValue
 from lilavati.llm.client import BaseLLMClient, LLMMessage, UniversalLLMClient
 from lilavati.llm.providers import INSTITUTIONAL_MODEL_PRESETS, ModelSpec
@@ -45,6 +54,9 @@ class AgentConfig(BaseModel):
     )
     max_tool_rounds: int = Field(
         default=8, ge=1, le=50, description="Max LLM turns that request tool calls"
+    )
+    identity_tolerance: float = Field(
+        default=1e-4, ge=0.0, description="absolute tolerance for identity checks on the answer, in its units"
     )
 
 
@@ -205,9 +217,10 @@ class NeuroSymbolicAgent:
                         violations=smt_check_result["violations"],
                     )
                     reflection_prompt = generate_smt_reflection_prompt(
-                        invariant_name="Balance Sheet & Cash Flow Reconcile",
+                        invariant_name="Statement identities",
                         violations=smt_check_result["violations"],
                         current_values=smt_check_result["values"],
+                        diagnosis=smt_check_result["diagnosis"],
                     )
                     if reflections >= self.config.max_reflection_iterations:
                         break
@@ -252,24 +265,24 @@ class NeuroSymbolicAgent:
         return schemas
 
     def _check_smt_invariants_if_present(self, text: str) -> dict[str, Any] | None:
-        """Checks if text contains candidate statement JSON and runs SuvarnaEngine verification."""
-        try:
-            # Look for JSON block if present
-            if "{" in text and "}" in text:
-                start = text.index("{")
-                end = text.rindex("}") + 1
-                data = json.loads(text[start:end])
-                if all(k in data for k in ("total_assets", "total_liabilities", "total_equity")):
-                    check = SuvarnaEngine.verify_balance_sheet_equation(
-                        total_assets=float(data["total_assets"]),
-                        total_liabilities=float(data["total_liabilities"]),
-                        shareholders_equity=float(data["total_equity"]),
-                    )
-                    return {
-                        "is_valid": check.is_valid,
-                        "violations": check.violations,
-                        "values": data,
-                    }
-        except Exception:
+        """Check the statement identities a JSON object in the answer allows; None if there is none.
+
+        Returns ``is_valid``, ``violations`` (each failed identity and its residual), ``values`` (the
+        numeric figures read) and ``diagnosis`` (``diagnose_identities``) for the reflection prompt.
+        """
+        if "{" not in text or "}" not in text:
             return None
-        return None
+        try:
+            data = json.loads(text[text.index("{"): text.rindex("}") + 1])
+        except (ValueError, json.JSONDecodeError):
+            return None
+        if not isinstance(data, dict):
+            return None
+        values = {k: float(v) for k, v in data.items()
+                  if isinstance(v, int | float) and not isinstance(v, bool) and math.isfinite(v)}
+        if not applicable_identities(values):
+            return None
+        diagnosis = diagnose_identities(values, tolerance=self.config.identity_tolerance)
+        violations = [f"{name}: off by {diagnosis.residuals[name]:,.6g}" for name in diagnosis.failed_identities]
+        return {"is_valid": diagnosis.consistent, "violations": violations, "values": values,
+                "diagnosis": diagnosis}

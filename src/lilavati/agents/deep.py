@@ -1,8 +1,11 @@
 """
-Deep Financial Reasoning Agent for Project Līlāvatī.
+Scenario tree on the statement graph: three fixed scenarios (or supplied ones), probability-weighted.
 
-Implements multi-step hypothesis tree search, scenario decomposition, and formal invariant pruning.
-Explores financial outcomes through recursive sensitivity analysis and SMT solver gates.
+No language model is called (the client argument is accepted for a common interface and unused); the
+``deep_reasoning_steps`` are fixed descriptions of the steps, not text derived from the question. Each
+scenario scales revenue and shifts the gross margin, recomputes the statements with ``StatementGraph``,
+and is pruned if it ends with negative cash. The identity check on each branch is not independent: the
+statement graph balances by an equity plug, so it holds by construction (statement graph not yet audited).
 """
 
 from __future__ import annotations

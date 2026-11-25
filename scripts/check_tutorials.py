@@ -25,7 +25,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXTRA_DOCS = ["getting-started.md", "faq.md", "contributing.md"]  # other pages whose code must run
+EXTRA_DOCS = ["getting-started.md", "faq.md", "contributing.md", "agent-workflows.md"]  # other pages whose code must run
 PENDING: set[str] = set()  # tutorials not yet at the tutorial standard (all retrofitted 2026-11-22)
 FENCE = re.compile(r'```python(?:\s+title="(?P<title>[^"]+)")?\n(?P<code>.*?)```', re.S)
 NEEDS_KEY = re.compile(r"\b[A-Z]+_API_KEY\b|\bLILAVATI_SEC_USER_AGENT\b")  # keys or network contacts

@@ -1,0 +1,185 @@
+"""Filing extraction with diagnosis-driven repair (agents/extraction.py), on verbatim 10-K lines.
+
+The document is lines as pypdf extracts them from Apple's FY2026 Form 10-K (statements, pp. 35, 37,
+39); each line has the current year first, then prior years. The extractors are scripted to make the
+errors real extraction makes, so the workflow is tested without a model.
+"""
+
+from __future__ import annotations
+
+from datetime import date
+
+from lilavati.agents.extraction import FilingExtractionAgent, llm_extractor, value_in_quote
+
+DOC = "\n".join([
+    "Total net sales  478,834  416,161  391,035 ",
+    "Total cost of sales  245,232  220,960  210,352 ",
+    "Gross margin  233,602  195,201  180,683 ",
+    "Total assets $ 404,548 $ 359,241 ",
+    "Total liabilities  292,455  285,508 ",
+    "Total shareholders’ equity  112,093  73,733 ",
+    "Total liabilities and shareholders’ equity $ 404,548 $ 359,241 ",
+])
+LINES = {"revenue": DOC.splitlines()[0], "cost_of_revenue": DOC.splitlines()[1], "gross_profit": DOC.splitlines()[2],
+         "total_assets": DOC.splitlines()[3], "total_liabilities": DOC.splitlines()[4],
+         "total_equity": DOC.splitlines()[5], "liabilities_and_equity": DOC.splitlines()[6]}
+TRUTH = {"revenue": 478_834, "cost_of_revenue": 245_232, "gross_profit": 233_602, "total_assets": 404_548,
+         "total_liabilities": 292_455, "total_equity": 112_093, "liabilities_and_equity": 404_548}
+FIGS = list(TRUTH)
+META = {"filing_type": "10-K", "filing_date": date(2026, 11, 3), "period_end": date(2026, 9, 26)}
+
+
+def scripted(first_errors: dict[str, tuple[float, str]], persistent: bool = False):
+    """Answers with the true values, except ``first_errors`` on the first call (every call if persistent)."""
+    calls: list[tuple[list[str], str]] = []
+
+    def extract(text: str, figures: list[str], instruction: str) -> dict[str, tuple[float, str]]:
+        calls.append((list(figures), instruction))
+        out = {f: (float(TRUTH[f]), LINES[f]) for f in figures}
+        if persistent or len(calls) == 1:
+            out.update({f: v for f, v in first_errors.items() if f in figures})
+        return out
+
+    return extract, calls
+
+
+def test_prior_year_column_is_caught_by_the_identities_and_repaired() -> None:
+    # Total assets read from the prior-year column: 359,241 is in the quoted line, so provenance
+    # passes; both assets identities fail, the diagnosis names total_assets alone, and only it is re-read.
+    extract, calls = scripted({"total_assets": (359_241.0, LINES["total_assets"])})
+    res = FilingExtractionAgent(extract).run(DOC, FIGS, **META)
+    assert res.consistent and res.unresolved == []
+    assert res.figures["total_assets"].value == 404_548
+    assert res.rounds[0].candidates == [["total_assets"]] and res.rounds[0].unsupported == []
+    assert calls[1][0] == ["total_assets"]  # only the diagnosed figure is re-read
+    assert "404,548" not in calls[1][1]  # the implied value is not shown (anchoring)
+    assert all(f.quote_in_document and f.value_in_quote for f in res.figures.values())
+
+
+def test_ambiguous_failure_rereads_every_candidate() -> None:
+    # Gross margin from the prior-year column: one identity fails, so revenue, cost of sales and gross
+    # margin all explain it; all three are re-read rather than one picked.
+    extract, calls = scripted({"gross_profit": (195_201.0, LINES["gross_profit"])})
+    res = FilingExtractionAgent(extract).run(DOC, FIGS, **META)
+    assert res.consistent and sorted(calls[1][0]) == ["cost_of_revenue", "gross_profit", "revenue"]
+    assert res.figures["gross_profit"].value == 233_602
+
+
+def test_a_quote_that_is_not_in_the_document_is_reread() -> None:
+    extract, calls = scripted({"total_liabilities": (292_455.0, "Total liabilities 292,455 (from memory)")})
+    res = FilingExtractionAgent(extract).run(DOC, FIGS, **META)
+    assert res.rounds[0].unsupported == ["total_liabilities"] and calls[1][0] == ["total_liabilities"]
+    assert res.consistent and res.figures["total_liabilities"].quote_in_document
+
+
+def test_a_typo_fails_provenance_before_any_identity() -> None:
+    extract, _ = scripted({"total_equity": (112_039.0, LINES["total_equity"])})
+    res = FilingExtractionAgent(extract).run(DOC, FIGS, **META)
+    assert res.rounds[0].unsupported == ["total_equity"] and res.consistent
+
+
+def test_abstains_when_the_extractor_keeps_misreading() -> None:
+    extract, calls = scripted({"total_assets": (359_241.0, LINES["total_assets"])}, persistent=True)
+    res = FilingExtractionAgent(extract, max_repair_rounds=2).run(DOC, FIGS, **META)
+    assert not res.consistent and res.unresolved == ["total_assets"] and len(calls) == 3
+    assert "abstaining on total_assets" in res.detail
+
+
+def test_value_in_quote() -> None:
+    assert value_in_quote(404_548, "Total assets $ 404,548 $ 359,241 ")
+    assert not value_in_quote(4_548, "Total assets $ 404,548 $ 359,241 ")
+    assert value_in_quote(-17_280, "Cash generated by/(used in) investing activities  (17,280)  15,195")
+
+
+def test_llm_extractor_parses_json_and_skips_bad_items() -> None:
+    from lilavati.llm.client import LLMResponse
+
+    class Scripted:
+        def generate(self, messages, tools=None):  # type: ignore[no-untyped-def]
+            assert "no arithmetic" in messages[0].content and "total_assets" in messages[0].content
+            return LLMResponse(content='Here: {"total_assets": {"value": 404548, "quote": "Total assets $ 404,548 $ 359,241"},'
+                                       ' "total_equity": {"value": "n/a"}}')
+
+    out = llm_extractor(Scripted())(DOC, ["total_assets", "total_equity"], "Read each figure.")  # type: ignore[arg-type]
+    assert out == {"total_assets": (404_548.0, "Total assets $ 404,548 $ 359,241")}
+
+
+def test_reread_all_asks_every_figure_again() -> None:
+    # The comparison arm for diagnosis targeting: any failure re-reads every figure.
+    extract, calls = scripted({"total_assets": (359_241.0, LINES["total_assets"])})
+    res = FilingExtractionAgent(extract, reread="all").run(DOC, FIGS, **META)
+    assert res.consistent and calls[1][0] == FIGS
+
+
+# Microsoft FY2026 Form 10-K, cash flow statement and balance sheet (USD millions), verbatim as the
+# document text reads: current year first. 30,242 + 182,935 - 139,500 - 52,546 - 196 = 20,935.
+MSFT_CASH = "\n".join([
+    "Net cash from operations 182,935 136,162 118,548",
+    "Net cash used in investing (139,500 ) (72,599 ) (96,970 )",
+    "Net cash used in financing (52,546 ) (51,699 ) (37,757 )",
+    "Effect of foreign exchange rates on cash and cash equivalents (196 ) 63 (210 )",
+    "Cash and cash equivalents $ 20,935 $ 30,242",
+])
+_ML = MSFT_CASH.splitlines()
+MSFT_TRUTH = {"operating_cash_flow": (182_935.0, _ML[0]), "investing_cash_flow": (-139_500.0, _ML[1]),
+              "financing_cash_flow": (-52_546.0, _ML[2]), "fx_effect_on_cash": (-196.0, _ML[3]),
+              "cash_closing": (20_935.0, _ML[4]), "cash_opening": (30_242.0, _ML[4])}
+MSFT_META = {"filing_type": "10-K", "filing_date": date(2026, 7, 29), "period_end": date(2026, 6, 30)}
+
+
+def msft_extractor(first_errors: dict[str, tuple[float, str]] | None = None):
+    calls: list[list[str]] = []
+
+    def extract(text: str, figures: list[str], instruction: str) -> dict[str, tuple[float, str]]:
+        calls.append(list(figures))
+        out = {f: MSFT_TRUTH[f] for f in figures}
+        if len(calls) == 1 and first_errors:
+            out.update({f: v for f, v in first_errors.items() if f in figures})
+        return out
+
+    return extract, calls
+
+
+def test_cash_roll_forward_with_the_exchange_rate_line() -> None:
+    # Investing cash flow read from the prior-year column: in the quoted line, so only the cash
+    # identity catches it; one identity cannot say which figure is wrong, so all six are re-read.
+    extract, calls = msft_extractor({"investing_cash_flow": (-72_599.0, _ML[1])})
+    res = FilingExtractionAgent(extract).run(MSFT_CASH, list(MSFT_TRUTH), **MSFT_META)
+    assert res.rounds[0].failed_identities == ["opening cash + cash flows = closing cash"]
+    assert sorted(calls[1]) == sorted(MSFT_TRUTH)
+    assert res.consistent and res.figures["investing_cash_flow"].value == -139_500
+
+
+def test_an_unread_exchange_rate_line_does_not_fail_the_cash_identity() -> None:
+    # Without fx_effect_on_cash the roll-forward is off by 196: the identity is skipped (the line may
+    # exist but was not asked for), unless the caller says the statement has no such line.
+    figs = [f for f in MSFT_TRUTH if f != "fx_effect_on_cash"]
+    extract, _ = msft_extractor()
+    res = FilingExtractionAgent(extract).run(MSFT_CASH, figs, **MSFT_META)
+    assert res.consistent and res.rounds[0].failed_identities == []
+    extract, _ = msft_extractor()
+    res = FilingExtractionAgent(extract, max_repair_rounds=0, fx_line_absent=True).run(MSFT_CASH, figs, **MSFT_META)
+    assert not res.consistent and res.rounds[0].failed_identities == ["opening cash + cash flows = closing cash"]
+
+
+def test_applicable_identities_optional_figure() -> None:
+    from lilavati.core.invariants import applicable_identities
+    vals = {f: v for f, (v, _) in MSFT_TRUTH.items() if f != "fx_effect_on_cash"}
+    assert "opening cash + cash flows = closing cash" in applicable_identities(vals)
+    assert applicable_identities(vals, optional_absent_is_zero=False) == {}
+
+
+def test_figures_no_identity_checks_are_reported() -> None:
+    # Walmart FY2026 shows "Net sales $ 706,413" and "Total revenues 713,163" and no gross profit line:
+    # revenue enters no identity, so a model that takes net sales is caught by nothing but the label.
+    doc = "Net sales $ 706,413 $ 674,538 $ 642,637\nTotal revenues 713,163 680,985 648,125\n" + DOC
+    lines = doc.splitlines()
+
+    def extract(text: str, figures: list[str], instruction: str) -> dict[str, tuple[float, str]]:
+        out = {f: (float(TRUTH[f]), LINES[f]) for f in figures if f in TRUTH}
+        out["revenue"] = (706_413.0, lines[0])
+        return out
+
+    figs = ["revenue", "total_assets", "total_liabilities", "total_equity", "liabilities_and_equity"]
+    res = FilingExtractionAgent(extract).run(doc, figs, **META)
+    assert res.consistent and res.unchecked == ["revenue"]

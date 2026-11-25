@@ -289,11 +289,17 @@ STATEMENT_IDENTITIES: dict[str, dict[str, float]] = {
 OPTIONAL_FIGURES = {"fx_effect_on_cash"}  # taken as 0 when absent (no exchange-rate line)
 
 
-def applicable_identities(values: dict[str, float]) -> dict[str, dict[str, float]]:
-    """The statement identities whose figures are all in ``values`` (optional figures may be absent)."""
+def applicable_identities(values: dict[str, float], optional_absent_is_zero: bool = True) -> dict[str, dict[str, float]]:
+    """The statement identities whose figures are all in ``values``.
+
+    With ``optional_absent_is_zero`` (the default, right when the values come from a filing whose
+    XBRL has no exchange-rate line), an absent optional figure counts as 0; set it False when the figure
+    may simply not have been read, so the identity is skipped instead of failing by the missing amount.
+    """
     out = {}
     for name, coeffs in STATEMENT_IDENTITIES.items():
-        needed = {k: c for k, c in coeffs.items() if k in values or k not in OPTIONAL_FIGURES}
+        needed = {k: c for k, c in coeffs.items()
+                  if k in values or not (optional_absent_is_zero and k in OPTIONAL_FIGURES)}
         if all(k in values for k in needed):
             out[name] = needed
     return out

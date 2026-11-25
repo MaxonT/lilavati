@@ -1,74 +1,75 @@
 # Architecture & Runtime Specification
 
-Project Līlāvatī decouples unstructured perception from deterministic quantitative calculation and formal verification:
+Līlāvatī separates what language models do (read text, plan tool calls, write prose) from what code
+does (compute, check, cite). The agents built on it are described in [agents](agents.md) and the
+workflows in [agent workflows](agent-workflows.md).
 
 ```mermaid
 flowchart TD
-    UserQuery["User / Portfolio Query"] --> AgentRuntime["Neuro-Symbolic Agent Runtime"]
-    
-    subgraph PerceptionLayer["1. Perception & Prompts (LLM Layer)"]
-        SystemPrompts["System Prompts & Roles<br/>(Zero Math Rule)"]
-        ModelAdapter["Universal LLM Client<br/>(Gemini / Claude / OpenAI / Local OSS)"]
-    end
-    
-    subgraph ToolLayer["2. Deterministic Sandboxes (FastMCP Bus)"]
-        FilingsMCP["Corporate Filings MCP<br/>(SEC EDGAR / Ind AS XBRL)"]
-        QuantMCP["Quantitative & Econometrics MCP<br/>(DuckDB / Polars / SciPy)"]
-        DerivativesMCP["Derivatives & Portfolio MCP<br/>(BSM / SABR / Execution)"]
-    end
-    
-    subgraph InvariantLayer["3. Formal Verification Gate (SMT Solver)"]
-        SuvarnaEngine["Suvarṇa Engine (Z3 Solver)<br/>Assets = Liab + Equity<br/>No-Arbitrage Spreads"]
-        SMTReflection["SMT Reflection Loop<br/>(Violation Feedback)"]
-    end
-    
-    subgraph AuditLayer["4. Telemetry & Provenance (Audit Trail)"]
-        Provenance["CitationRef Engine<br/>(SHA-256 Hashes)"]
-        Tracer["OpenTelemetry Tracer<br/>(JSONL Audit Logs)"]
+    Q["Question or document"] --> RT["Agent runtime<br/>NeuroSymbolicAgent / FinancialStateGraph"]
+
+    subgraph LLM["1. Language model (reads, plans, writes)"]
+        P["Prompts: no arithmetic in text,<br/>cite sources, respect the as-of date"]
+        M["Model client: OpenAI-compatible (Groq, Ollama, vLLM),<br/>Gemini, Anthropic; mock by default"]
     end
 
-    AgentRuntime --> PerceptionLayer
-    PerceptionLayer --> ToolLayer
-    ToolLayer --> InvariantLayer
-    InvariantLayer -- "UNSAT (Violation)" --> SMTReflection
-    SMTReflection --> PerceptionLayer
-    InvariantLayer -- "SAT (Verified)" --> AuditLayer
-    AuditLayer --> FinalOutput["Investment Committee Memo with audit trail"]
+    subgraph TOOLS["2. Deterministic engines (Python; also 8 MCP servers)"]
+        F["lilavati-mcp-corporate-filings<br/>SEC XBRL figures, statement model, diagnosis"]
+        FI["lilavati-mcp-fixed-income<br/>bonds, curves, Merton, covenants and paths"]
+        O["derivatives, econometrics, financial-ml,<br/>portfolio-exec, sustainability, committee"]
+    end
+
+    subgraph CHECKS["3. Checks"]
+        Z["Identities (Z3) on the numbers;<br/>diagnosis of which figures could be wrong"]
+        G["Gates: SMTBalanceGate, CovenantGate,<br/>ProvenanceGate(SourceStore), TemporalPurityGate"]
+        V["validation status on every tool result"]
+    end
+
+    subgraph AUDIT["4. Evidence"]
+        C["CitationRef: source hash, tag or page, snippet"]
+        T["Trace spans (JSONL export)"]
+    end
+
+    RT --> LLM
+    LLM -->|"tool calls"| TOOLS
+    TOOLS --> CHECKS
+    CHECKS -->|"failed: reflection prompt with the diagnosis"| LLM
+    CHECKS -->|"passed"| AUDIT
+    AUDIT --> OUT["Answer, figures or dossier with citations"]
 ```
 
----
+## 1. Prompts (`src/lilavati/prompts/`)
 
-## 1. Centralized Prompts Catalog (`src/lilavati/prompts/`)
-All prompts strictly enforce institutional constraints:
+- `LILAVATI_CORE_SYSTEM_PROMPT`: no arithmetic in text (use tools), cite every extracted value,
+  re-check the figures a diagnosis names rather than adjust numbers, respect the as-of date.
+- Role prompts (`BULL_RESEARCHER_PROMPT`, `FORENSIC_BEAR_PROMPT`, `SUSTAINABILITY_ANALYST_PROMPT`,
+  `PORTFOLIO_MANAGER_PROMPT`) for workflows with model roles; every tool they name is a registered MCP
+  tool (`tests/test_mcp_registry.py` checks it). The library's committee does not use them: it is
+  rule-based.
+- `generate_smt_reflection_prompt()`: the failed identities and, given a diagnosis, the figures to
+  re-check, with a warning not to pick one by plausibility when several explain the failure.
 
-- `LILAVATI_CORE_SYSTEM_PROMPT`: Prohibits mental arithmetic and demands formal tool calls.
-- `BULL_RESEARCHER_PROMPT`: Directs valuation catalyst modeling.
-- `FORENSIC_BEAR_PROMPT`: Directs earnings quality and Beneish M-Score audits.
-- `SUSTAINABILITY_ANALYST_PROMPT`: Directs carbon accounting and transition risk.
-- `PORTFOLIO_MANAGER_PROMPT`: Directs final capital allocation under SMT verification.
-- `generate_smt_reflection_prompt()`: Bridges SMT solver contradictions back into the LLM context.
+## 2. Model client (`src/lilavati/llm/`)
 
----
+One client for OpenAI-compatible APIs (OpenAI, Groq presets such as `groq-gpt-oss-120b`, local Ollama
+or vLLM: presets `llama3-fin-8b`, `vllm-finance-70b`), Gemini and Anthropic, with tool calling on all
+three and bounded retries on 429/5xx. Keys come from environment variables. The default preset,
+`mock-evaluator`, returns canned text, so examples exercise the tools rather than a model.
 
-## 2. Multi-Model LLM Adapter (`src/lilavati/llm/`)
-Supports seamless switching between cloud and open-source models:
+## 3. Runtime and checks
 
-- Google Gemini (`gemini-2.5-pro`, `gemini-2.5-flash`)
-- Anthropic Claude (`claude-3-7-sonnet`)
-- OpenAI (`gpt-4o`, `o3-mini`)
-- Open-weight models on Groq via its OpenAI-compatible endpoint (`groq-gpt-oss-120b`, `groq-gpt-oss-20b`,
-  `groq-qwen3.6-27b`, `groq-qwen3.8-27b`; key from `GROQ_API_KEY`)
-- Local models through the OpenAI-compatible endpoints of Ollama or vLLM (presets `llama3-fin-8b` and
-  `vllm-finance-70b`; point either at whatever model you serve locally)
+- `NeuroSymbolicAgent` (`runtime/`): the model requests tools; registered functions run them; tool
+  rounds are capped (`completed=False` at the cap). A JSON answer is checked against every statement
+  identity its figures allow; on failure the model gets the diagnosis and tries again, up to
+  `max_reflection_iterations`.
+- `FinancialStateGraph` (`framework/`): your node functions in sequence or by conditional edges, with
+  gates between them. `ProvenanceGate(store)` resolves citations against the sources a pipeline read.
+- Every MCP tool result has a `validation` field (`reference-checked`, `piloted on real data`,
+  `rule-based`, `not reference-checked`), so an agent can tell a checked engine from an unchecked one.
 
----
+## 4. Tracing (`src/lilavati/tracing/`)
 
-## 3. Telemetry, Tracing & Compliance (`src/lilavati/tracing/`)
-Every agent run captures:
-
-- OpenTelemetry-compatible `TraceSpan` records for each turn.
-- Tool arguments, outputs, and execution latencies.
-- SMT solver SAT/UNSAT status and violation descriptions.
-- Token consumption and financial document SHA-256 hashes.
-- Immutable JSONL audit file exports for compliance.
-
+Each run records spans for the run, each model call, each tool call (arguments, output, duration) and
+each identity check (result and violations), and exports them as JSONL. Token counts and document
+hashes are not recorded in the trace yet (the model client returns token usage; citations carry the
+hashes).

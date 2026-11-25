@@ -1,0 +1,42 @@
+{
+  "created_utc": "2026-11-25T11:04:49+00:00",
+  "git_commit": "e43aa49e04c25316298e701309e964a39107f5e4",
+  "git_dirty": true,
+  "python": "3.11.14",
+  "prompt_version": "v3",
+  "script": "scripts/run_extraction_repair_eval.py",
+  "case_set": "extraction",
+  "model": "groq-gpt-oss-120b",
+  "model_name": "openai/gpt-oss-120b",
+  "base_url": "https://api.groq.com/openai/v1",
+  "ticker": "AAPL",
+  "accession": "0000320193-26-000026",
+  "period_end": "2026-09-26",
+  "samples": 1,
+  "temperature": 0.0,
+  "paired_first_reading": true,
+  "arms": [
+    "single",
+    "targeted",
+    "reread_all",
+    "implied"
+  ],
+  "extraction_version": "x2",
+  "figures": [
+    "revenue",
+    "cost_of_revenue",
+    "gross_profit",
+    "total_assets",
+    "total_liabilities",
+    "liabilities_and_equity",
+    "operating_cash_flow",
+    "investing_cash_flow",
+    "financing_cash_flow",
+    "total_equity",
+    "cash_closing",
+    "cash_opening"
+  ],
+  "gap_seconds": 4.0,
+  "run_date": "2026-11-25",
+  "n_records": 4
+}

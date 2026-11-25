@@ -1,9 +1,10 @@
 """
 Financial State Graph Orchestrator for Project Līlāvatī.
 
-Enables developers to build, compose, and deploy multi-agent financial state machines,
-similar to LangGraph and Google ADK, but natively equipped with zero-math enforcement,
-SMT verification gates, cryptographic citations, and OpenTelemetry audit tracing.
+Runs your node functions in order or by conditional edges over a typed state, with tracing; put
+gates (``framework.gates``) between nodes for identity, covenant, citation and as-of-date checks. A small
+orchestrator for pipelines with checks; for general agent orchestration use LangGraph or Google ADK with
+the MCP servers.
 """
 
 from __future__ import annotations

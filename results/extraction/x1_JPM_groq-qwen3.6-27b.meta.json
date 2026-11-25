@@ -1,0 +1,41 @@
+{
+  "created_utc": "2026-11-25T11:02:42+00:00",
+  "git_commit": "e43aa49e04c25316298e701309e964a39107f5e4",
+  "git_dirty": true,
+  "python": "3.11.14",
+  "prompt_version": "v3",
+  "script": "scripts/run_extraction_repair_eval.py",
+  "case_set": "extraction",
+  "model": "groq-qwen3.6-27b",
+  "model_name": "qwen/qwen3.6-27b",
+  "base_url": "https://api.groq.com/openai/v1",
+  "ticker": "JPM",
+  "accession": "0001628280-26-008131",
+  "period_end": "2025-12-31",
+  "samples": 1,
+  "temperature": 0.0,
+  "paired_first_reading": true,
+  "arms": [
+    "single",
+    "targeted",
+    "reread_all",
+    "implied"
+  ],
+  "extraction_version": "x1",
+  "figures": [
+    "revenue",
+    "total_assets",
+    "total_liabilities",
+    "liabilities_and_equity",
+    "operating_cash_flow",
+    "investing_cash_flow",
+    "financing_cash_flow",
+    "fx_effect_on_cash",
+    "total_equity",
+    "cash_closing",
+    "cash_opening"
+  ],
+  "gap_seconds": 4.0,
+  "run_date": "2026-11-25",
+  "n_records": 4
+}

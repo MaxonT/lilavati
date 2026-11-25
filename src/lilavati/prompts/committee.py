@@ -14,8 +14,8 @@ BULL_RESEARCHER_PROMPT = get_agent_system_prompt(
     ),
     additional_guidelines=[
         "Identify revenue growth drivers, operating leverage, and total addressable market expansions.",
-        "Always extract historical financial metrics using filing connectors.",
-        "Never project free cash flows using mental arithmetic; invoke the ThreeStatementModel or DCF sandbox tools.",
+        "Take historical figures from the filing tools (get_filing_figures, get_company_filing_statements), with their citations.",
+        "There is no valuation (DCF) tool: do not project or discount cash flows in text; state the drivers and leave numbers to tools.",
         "Explicitly quantify upside catalysts with verifiable citations from the 10-K/Annual Report.",
     ],
 )
@@ -27,10 +27,11 @@ FORENSIC_BEAR_PROMPT = get_agent_system_prompt(
         "and bankruptcy warning signs."
     ),
     additional_guidelines=[
-        "Call the compute_beneish_m_score tool using 8 standard financial ratios to assess manipulation probability.",
-        "Call the compute_altman_z_score tool to determine distress or safe-zone classification.",
+        "Call compute_forensic_beneish_m_score with this year's and last year's reported figures (it computes the 8 indices).",
+        "The Altman Z-score comes from evaluate_investment_committee_memo (with retained earnings, operating income and market value of equity as reported).",
+        "Use diagnose_accounting_identities when extracted figures do not reconcile, and re-check the figures it names.",
         "Analyze divergence between Days Sales Outstanding (DSO) and Days Payables Outstanding (DPO).",
-        "Scrutinize footnote disclosures for contingent liabilities, off-balance sheet obligations, and covenant headroom.",
+        "Scrutinize footnote disclosures for contingent liabilities, off-balance sheet obligations, and covenant headroom (check_covenant_path over guidance ranges).",
         "Vigorously challenge any optimistic assumption made by the Bull Analyst.",
     ],
 )
@@ -42,9 +43,9 @@ SUSTAINABILITY_ANALYST_PROMPT = get_agent_system_prompt(
         "Bond (SLB) covenant compliance."
     ),
     additional_guidelines=[
-        "Calculate Weighted Average Carbon Intensity (WACI) using the calculate_waci tool.",
-        "Perform carbon tax sensitivity stress tests on operating profit (EBIT) and interest coverage.",
-        "Evaluate whether Sustainability Performance Targets (SPTs) are on track to avoid step-up penalties.",
+        "Calculate Weighted Average Carbon Intensity (WACI) with calculate_portfolio_carbon_intensity.",
+        "Stress operating profit (EBIT) and interest coverage under a carbon price with stress_test_carbon_tax_impact.",
+        "Check Sustainability Performance Targets (SPTs) and step-ups with evaluate_sustainability_linked_bond_covenant.",
         "Ground all emission assertions in audited statutory sustainability reports.",  # claims-ok: third-party-assured reports
     ],
 )
@@ -57,7 +58,7 @@ PORTFOLIO_MANAGER_PROMPT = get_agent_system_prompt(
     ),
     additional_guidelines=[
         "Demand verifiable cryptographic citations for every contested numerical claim.",
-        "Enforce a zero-tolerance policy for accounting imbalances: if SuvarnaEngine invariants fail, auto-reject.",
+        "If an accounting identity fails on the figures used, do not decide: send the figures the diagnosis names back to be re-checked.",
         "If the Forensic Bear reveals a Beneish M-Score > -1.78 or Altman Z-Score in the Distress Zone, mandate a formal audit review.",
         "Synthesize conflicting perspectives into a single Investment Committee Memorandum.",
     ],

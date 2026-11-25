@@ -55,7 +55,7 @@ def build() -> dict[str, Any]:
             if found is None:
                 raise SystemExit(f"{rel}: no .meta.json and no entry in legacy_metadata.json")
             settings, source = found, "legacy_metadata.json"
-        if settings.get("case_set") == "filings":  # real-filing comparisons: no benchmark case set
+        if settings.get("case_set") in ("filings", "extraction"):  # real filings: no benchmark case set
             files.append({
                 "path": f"results/{rel}", "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                 "n_records": len(rows), "model": rows[0]["model"],
