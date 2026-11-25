@@ -136,10 +136,9 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
 
 - [x] **4.1 Role-Bound Financial Agents & Forensics:**
   * **Forensic Credit & Accounting Auditor:** 8-variable Beneish (1999) M-Score (coefficients corrected and tested against the paper) and Altman Z-Score.
-  * **Thematic Bull Analyst:** Revenue growth drivers, operating income trajectories, and target models.
+  * **Bull rule:** revenue growth against a target (the committee is rule-based; role prompts for model-based roles are in `prompts/committee.py`).
 - [x] **4.2 The Adversarial Investment Committee Protocol:**
-  * Deliberative multi-turn protocol: Bull presents thesis; Forensic Bear stress-tests earnings quality and receivables.
-  * Mandatory Z3 formal verification gate (`SuvarnaEngine`) before emitting the binding `InvestmentCommitteeMemo`.
+  * Rule-based: growth against a target; Beneish and Altman flags; balance-sheet (Z3) and cash identities on reported inputs; a failed identity rejects the memo. No model is called. A model-based committee is a Phase 11 research design ([agent workflows](docs/agent-workflows.md), workflow 5).
 - [x] **4.3 FastMCP Committee Server:**
   * Exposes `evaluate_investment_committee_memo` and `compute_forensic_beneish_m_score` over FastMCP.
 - [x] **4.4 Centralized Institutional Prompts Catalog (`src/lilavati/prompts/`):**
@@ -155,10 +154,12 @@ Every roadmap task must pass a strict 5-stage quality gate before being marked a
   * OpenTelemetry-compatible span models capturing agent runs, model calls, tool executions, SMT verification results, and citation checks.
   * Immutable JSONL audit trail exporter and compliance summaries.
 - [x] **4.8 Advanced Autonomous Financial Agents (Search, Deep, Research) (`src/lilavati/agents/`):**
-  * **FinancialSearchAgent:** Autonomous multi-source discovery across SEC EDGAR, India BSE/NSE Ind AS, and macro feeds with SHA-256 cryptographic provenance.
-  * **DeepFinancialAgent:** Deep reasoning hypothesis tree search (Bull, Base, Bear) evaluated through reactive DAGs and Z3 SMT invariant pruning.
+  * **FinancialSearchAgent:** the latest SEC 10-K filed by an as-of date, five figures with citations; India not implemented; no macro feeds.
+  * **DeepFinancialAgent:** three fixed (or supplied) scenarios on the statement graph, probability-weighted, pruning negative-cash branches; no model is called, and its balance flag holds by construction (equity plug).
+  * **FilingExtractionAgent (2026-11-25):** a model reads figures with the lines they came from; quotes are checked against the document, identities diagnosed, and only the diagnosed figures re-read; it abstains on what it cannot settle. First real-model runs (five 10-Ks, four models on Groq, 2026-11-25): after fixing the quote check and a revenue label, 240 of 240 figures correct in one pass, so the repair is not yet measured; harder inputs next.
   * **FinancialResearchAgent:** dossier from one 10-K (latest filed by the as-of date): this year and the prior-year comparatives from the filing's own XBRL facts, the three-statement model with checks, the rule-based committee (Beneish, Altman, identities), a scenario tree calibrated from the filing (assumed multipliers, listed), carbon WACI only from supplied emissions, and every citation resolved against the SEC data read. Refuses when an input is not reported. Checked live on Apple, Microsoft, Walmart and Nvidia (2026-11-24); J&J refused.
-- [x] **4.9 Verification:** unit tests across committee deliberation, model connectivity, tracing, runtime loops, and agents. Note: the default LLM is a mock; real-model agent runs are not yet part of the test suite.
+- [x] **4.9 Verification:** unit tests across the committee, model connectivity, tracing, runtime loops (including scripted-model reflection with a diagnosis) and agents. Note: the default LLM is a mock; real-model agent runs are not yet part of the test suite.
+- [ ] **4.10 Agent workflows ([docs/agent-workflows.md](docs/agent-workflows.md)):** extraction with diagnosis-driven repair (implemented; first real-model runs found no misreadings to repair on 10-K statements text; ablations on harder inputs open); covenant monitoring against guidance; answers with evidence (a gate on unsupported numbers); committee ladder (Phase 11).
 
 ---
 

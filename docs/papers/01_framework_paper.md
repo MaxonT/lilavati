@@ -94,7 +94,7 @@ Neuro-symbolic AI seeks to unite the pattern-recognition capabilities of deep ne
 Līlāvatī integrates an SMT solver into a financial agent runtime, formalizing accounting identities and capital structure constraints as first-order theories over real numbers ($\mathcal{T}_{\mathbb{R}}$).
 
 ### 2.3 Financial Machine Learning and Econometric Rigor
-In *Advances in Financial Machine Learning*, López de Prado [2018] identified the principal methodological traps in quantitative finance: standard integer differencing ($d=1$) destroys long-range memory, standard $k$-fold cross-validation leaks information across autocorrelated time series, and static time-sampling yields non-Gaussian, leptokurtic returns. Līlāvatī directly embeds de Prado's core algorithms—including optimal fractional differentiation ($d^*$), triple-barrier event labeling, and purged cross-validation—as foundational execution tools.
+In *Advances in Financial Machine Learning*, López de Prado [2018] identified the principal methodological traps in quantitative finance: standard integer differencing ($d=1$) destroys long-range memory, standard $k$-fold cross-validation leaks information across autocorrelated time series, and static time-sampling yields non-Gaussian, leptokurtic returns. Līlāvatī implements two of these as tools, optimal fractional differentiation ($d^*$) and triple-barrier event labeling, checked against the book; purged and embargoed cross-validation is not yet implemented.
 
 ---
 
@@ -105,12 +105,12 @@ Līlāvatī is organized into a modular four-tier architecture designed around t
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        TIER 4: AGENTIC WORKFLOW                        │
-│   FinancialStateGraph │ Adversarial Committee │ Deep Reasoning Tree    │
+│   StateGraph │ Extraction & Research agents │ Rule-based Committee     │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────▼────────────────────────────────────┐
 │                    TIER 3: FORMAL INVARIANT GATES                      │
-│   SuvarṇaEngine (Z3 SMT) │ CovenantGate │ TemporalPurityGate (DuckDB)  │
+│   Z3 identities + diagnosis │ Provenance │ Covenant │ TemporalPurity   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────▼────────────────────────────────────┐
@@ -128,7 +128,7 @@ Līlāvatī is organized into a modular four-tier architecture designed around t
 We formally state the Zero LLM Arithmetic invariant:
 > **Axiom 1 (Zero LLM Arithmetic)**: *Let $\mathcal{M}$ be a generative foundation model and let $\mathcal{S}$ be the agent state space. No arithmetic operation $f: \mathbb{R}^n \to \mathbb{R}$ governing valuation, leverage, yield, duration, or accounting reconciliation may be evaluated via the auto-regressive token generation of $\mathcal{M}$. Every operation $f$ must be dispatched as a structured Remote Procedure Call (RPC) across the FastMCP bus to a deterministic compiler $\mathcal{C}$.*
 
-By enforcing Axiom 1, the LLM is restricted to semantic parameter extraction and tool coordination, eliminating numerical rounding and precision drift.
+Axiom 1 is a design rule, not an enforced property: the prompts require it, tools supply the numbers, and the integration examples check that a final answer quotes the tool outputs, but no gate yet rejects a number in prose that no tool or source produced (a proposed workflow, `docs/agent-workflows.md`). Where it holds, the model is limited to reading parameters and coordinating tools, which removes model arithmetic from the computed figures.
 
 ### 3.2 The Suvarṇa Invariant Engine: SMT Formulation of Financial Equilibrium
 In audited corporate reporting <!-- claims-ok: audited financial statements -->, a three-statement financial model must satisfy simultaneous linear identities over the real numbers $\mathbb{R}$. We formalize this in first-order logic.

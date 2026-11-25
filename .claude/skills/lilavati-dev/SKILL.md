@@ -136,6 +136,17 @@ one third, so a limit built from it is not met exactly.
   rejected its own answer. Pass `Fraction`s internally; round a reported value in the safe direction.
 - **One fresh `z3.Context()` per call** for anything non-trivial: heuristics depend on term creation
   order, so the same covenant-path problem took 9 s alone and 53 s after other Z3 work in the process.
+- **Do not show a model the answer a check implies.** A re-read request names the failed checks and the
+  figures; it does not say "should be 404,548", which a model can copy instead of reading the source
+  (`FilingExtractionAgent`, `show_implied_values=False`).
+- **Prompts may name only registered tools.** The role prompts named three tools that did not exist;
+  `tests/test_mcp_registry.py` now checks every tool a prompt names.
+- **Quote checks ignore whitespace.** HTML-to-text gives "(139,500 )" (a space between table cells);
+  gpt-oss-120b quoted "(139,500)" and a spacing-sensitive check sent three correct Microsoft figures
+  back for a re-read. `SourceStore` compares snippets with whitespace removed; the characters must match.
+- **An unread optional figure is not a zero.** The cash roll-forward without the exchange-rate line
+  failed by Microsoft's 196 on true values. In the extraction agent the identity waits for
+  `fx_effect_on_cash` unless the caller says the statement has no such line (`fx_line_absent=True`).
 - **Corners are not ranges.** Check a property over a range with a solver unless monotonicity is shown;
   a leverage-based cash sweep made a mid-range EBITDA the worst case while all four corners complied.
 Describe this accurately; never write "proven", "formally guaranteed", "audited" or
@@ -289,6 +300,7 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 | Execution / portfolio | `core/execution.py` | LOB snapshot, Almgren-Chriss (audited), Black-Litterman, HRP (not yet audited) |
 | Sustainability | `core/sustainability.py` | WACI, carbon-tax stress, SLB step-up |
 | Forensics | `agents/forensics.py` | Beneish (1999), Altman (1968) |
+| Agents | `agents/`, `runtime/`, `framework/` | extraction with repair, research dossier, rule-based committee, search, scenario tree; what each does: `docs/agents.md`; workflows: `docs/agent-workflows.md` |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
 | Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py`, `connectors/india_filings.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); validation `docs/validation/connectors.md` |
 | Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
@@ -356,3 +368,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-25: CVXPY status check added to the solver-output rule (Black-Litterman equal-weight fallback).
 - 2026-11-25: Validation-status manifest rule (status per engine, returned by every MCP tool).
 - 2026-11-25: Rules from the covenant-path work (exact optima, fresh Z3 contexts, corners vs ranges).
+- 2026-11-25: Agent rules (no implied values to the model; prompts name only registered tools); repo map row for agents.
+- 2026-11-25: Quote checks ignore whitespace; unread optional figures are not zeros (extraction evaluation).

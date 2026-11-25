@@ -68,6 +68,8 @@ nav:
   - Home: index.md
   - Getting started: getting-started.md
   - Architecture & Runtime: architecture.md
+  - Agents: agents.md
+  - Agent workflows: agent-workflows.md
   - Tutorials & Developer Guide:
       - "01. Credit Workflow: Covenants, Merton PD & API": tutorials/01_build_your_first_financial_agent.md
       - "02. Statistical Arbitrage & Execution, Checked": tutorials/02_statistical_arbitrage_and_execution_agent.md

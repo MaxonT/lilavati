@@ -35,6 +35,9 @@ researchers and AI engineers.
 - **India-first data needs per-source licence checks.** *To verify before any doc states it:*
   redistribution terms of NSE/BSE market data, MCA filings, RBI DBIE, and third-party copyright on
   individual FRED series. Licence-clean starting points to confirm: SEC EDGAR, World Bank, ALFRED.
+  Checked 2026-11-26: NSE's website terms of use prohibit systematic or automated data collection
+  (scraping, extraction, harvesting) without NSE's written consent, and NSE sells the complete XBRL
+  series by subscription; BSE's terms not yet read.
 - **Decimal arithmetic only where it matters** (money, accounting identities; Z3 already uses exact
   rationals). Floating-point models (Black-Scholes, GARCH, optimisers) get stated tolerances instead.
 - **Replay consistency is defined within a tolerance** on pinned dependencies (solvers can differ in
@@ -171,7 +174,8 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [x] Ind AS crosswalk on real audited results, line by line against the printed statements (7.5;
       2026-11-24: Maruti Suzuki FY2025-26 consolidated; all checks hold; the exchange filing folds
       right-of-use assets into PP&E).
-- [ ] Ind AS: a standalone statement and a second company; read the exchange's Ind AS filing directly.
+- [ ] Ind AS: a standalone statement and a second company; read the exchange's Ind AS filing directly
+      (plan under "India exchange XBRL" in Phase 10).
 - [ ] 10-K PDF parser on a second issuer (labels are Apple's today) (7.5); list prior-year items not found
       (only current-year items are in `missing_items`); footnote markers such as "(1)" after a label are
       read as −1.
@@ -208,6 +212,13 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       before citing).
 - [ ] Derivatives: static no-arbitrage across a surface: total implied variance non-decreasing in
       maturity (calendar) and the Durrleman density condition (verify Gatheral and Jacquier before citing).
+- [ ] Agent workflows ([docs/agent-workflows.md](docs/agent-workflows.md)): extraction with
+      diagnosis-driven repair evaluated on the pilot 10-Ks with four models (2026-11-25, x1 and x2:
+      checker and label faults fixed, then 240 of 240 correct in one pass, nothing to repair). Next: the
+      same arms on inputs where models misread (PDF page text, 10-Q columns, Ind AS reports in lakhs or
+      crores), plus the no-provenance-check ablation; build the covenant-monitoring agent (terms and guidance
+      read with quotes, paths checked by tools); an answer gate rejecting numbers no tool or source
+      produced. Record token usage in traces.
 - [ ] Benchmark process metrics: whether the final answer quotes tool outputs unchanged (no re-rounding or
       unit drift), unit-trap and mixed-scale tables, instructions injected into filing text, and tokens,
       tool rounds and latency in the manifest (accuracy against cost).
@@ -223,6 +234,45 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Licence review per source (see corrections); record the result in a dataset card.
 - [ ] Connectors: SEC EDGAR company facts (filing-anchored extraction done, 2026-11-23), ALFRED vintages,
       World Bank, RBI DBIE and MOSPI release snapshots (licence check first). *After reviewer feedback.*
+- [ ] **India exchange XBRL** (outside review, assessed 2026-11-26). Feasible for files a user downloads;
+      automated fetching from NSE needs NSE's written consent (terms of use above). Facts checked:
+      SEBI's Integrated Filing circular of 31 Dec 2024 (Governance in XBRL only from the quarter ended
+      March 2025; Financial within 45 days of a quarter, 60 after the year); NSE files results from
+      the quarter ended March 2025 under Integrated Filing – Financials, served as inline XBRL
+      (`nsearchives.nseindia.com/corporate/ixbrl/INTEGRATED_FILING_INDAS_..._iXBRL_WEB.html`); BSE
+      made XBRL results mandatory from 1 April 2017; MCA's Ind AS filing manual allows no extensions to
+      the core taxonomy; MCA exempts banks, insurers, NBFCs and housing finance companies from XBRL
+      financial statements. Not confirmed, do not repeat until checked: the "in-capmkt" taxonomy name,
+      "~893" BRSR tags, the power-sector exemption (MCA's FAQ and the rule text disagree), and whether
+      insurers now file results in XBRL (BSE exempted them in 2017). Corrected: half-yearly and annual
+      results include a statement of assets and liabilities and a cash flow statement (LODR Reg. 33),
+      so the exchange filing covers all three statements without notes; verify they are tagged, not
+      only in the PDF. Scope 3 is, as far as known, a voluntary (leadership) BRSR indicator: check the
+      format before relying on it. Steps:
+  - [ ] Access: ask NSE and BSE for written consent or a research licence, including permission to keep
+        one or two filings as test fixtures; read BSE's terms. Until then no fetcher: the connector
+        reads a file the user supplies, real filings stay in git-ignored `data/raw/`, and committed
+        tests use small instance documents built from the taxonomy.
+  - [ ] Parser (`connectors/india_xbrl.py`): XML and inline XBRL (`ix:nonFraction` with `scale`, `sign`,
+        `format`); contexts (instant or duration, consolidated or standalone, dimensions); units and
+        decimals; never fill a missing fact. Register the file's SHA-256 in `SourceStore`; cite element
+        and context. Output `IndASCompanyDisclosure`, so the existing crosswalk and checks apply.
+  - [ ] Mapping: element names from the exchange taxonomy package (record its version); a table to the
+        crosswalk's Schedule III items; banking, NBFC and insurance taxonomies afterwards.
+  - [ ] Validation: Maruti Suzuki FY2025-26 consolidated, already typed from the printed statements,
+        must match the XBRL values line by line; then its standalone filing and a second company;
+        results in `docs/validation/connectors.md`.
+  - [ ] Coverage table: which statements each quarter's filing tags (quarterly P&L; half-yearly assets
+        and liabilities and cash flows; Q4 annual), so missing statements are reported as not filed.
+  - [ ] Point in time: the exchange submission time as knowledge time; re-filed results become
+        restatement cases (below).
+  - [ ] BRSR XBRL reader for the sustainability engine: Scope 1 and 2 emissions, energy and water, with
+        units and the reporting boundary; element names from the BRSR taxonomy; BRSR Core assurance
+        flag; validate two companies against their BRSR PDFs.
+  - [ ] MCA AOC-4 XBRL (full statements with notes): deferred. No free bulk access found (paid per
+        document on MCA V3); revisit if MCA grants research access. No extensions would make a
+        complete mapping table possible: confirm on a real instance.
+  - [ ] Tutorial and skill entry when the parser lands (an Ind AS company from its exchange XBRL).
 - [ ] Typed macro series (frequency, unit, nominal or real, base year, seasonal adjustment,
       transformation, stock or flow, release time) and conversion tools (rebasing, SAAR and year-on-year,
       deflating); a release calendar so an observation is usable only after its publication time.
