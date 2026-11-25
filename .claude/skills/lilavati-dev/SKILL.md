@@ -243,6 +243,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
   or a validation page instead of copying them, so they cannot drift. Run every code block that
   needs no API key before publishing the tutorial.
 - **Before rewriting an example, grep `tests/` for importers** (`tests/test_tutorial_agents.py` imports examples 07–09).
+- **When an engine's output changes, grep the papers for it.** After the Altman fix the framework paper
+  still quoted Apple's Z-score as 12.02 (it is 9.71), and the benchmark paper quoted a content-free
+  baseline (15.7%) that no script reproduced (15.0%). Re-derive every number in `docs/papers/` from a
+  script before a revision, and keep the script.
 - **When you correct a claim, grep tutorials and examples too.** "Z3 proves covenants", an "equity
   cure" that was really debt paydown, and `serve_agent(host="0.0.0.0")` were corrected in the docs and
   code but survived in Tutorial 01 and `examples/06` until 2026-11-22. Search `docs/tutorials/`,
@@ -275,8 +279,10 @@ Describe this accurately; never write "proven", "formally guaranteed", "audited"
 5. MCP tools: `docs/mcp-setup.md` and the tool count in `tests/test_mcp_registry.py`.
 6. CHANGELOG (Added, Fixed, Docs), the ROADMAP item and the TODO item (what is done, what is open).
 7. This skill: a rule for each general lesson, the repository map, a change-log line.
-8. Checks: ruff, mypy, pytest (including `tests/test_docs_coverage.py`), `mkdocs build --strict`,
-   `check_claims.py`, `check_tutorials.py`.
+8. Papers: if the feature completes or advances a ROADMAP or TODO item, revise the paper it belongs to
+   (section 4c).
+9. Checks: ruff, mypy, pytest (including `tests/test_docs_coverage.py`), `mkdocs build --strict`,
+   `check_claims.py`, `check_tutorials.py`, `check_papers_current.py`.
 
 **Regular sweep** (in every pull request that changes behaviour, before any release, and at least
 monthly):
@@ -291,6 +297,47 @@ monthly):
 
 `tests/test_docs_coverage.py`, `tests/test_validation_status.py` and `tests/test_mcp_registry.py`
 enforce the mechanical parts; the sweep is judgement and is part of review.
+
+## 4c. Papers: revise at each milestone
+
+The two working papers (`docs/papers/01_framework_paper.md`, the system; `02_benchmark_paper.md`, the
+benchmark) describe the project as it is, so they fall behind whenever a milestone lands. On
+2026-11-26 the framework paper still quoted an Altman Z-score from before a fix, described a Johansen
+test that does not exist and called a risk-neutral default probability physical.
+
+**When.** Revise the paper a milestone belongs to in the same pull request, or the next one:
+
+- a ROADMAP or TODO item is completed (`[x]`) or advanced (`[~]`) with a date:
+  `uv run python scripts/check_papers_current.py` lists the dated items newer than each paper's
+  "Version of" line, and suggests which paper each concerns;
+- an engine's validation status changes, or a fix changes an output a paper quotes;
+- new measured results land in `results/` (benchmark runs, real-filing pilots, evaluations);
+- before a release, a tag, or an arXiv or journal submission.
+
+The framework paper covers engines, checks, connectors, agents, case studies and latency; the benchmark
+paper covers cases, tracks, metrics, runs, results and error analysis.
+
+**How.**
+
+1. Load the `academic-journal-writing` skill if it is available (the author's style, British English,
+   APA citations, the pre-submission checklist); otherwise apply these rules directly.
+2. Re-derive every number the revision touches from a script, test or results file, never by hand, and
+   name the source. A number no script reproduces is removed or corrected, not kept (the content-free
+   baseline was 15.7% in the paper and 15.0% from `scripts/trivial_baseline.py`).
+3. Describe what is implemented and measured; mark proposed or unchecked parts as such, with the
+   engine's validation status, and update the limitations section.
+4. References: add only sources you have read (title, venue, year and DOI checked). Mark anything
+   unconfirmed with `<!-- VERIFY: ... -->` and list it for the author; never complete author lists from
+   memory.
+5. Consistency: counted lists are true counts ("four contributions"); every section, table and figure
+   reference resolves and every table is cited; abstract, body and conclusion report the same numbers.
+6. Bump the "Version of <day> <Month> <year>" line (the script reads it) and add a CHANGELOG "Docs"
+   entry naming what changed.
+7. Checks: `check_claims.py` (APA reference entries count as other authors' titles), `mkdocs build
+   --strict`, `analyse_results.py --check` when results are quoted, and `check_papers_current.py` showing
+   no milestone newer than the version.
+8. Readiness for arXiv is the author's call. List what remains (the author's read-through, VERIFY flags,
+   the AI-use statement, endorsement, LaTeX or PDF, a pinned release) instead of declaring a paper ready.
 
 ## 5. Secrets, network and LLM clients
 
@@ -420,3 +467,5 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-25: Quote checks ignore whitespace; unread optional figures are not zeros (extraction evaluation).
 - 2026-11-26: Backtest-overfitting module (DSR, PBO, purged CV); rules on centred moments and trial counts.
 - 2026-11-26: Documentation process (section 4b, enforced by `tests/test_docs_coverage.py`); NSE page reader rules (manual downloads found by hash; a rendered "iXBRL" page).
+- 2026-11-26: Papers revised; rule to re-derive paper numbers when an engine changes.
+- 2026-11-26: Section 4c (revise the papers at each milestone; `scripts/check_papers_current.py`).
