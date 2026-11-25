@@ -94,8 +94,16 @@ ENGINES: tuple[Engine, ...] = (
     Engine("financial_ml", "Fractional differencing, minimal-d search, triple barrier", "IV",
            "core/financial_ml.py", "reference-checked", "validation/financial_ml.md",
            ("find_optimal_fractional_diff", "apply_triple_barrier_labels"),
-           open_items="purged and embargoed cross-validation not implemented (7.4)",
            readme_row="Fractional differentiation + minimal-d search"),
+    Engine("backtest_statistics", "Probabilistic and Deflated Sharpe ratios, probability of backtest overfitting",
+           "IV", "core/backtest_overfitting.py", "reference-checked", "validation/financial_ml.md",
+           ("compute_deflated_sharpe_ratio", "estimate_probability_of_backtest_overfitting"),
+           open_items="the number of independent trials is the caller's estimate",
+           readme_row="Deflated Sharpe ratio"),
+    Engine("purged_cv", "Purged and embargoed K-fold, combinatorial purged cross-validation", "IV",
+           "core/backtest_overfitting.py", "not reference-checked", "validation/financial_ml.md",
+           open_items="checked against the definitions, not yet against AFML's code or a reference library",
+           readme_row="Purged and embargoed K-fold"),
     Engine("derivatives", "Black-Scholes-Merton, Greeks, CRR, implied vol, SABR, butterfly check", "V",
            "core/derivatives.py", "reference-checked", "validation/derivatives.md",
            ("price_european_option", "price_american_option", "calculate_option_greeks",
@@ -136,6 +144,10 @@ ENGINES: tuple[Engine, ...] = (
            "validation/connectors.md", open_items="one filing (Apple FY2026); labels are Apple's"),
     Engine("ind_as", "Ind AS crosswalk", "Filings & agents", "connectors/india_filings.py", "piloted on real data",
            "validation/connectors.md", open_items="one company (Maruti Suzuki FY2025-26, consolidated)"),
+    Engine("nse_integrated_filing", "NSE Integrated Filing (Financial) page reader, Ind AS", "Filings & agents",
+           "connectors/nse_integrated_filing.py", "piloted on real data", "validation/connectors.md",
+           open_items="one filing (Maruti Suzuki FY2025-26, consolidated); reads NSE's rendered page by label",
+           readme_row="NSE Integrated Filing (Financial) reader"),
 )
 
 _BY_TOOL = {tool: e for e in ENGINES for tool in e.tools}

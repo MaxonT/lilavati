@@ -12,6 +12,12 @@ on AI in finance.
 3. Measure **tool grounding**: whether each number in an answer actually came from a tool.
 4. State precisely what this experiment does and does not show.
 
+## Where this fits
+
+It uses the setup of [Tutorial 05](05_benchmarking_llms_with_open_models.md) and the paired statistics
+of [Tutorial 06](06_analysing_and_publishing_results.md). [Tutorial 08](08_real_10k_llm_vs_lilavati.md)
+runs the same comparison on a real 10-K.
+
 ## 1. The idea in one example
 
 Without tools, a model asked for a Black-Scholes call price and Greeks computes them in text. In

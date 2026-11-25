@@ -79,6 +79,8 @@ nav:
       - "06. Analysing, Publishing & Citing Results": tutorials/06_analysing_and_publishing_results.md
       - "07. Tools versus Mental Math": tutorials/07_tools_versus_mental_math.md
       - "08. A Real 10-K, Three Ways": tutorials/08_real_10k_llm_vs_lilavati.md
+      - "09. Is This Backtest Real? DSR, PBO & Purged CV": tutorials/09_is_this_backtest_real.md
+      - "10. An Indian Company from Its Exchange Filing": tutorials/10_indian_company_from_exchange_filing.md
   - "Course: AI in Finance": course/index.md
   - Using the MCP Servers: mcp-setup.md
   - Integrations (LangGraph, ADK, A2A): integrations.md

@@ -18,7 +18,9 @@
 
 No LLM here: these are the deterministic tools an agent calls. An LLM asked for a half-life or an
 execution schedule computes it in text; [Tutorial 07](07_tools_versus_mental_math.md) measures how
-often that goes wrong. Steps 1–4 form one module; save them as `stat_arb_agent.py`.
+often that goes wrong. Steps 1–4 form one module; save them as `stat_arb_agent.py`. Before trusting a
+rule chosen as the best of many backtests, see [Tutorial 09](09_is_this_backtest_real.md) (Deflated
+Sharpe Ratio, probability of backtest overfitting).
 
 ```bash
 git clone https://github.com/revendrat/lilavati.git && cd lilavati

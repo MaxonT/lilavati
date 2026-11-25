@@ -14,6 +14,14 @@ By the end you will be able to:
 4. Tell apart the four ways a model can fail to give a correct answer, and explain why mixing them
    up produces misleading benchmark numbers.
 
+## Where this fits
+
+This is the first of three benchmarking tutorials: here a model answers without tools;
+[Tutorial 06](06_analysing_and_publishing_results.md) turns the runs into claims you can defend, and
+[Tutorial 07](07_tools_versus_mental_math.md) gives the model tools and compares. Tutorials
+[08](08_real_10k_llm_vs_lilavati.md) and [10](10_indian_company_from_exchange_filing.md) move from
+generated cases to real filings.
+
 ## 1. Choose a model provider
 
 Līlāvatī talks to three API styles: OpenAI-compatible (Groq, vLLM, Ollama, many others), Gemini and

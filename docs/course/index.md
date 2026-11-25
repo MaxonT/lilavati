@@ -46,12 +46,12 @@ learning background is required.
 | 1 | Why LLMs get finance numbers wrong | README "Why Līlāvatī"; [Tutorial 05](../tutorials/05_benchmarking_llms_with_open_models.md) §5 | Run one model on the golden cases |
 | 2 | Validated engines: references, units, conventions | [Validation overview](../validation/index.md); developer skill §2 | Find the convention behind one past bug |
 | 3 | Fixed income and credit: covenants and structural default risk | [Tutorial 01](../tutorials/01_build_your_first_financial_agent.md); [fixed-income validation](../validation/fixed_income.md) | Reference test for a bond function |
-| 4 | Econometrics, statistical arbitrage, execution | [Tutorial 02](../tutorials/02_statistical_arbitrage_and_execution_agent.md); [econometrics validation](../validation/econometrics.md) | Explain the GARCH order bug |
+| 4 | Econometrics, statistical arbitrage, execution; is the backtest real? | [Tutorial 02](../tutorials/02_statistical_arbitrage_and_execution_agent.md); [Tutorial 09](../tutorials/09_is_this_backtest_real.md); [econometrics validation](../validation/econometrics.md) | Explain the GARCH order bug; DSR and PBO for a rule family of your own |
 | 5 | Forensic accounting and adversarial review | [Tutorial 03](../tutorials/03_forensic_accounting_and_adversarial_committee.md) | Beneish score from a real filing |
 | 6 | Sustainable finance | [Tutorial 04](../tutorials/04_climate_risk_and_sustainable_portfolio.md); [sustainability validation](../validation/sustainability.md) | WACI and SLB worked example |
 | 7 | Benchmarking LLMs fairly | [Tutorial 05](../tutorials/05_benchmarking_llms_with_open_models.md) | Baselines for two models |
 | 8 | Evidence: statistics, error analysis, publishing | [Tutorial 06](../tutorials/06_analysing_and_publishing_results.md) | Failure taxonomy for one model |
-| 9 | Tools versus mental math; real filings | Tutorials [07](../tutorials/07_tools_versus_mental_math.md) and [08](../tutorials/08_real_10k_llm_vs_lilavati.md) | Paired experiment; one real 10-K three ways |
+| 9 | Tools versus mental math; real filings (US and India) | Tutorials [07](../tutorials/07_tools_versus_mental_math.md), [08](../tutorials/08_real_10k_llm_vs_lilavati.md) and [10](../tutorials/10_indian_company_from_exchange_filing.md) | Paired experiment; one real 10-K three ways; one Indian filing reconciled with its printed statements |
 | 10 | Agents in existing frameworks (MCP, LangGraph, ADK, A2A) | [Integrations](../integrations.md); [MCP setup](../mcp-setup.md) | Agent that answers with tool outputs |
 | 11 | AI-assisted engineering on a shared codebase | developer skill; [contributing](../contributing.md) | A reviewed pull request |
 | 12 | Capstone presentations | | Capstone report |

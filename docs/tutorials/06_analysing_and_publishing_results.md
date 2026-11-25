@@ -11,6 +11,12 @@ paper or a pull request that changes a number in the docs.
 3. Find *how* a model was wrong, field by field, and turn that into a failure taxonomy.
 4. Publish results so that others can verify every number: manifest, licence, citable snapshot.
 
+## Where this fits
+
+[Tutorial 05](05_benchmarking_llms_with_open_models.md) produces the runs; this tutorial turns them
+into numbers others can check. [Tutorial 07](07_tools_versus_mental_math.md) uses the same paired
+comparisons to measure what tools change.
+
 ## 1. Every answer is tied to its question
 
 Case ids are labels; the **content hash** is the identity. Before 2026-11-21, `generate_cases(2026, 2)`
@@ -103,6 +109,19 @@ What this repository does, and what to copy for your own study:
 5. **A citable snapshot.** Cut a GitHub release, and enable the
    [Zenodo GitHub integration](https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content)
    to get a DOI for that release. Cite the DOI, not the moving `main` branch.
+
+## What can go wrong (all found in this repository)
+
+- **Re-running failures until they pass.** `--resume` once re-ran unparsable answers together with
+  provider errors and lifted a score from 0.4417 to 0.4667. Re-run only provider errors and empty
+  replies; a wrong answer is a result.
+- **Case ids that are not identities.** `generate_cases(2026, 2)` and `generate_cases(2026, 4)` both
+  produced `GEN-T2-000`, with different bonds. Pair comparisons on the content hash (`case_hash`), not
+  the id.
+- **Hashes that depend on the platform.** The first case hash included floats computed with exp and
+  log; their last digits differed between macOS and Linux, so CI disagreed. Hash inputs, not outputs.
+- **Totals copied instead of recomputed.** The SEC pilot was quoted as "64 of 64" in four places while
+  its results file said 71 of 71. Quote numbers from `results/ANALYSIS.md`, regenerated from the files.
 
 ## Using this with Claude Code
 

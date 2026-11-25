@@ -161,6 +161,45 @@ cash + cash flows + exchange-rate effect = closing cash, Ind AS 7), raises namin
 not given, and cites only the items in the disclosure.
 
 Open items: one company and one year (consolidated); a standalone statement and a second company;
-no retrieval (the caller types or supplies the figures; the exchange filing is HTML rendered from
-XBRL and could be read directly); the "other equity" breakdown (retained earnings is "other equity"
+no retrieval (the caller types or supplies the figures, or supplies NSE's page, read below); the
+"other equity" breakdown (retained earnings is "other equity"
 unless given separately, and recorded as such) depends on what the caller supplies.
+
+## NSE Integrated Filing (Financial) reader (`connectors/nse_integrated_filing.py`)
+
+Added 2026-11-26. Status: piloted on real data (one filing). Reads NSE's page for an Integrated Filing
+(Financial), Ind AS (`nsearchives.nseindia.com/corporate/ixbrl/INTEGRATED_FILING_INDAS_..._iXBRL_WEB.html`,
+title "IndAS Details") into the Ind AS crosswalk. The page is rendered from the XBRL filed against
+SEBI's Integrated Filing Finance Taxonomy (`in-capmkt`, version 1.0 of 2025-01-31, 507 elements; read
+from NSE's taxonomy archive): labelled tables, no XBRL tags or element names. The caller supplies the
+page (NSE's terms of use prohibit automated collection without written consent); nothing is fetched.
+
+Conventions: general information before the first "Particulars" row; each section's columns from its
+own start date, end date, audit status and standalone/consolidated rows; a section is identified by a
+line only it has ("Total expenses", "Total assets", "Net cash flows from (used in) operating
+activities"; the segment section also has "Revenue from operations"); values in the filing's rounding
+(lakhs: the disclosure's `scale` is 100,000); negatives in parentheses; a row's heading is the nearest
+preceding row without values (it separates "Total Trade payable" under current and non-current, and
+"Interest paid" under operating and financing). Items not shown are listed in `missing`, never filled.
+Trade receivables and trade payables are sums of the current and non-current lines (`derived`).
+
+**Maruti Suzuki India, consolidated, year ended 31 March 2026** (filed 2026-04-28 19:47:40; SHA-256 of
+the page as saved `cf868659…`; checked 2026-11-26):
+
+| Check | Reference | Result | Status |
+| :--- | :--- | :--- | :--- |
+| 26 values read from this page by hand on 2026-11-24 (fixture `exchange_filing_lakhs`) | manual reading of the same page | 26 of 26 equal | pass |
+| 28 items of the printed statements (INR million, typed from the results PDF) | printed statements, pp. 6-8 | 26 of 28 equal; profit before tax −2,855 (the printed figure includes associates 2,591 and joint ventures 264) and PP&E +5,998 (the exchange includes right-of-use assets) | pass (both definitional, reconciled to the unit) |
+| Crosswalk identities on the exchange figures | assets = liabilities + equity; assets = total equity and liabilities; opening cash + flows = closing cash (18,450 + 19,09,990 − 14,73,350 − 4,48,400 = 6,690 lakh) | 3 of 3 hold | pass |
+| Every figure's citation (row text, page hash) resolves in `SourceStore` | definition | all resolve; a mistyped figure does not | pass |
+| Quarter view (`period="quarter"`) | the page's quarter column | income statement only; balance sheet and cash flows listed missing (19 items) | pass |
+| Synthetic pages: Indian digit grouping, parentheses, two items in one row, headings, NSE's misspelt "liabilites", a repeated empty label in the segment section, script content ignored, unknown rounding, a standalone column in a consolidated filing, a label with values on two rows | constructed cases | all as specified | pass |
+
+Tests: `tests/test_nse_integrated_filing.py` (the Maruti test finds the page in git-ignored
+`data/raw/india_xbrl/` by its SHA-256 and is skipped without it). Tutorial:
+[Tutorial 10](../tutorials/10_indian_company_from_exchange_filing.md).
+
+Open: one company and one filing; the standalone filing and a second company; the XBRL instance
+(element names and contexts instead of labels) if NSE publishes it; BRSR; NSE's label changes are
+caught only as `missing` items.
+

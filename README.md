@@ -60,7 +60,7 @@ whether a balance sheet still balances, or whether a backtest used data publishe
 - **One validated implementation, shared.** A fix here (such as the GARCH order bug) fixes every agent that
   calls the tool, instead of each team finding it alone.
 - **Small, checkable contributions.** A typical PR is one function plus a reference test that cites its
-  source. Open work: auditing the order book, Black-Litterman and HRP engines; purged cross-validation;
+  source. Open work: auditing the order book, Black-Litterman and HRP engines; checking purged cross-validation against a reference;
   Heston, Nelson-Siegel-Svensson and key-rate durations; harder multi-step benchmark cases
   ([roadmap](ROADMAP.md)).
 - **Domain expertise counts as much as code.** Practitioners who can supply a worked example from a
@@ -74,9 +74,9 @@ whether a balance sheet still balances, or whether a backtest used data publishe
 
 | You are | What Līlāvatī gives you today | Start here | Status |
 | :--- | :--- | :--- | :--- |
-| **Finance student or educator** | Runnable tutorials with exercises and instructor notes; a draft 12-week course; everything runs on free tiers or local models | [Tutorial 01](docs/tutorials/01_build_your_first_financial_agent.md), [course](docs/course/index.md) | ✅ all eight tutorials at the tutorial standard, their code executed in CI |
-| **Quantitative researcher or academic** | Līlāvatī-Bench with no-tool and tool arms; every model reply published with a manifest, bootstrap CIs and paired comparisons; reference-tested engines | [Tutorial 06](docs/tutorials/06_analysing_and_publishing_results.md), [results](results/ANALYSIS.md), [paper drafts](docs/papers/02_benchmark_paper.md) | 🟡 pilot-scale evidence (20 generated cases per model, one pass) |
-| **Credit, equity or risk analyst** | Bond analytics, Merton PD, covenant checks, Beneish and Altman scores, WACI and sustainability-linked bond checks; SEC EDGAR, 10-K and Ind AS connectors | Tutorials [01](docs/tutorials/01_build_your_first_financial_agent.md), [03](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md), [04](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md), [08](docs/tutorials/08_real_10k_llm_vs_lilavati.md) | 🟡 engines validated; SEC XBRL extraction piloted on five companies' latest 10-Ks; 10-K PDF parser checked on one filing (Apple FY2026), Ind AS crosswalk on one company's annual results (Maruti Suzuki FY2026) |
+| **Finance student or educator** | Runnable tutorials with exercises and instructor notes; a draft 12-week course; everything runs on free tiers or local models | [Tutorial 01](docs/tutorials/01_build_your_first_financial_agent.md), [course](docs/course/index.md) | ✅ all ten tutorials at the tutorial standard, their code executed in CI (except steps that read a file the reader downloads by hand, in Tutorial 10) |
+| **Quantitative researcher or academic** | Līlāvatī-Bench with no-tool and tool arms; every model reply published with a manifest, bootstrap CIs and paired comparisons; reference-tested engines; the Deflated Sharpe Ratio, the probability of backtest overfitting and purged cross-validation for judging backtests | [Tutorial 06](docs/tutorials/06_analysing_and_publishing_results.md), [Tutorial 09](docs/tutorials/09_is_this_backtest_real.md), [results](results/ANALYSIS.md), [paper drafts](docs/papers/02_benchmark_paper.md) | 🟡 pilot-scale evidence (20 generated cases per model, one pass) |
+| **Credit, equity or risk analyst** | Bond analytics, Merton PD, covenant checks, Beneish and Altman scores, WACI and sustainability-linked bond checks; SEC EDGAR, 10-K and Ind AS connectors, and a reader for NSE's Integrated Filing (Indian listed companies) | Tutorials [01](docs/tutorials/01_build_your_first_financial_agent.md), [03](docs/tutorials/03_forensic_accounting_and_adversarial_committee.md), [04](docs/tutorials/04_climate_risk_and_sustainable_portfolio.md), [08](docs/tutorials/08_real_10k_llm_vs_lilavati.md), [10](docs/tutorials/10_indian_company_from_exchange_filing.md) | 🟡 engines validated; SEC XBRL extraction piloted on five companies' latest 10-Ks; 10-K PDF parser checked on one filing (Apple FY2026), Ind AS crosswalk on one company's annual results (Maruti Suzuki FY2026) |
 | **AI or agent engineer** | Eight MCP servers; LangGraph, Google ADK and A2A examples; one client for OpenAI-compatible (incl. Groq, Ollama, vLLM), Gemini and Anthropic APIs; a tool-use evaluation harness | [Integrations](docs/integrations.md), [MCP setup](docs/mcp-setup.md), [Tutorial 07](docs/tutorials/07_tools_versus_mental_math.md) | ✅ live-tested on Gemini and Groq; Anthropic format-tested only |
 | **Model validation, audit or compliance** | Per-engine validation pages (reference, measured tolerance, bugs fixed); provenance on extracted values; Z3 accounting-identity checks; a reproducible evidence trail | [Numerical validation](docs/validation/index.md) | 🟡 order book, Black-Litterman, HRP and statement graph not yet audited; connectors piloted ([connectors page](docs/validation/connectors.md)) |
 | **Open-source contributor** | Clear rules (developer skill, CONTRIBUTING), a roadmap with open items, small checkable tasks (one function plus a cited reference test) | [CONTRIBUTING](CONTRIBUTING.md), [roadmap](ROADMAP.md), [to-do](TODO.md) | ✅ |
@@ -100,7 +100,7 @@ commercial software. Where it stands:
 
 ## 🎓 Learn: tutorials and a course
 
-Every feature comes with a tutorial (eight so far): what it is for, runnable steps, the real mistakes it guards
+Every feature comes with a tutorial (ten so far): what it is for, runnable steps, the real mistakes it guards
 against, how to use it with Claude Code, and exercises.
 
 | Tutorial | You will learn to |
@@ -113,6 +113,8 @@ against, how to use it with Claude Code, and exercises.
 | [06 Analysing, publishing & citing results](docs/tutorials/06_analysing_and_publishing_results.md) | compute CIs, pair comparisons, publish evidence |
 | [07 Tools versus mental math](docs/tutorials/07_tools_versus_mental_math.md) | measure what tools change, on the same questions |
 | [08 A real 10-K, three ways](docs/tutorials/08_real_10k_llm_vs_lilavati.md) | get figures from SEC filings reliably across companies, and compare an LLM alone, an LLM with Līlāvatī, and Līlāvatī alone |
+| [09 Is this backtest real?](docs/tutorials/09_is_this_backtest_real.md) | deflate the best of many backtests (DSR), estimate the probability of backtest overfitting, and build purged cross-validation splits |
+| [10 An Indian company from its exchange filing](docs/tutorials/10_indian_company_from_exchange_filing.md) | read NSE's Integrated Filing into the Ind AS crosswalk, check it against the printed statements, and cite every figure |
 
 **For universities:** a draft one-semester course, [*AI in Finance: Harnessing LLMs, Correcting
 Their Mistakes*](docs/course/index.md), maps these tutorials to a 12-week schedule with labs,
@@ -192,7 +194,9 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | KPSS / Phillips-Perron, Johansen/VECM, EGARCH, DCC-GARCH, regime switching | 🗺️ | n/a |
 | **Financial ML** | Fractional differentiation + minimal-d search | ✅ | `core/financial_ml.py` |
 | | Triple-barrier labeling | ✅ | `core/financial_ml.py` |
-| | Purged/embargoed CV, meta-labeling, information-driven bars | 🗺️ | n/a |
+| | Deflated Sharpe ratio, Probabilistic Sharpe ratio, probability of backtest overfitting (CSCV) | ✅ | `core/backtest_overfitting.py` |
+| | Purged and embargoed K-fold, combinatorial purged CV with backtest paths (tested against the definitions; not yet checked against a reference) | ✅ | `core/backtest_overfitting.py` |
+| | Meta-labeling, information-driven bars | 🗺️ | n/a |
 | **Derivatives** | Black-Scholes price and Greeks, CRR American options, implied vol | ✅ | `core/derivatives.py` |
 | | SABR smile calibration, butterfly arbitrage check (Z3) | ✅ | `core/derivatives.py` |
 | | Heston, local vol, full-surface no-arbitrage | 🗺️ | n/a |
@@ -206,6 +210,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | Statement DAG with driver shocks | 🟡 not yet checked against a reference (balances by an equity plug) | `core/graph.py` |
 | | Bi-temporal DuckDB store, `CitationRef` provenance | ✅ | `core/temporal.py`, `core/provenance.py` |
 | | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk each checked on one company) | ✅ | `connectors/` |
+| | NSE Integrated Filing (Financial) reader: an Ind AS company's exchange filing into the crosswalk, every figure cited (pilot on one filing, 26 of 28 printed items equal) | ✅ | `connectors/nse_integrated_filing.py` |
 | | Market data: OHLCV normalisation, curve fit from supplied yields | 🟡 no data fetching / FRED yet | `connectors/market_data.py` |
 | | US-GAAP ↔ IFRS reconciliation | 🗺️ | n/a |
 | **Agents** | Neuro-symbolic runtime (identity checks with diagnosis on answers); filing extraction with diagnosis-driven repair; rule-based committee (Beneish, Altman, identity checks on reported inputs); research dossier from one 10-K with every input cited and checked against the SEC data read | ✅ | `runtime/`, `agents/` |
@@ -285,7 +290,7 @@ To measure progress, we are developing **Līlāvatī-Bench** (harness available;
 | 1. Three-statement accounting | balance sheet balances; cash flow reconciles opening to closing cash | multi-step shock propagation across statements |
 | 2. Fixed income and credit | bond price; Macaulay duration range; Merton distance to default and default probability | covenant headroom, tranche waterfalls |
 | 3. Econometrics | unit-root (ADF) judgement on a random walk; rejecting a spurious levels regression | cointegration and half-life cases |
-| 4. Financial ML | stationarity after fractional differencing; memory retained | purged and embargoed cross-validation (not yet implemented) |
+| 4. Financial ML | stationarity after fractional differencing; memory retained; selection-adjusted Sharpe ratio (DSR) and PBO | purged and embargoed cross-validation tested against its definitions only |
 | 5. Derivatives | Black-Scholes price, delta, gamma, vega; butterfly no-arbitrage check | SABR and volatility-surface cases |
 | 6. Microstructure and execution | spread, microprice; Almgren-Chriss holdings at start and end | full schedules, VWAP |
 | 7. Sustainable finance | portfolio WACI; sustainability-linked bond target, coupon and step-up | extraction of disclosed emissions from documents |
