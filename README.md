@@ -290,7 +290,7 @@ To measure progress, we are developing **Līlāvatī-Bench** (harness available;
 | 1. Three-statement accounting | balance sheet balances; cash flow reconciles opening to closing cash | multi-step shock propagation across statements |
 | 2. Fixed income and credit | bond price; Macaulay duration range; Merton distance to default and default probability | covenant headroom, tranche waterfalls |
 | 3. Econometrics | unit-root (ADF) judgement on a random walk; rejecting a spurious levels regression | cointegration and half-life cases |
-| 4. Financial ML | stationarity after fractional differencing; memory retained; selection-adjusted Sharpe ratio (DSR) and PBO | purged and embargoed cross-validation tested against its definitions only |
+| 4. Financial ML | stationarity after fractional differencing; memory retained | cases for purged cross-validation, the Deflated Sharpe Ratio and PBO (the engines exist; the benchmark does not test them yet) |
 | 5. Derivatives | Black-Scholes price, delta, gamma, vega; butterfly no-arbitrage check | SABR and volatility-surface cases |
 | 6. Microstructure and execution | spread, microprice; Almgren-Chriss holdings at start and end | full schedules, VWAP |
 | 7. Sustainable finance | portfolio WACI; sustainability-linked bond target, coupon and step-up | extraction of disclosed emissions from documents |

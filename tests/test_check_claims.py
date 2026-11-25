@@ -31,6 +31,12 @@ def test_allows_negations_markers_and_bibliography(tmp_path: Path) -> None:
     assert _flags(tmp_path, "Say checked, never write proven.") == []
     assert _flags(tmp_path, "Formal theorem proving <!-- claims-ok: field name -->") == []
     assert _flags(tmp_path, "* **Paulson, L. C.** (1994). *Isabelle: A Generic Theorem Prover*.") == []
+    # APA reference entries (papers): another author's title, not a claim
+    assert _flags(tmp_path, "Paulson, L. C. (1994). *Isabelle: A generic theorem prover*. Springer.") == []
+    assert _flags(tmp_path, "Colebrooke, H. T. (Trans.). (1817). *Algebra with arithmetic*. John Murray.") == []
+    assert _flags(tmp_path, "de Moura, L., & Kong, S. (2015). The Lean theorem prover. In *CADE-25*.") == []
+    # prose that cites in passing is still checked
+    assert _flags(tmp_path, "Our method is proven correct (Paulson, 1994).") != []
 
 
 def test_repository_is_clean() -> None:

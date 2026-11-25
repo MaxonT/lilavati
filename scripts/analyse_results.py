@@ -3,13 +3,15 @@
 No API calls: everything is computed from stored replies. Rebuild the manifest first if result
 files changed (scripts/build_results_manifest.py).
 
-    uv run python scripts/analyse_results.py
+    uv run python scripts/analyse_results.py          # writes the two files
+    uv run python scripts/analyse_results.py --check  # fails if either is stale
 """
 
 from __future__ import annotations
 
 import json
 import statistics
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -38,8 +40,10 @@ def main() -> None:
     manifest = json.loads((RESULTS / "manifest.json").read_text())
     rows: list[dict[str, Any]] = []
     for entry in manifest["files"]:
-        if entry.get("case_set") == "filings":
-            continue  # real-filing comparisons are summarised in results/filings/ (Tutorial 08)
+        if entry.get("case_set") in ("filings", "extraction"):
+            # real-filing runs: summarised in results/filings/ (Tutorial 08) and by
+            # scripts/run_extraction_repair_eval.py --report (docs/agent-workflows.md)
+            continue
         s = summarise(load_records(entry["path"]), _cases(entry))
         rows.append({"entry": entry, "summary": s})
 
@@ -104,12 +108,20 @@ def main() -> None:
         e = r["entry"]
         if e["status"] != "current":
             lines.append(f"- `{e['path']}`: {e['status']}, prompt {e['prompt_version']}. {e.get('notes', '')}".rstrip())
-    (RESULTS / "ANALYSIS.md").write_text("\n".join(lines) + "\n")
-
+    md = "\n".join(lines) + "\n"
     out = [{"path": r["entry"]["path"], "status": r["entry"]["status"],
             **{k: v for k, v in r["summary"].items() if k != "field_misses"},
             "field_misses": {k: len(v) for k, v in r["summary"]["field_misses"].items()}} for r in rows]
-    (RESULTS / "analysis.json").write_text(json.dumps({"files": out, "paired": pairs}, indent=2, default=str) + "\n")
+    js = json.dumps({"files": out, "paired": pairs}, indent=2, default=str) + "\n"
+    if "--check" in sys.argv[1:]:
+        stale = [name for name, text in (("ANALYSIS.md", md), ("analysis.json", js))
+                 if (RESULTS / name).read_text() != text]
+        if stale:
+            raise SystemExit(f"stale: {', '.join(stale)}; run scripts/analyse_results.py")
+        print("results/ANALYSIS.md and results/analysis.json are up to date")
+        return
+    (RESULTS / "ANALYSIS.md").write_text(md)
+    (RESULTS / "analysis.json").write_text(js)
     print(f"wrote results/ANALYSIS.md and results/analysis.json ({len(rows)} files, {len(pairs)} paired comparisons)")
 
 
