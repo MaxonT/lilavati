@@ -116,8 +116,14 @@ def record_hash(record: dict[str, Any]) -> str:
     return hashlib.sha256(json.dumps(record, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+_PLAIN_QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"'})
+
+
 def _norm(text: str) -> str:
-    return " ".join(text.split())
+    # Whitespace removed: text extraction adds or drops spaces between table cells ("(139,500 )" from
+    # HTML, joined words from PDF), so only the characters themselves must match. Typographic quotes
+    # count as plain ones ("shareholders’ equity" quoted as "shareholders' equity").
+    return "".join(text.translate(_PLAIN_QUOTES).split())
 
 
 class SourceStore:
@@ -127,7 +133,7 @@ class SourceStore:
 
     - ``add_document(content, pages)``: a PDF or HTML filing; the hash is of the bytes, ``pages`` the
       text of each page (one entry for a document without pages). A citation must point to a page that
-      exists, and its snippet (whitespace collapsed) must appear on that page (anywhere when ``page`` is
+      exists, and its snippet must appear on that page (ignoring whitespace; curly quotes count as straight) (anywhere when ``page`` is
       None).
     - ``add_xbrl_company_facts(facts)``: SEC company facts; every fact record is registered by its
       ``record_hash``. A citation must match the record's concept (``xbrl_tag``), period end and filing

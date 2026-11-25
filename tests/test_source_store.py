@@ -71,7 +71,7 @@ def test_document_snippet_must_be_on_the_cited_page() -> None:
     h = store.add_document(b"10-K bytes", pages)
     cit = CitationRef(doc_hash=h, filing_type="10-K", filing_date=date(2026, 11, 3), period_end=date(2026, 9, 26),
                       page=1, raw_snippet="Provision for income taxes 27,062 20,719 29,749")
-    assert store.check(cit) == []  # whitespace is collapsed on both sides
+    assert store.check(cit) == []  # whitespace is ignored on both sides
     assert "not found on page 2" in store.check(cit.model_copy(update={"page": 2}))[0]
     assert "beyond the document's 2 pages" in store.check(cit.model_copy(update={"page": 3}))[0]
     assert "not found" in store.check(cit.model_copy(update={"raw_snippet": "Provision for income taxes 27,063"}))[0]
@@ -93,3 +93,24 @@ def test_ind_as_citations_resolve_against_the_registered_disclosure() -> None:
     # A different disclosure (one fact changed) has a different hash: its citations do not resolve here.
     other = IndiaFilingsClient.parse_ind_as_disclosure(_disclosure({**FACTS, "OtherIncome": 201.0}))
     assert "not in the source store" in store.check(other.sourced_facts["RevenueFromOperations"].citation)[0]
+
+
+def test_snippet_match_ignores_spacing_from_text_extraction() -> None:
+    # Microsoft's FY2026 10-K as HTML-to-text gives "(139,500 )": a space between the table cells. A
+    # model quoting "(139,500)" quotes the document correctly; the characters must still all match.
+    page = "Net cash used in investing (139,500 ) (72,599 ) (96,970 ) Effect of foreign exchange rates"
+    store = SourceStore()
+    h = store.add_document(b"10-K html", [page])
+    cit = CitationRef(doc_hash=h, filing_type="10-K", filing_date=date(2026, 7, 29), period_end=date(2026, 6, 30),
+                      page=None, raw_snippet="Net cash used in investing (139,500) (72,599) (96,970)")
+    assert store.check(cit) == []
+    assert store.check(cit.model_copy(update={"raw_snippet": "Net cash used in investing (139,600)"}))
+
+
+def test_snippet_match_treats_typographic_quotes_as_plain() -> None:
+    # Apple's 10-K prints "shareholders’ equity" (U+2019); qwen3.6-27b quoted it with an ASCII apostrophe.
+    store = SourceStore()
+    h = store.add_document(b"10-K", ["Total shareholders’ equity 112,093 73,733"])
+    cit = CitationRef(doc_hash=h, filing_type="10-K", filing_date=date(2026, 11, 3), period_end=date(2026, 9, 26),
+                      page=None, raw_snippet="Total shareholders' equity 112,093 73,733")
+    assert store.check(cit) == []
