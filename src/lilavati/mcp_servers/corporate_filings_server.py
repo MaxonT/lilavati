@@ -21,6 +21,7 @@ from fastmcp import FastMCP
 
 from lilavati.connectors.edgar import EdgarClient
 from lilavati.connectors.sec_filing import fetch_filing_extraction, filing_ratios
+from lilavati.core.invariants import diagnose_identities
 from lilavati.validation_status import with_validation_status
 
 mcp = FastMCP(
@@ -131,6 +132,36 @@ def get_filing_figures(
     out["filing"]["url"] = ex.filing.url
     out["ratios"] = filing_ratios({k: v.value for k, v in ex.values.items()})
     return out
+
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
+@with_validation_status
+def diagnose_accounting_identities(
+    values: dict[str, float],
+    tolerance: float = 0.5,
+) -> dict[str, Any]:
+    """
+    Which extracted figures could be wrong, when accounting identities fail. values: figures in one
+    currency unit, keyed by these names (any subset): total_assets, total_liabilities, total_equity,
+    liabilities_and_equity, revenue, cost_of_revenue, gross_profit, cash_opening, operating_cash_flow,
+    investing_cash_flow, financing_cash_flow, fx_effect_on_cash, cash_closing. Every identity whose
+    figures are present is checked (assets = liabilities + equity; assets = total liabilities and
+    equity; revenue - cost of revenue = gross profit; opening cash + cash flows = closing cash), with
+    tolerance in the same units for rounding. Returns the failed identities and every smallest set of
+    figures that, if wrong, explains all failures (with the values they would need), found with Z3's
+    optimiser. One candidate means the identities single it out; several mean only the source can tell.
+    """
+    try:
+        return diagnose_identities(values, tolerance=tolerance).model_dump()
+    except ValueError as e:
+        return {"error": str(e)}
 
 
 def main() -> None:

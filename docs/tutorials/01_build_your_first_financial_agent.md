@@ -186,7 +186,103 @@ The stressed borrower fails **both** tests. Notice also that its one-year Merton
 modest volatility over a short horizon. A covenant breach and a low model PD can coexist; neither
 number alone is a credit decision.
 
-## Step 5: Test it
+### Step 4b: Both covenants at once, and a guidance range
+
+`debt_reduction_to_comply` above answers the leverage test only. `minimum_debt_repayment` finds the
+smallest repayment that meets **both** covenants together, solved exactly with Z3's optimiser. Its
+model is stated: the repayment comes from outside the cash balance (new equity or asset sales; repaying
+from existing cash leaves net debt unchanged) and interest falls in proportion to debt.
+`check_covenants_over_ranges` then asks whether the covenants hold for **every** value in a range, such
+as management's EBITDA guidance: Z3 searches the whole range for a breach and either finds none or
+returns one.
+
+```python
+from lilavati.core.invariants import check_covenants_over_ranges, minimum_debt_repayment
+
+# Stressed Retail Corp from Step 4 (USD m): debt 275, cash 0, EBITDA 50, interest 18; max 4.0x, min 3.5x.
+r = minimum_debt_repayment(total_debt=275.0, cash=0.0, ebitda=50.0, interest_expense=18.0,
+                           max_net_leverage=4.0, min_interest_coverage=3.5)
+print(f"repay {r.required_repayment:.1f}; binding: {r.binding}; "
+      f"after: {r.net_leverage_after:.2f}x leverage, {r.interest_coverage_after:.2f}x coverage")
+
+# After repaying, debt is 200. Management guides EBITDA of 60-75 next year, cash 0-10, interest 12-14.
+ok = check_covenants_over_ranges(total_debt=(200.0, 200.0), cash=(0.0, 10.0), ebitda=(60.0, 75.0),
+                                 interest_expense=(12.0, 14.0), max_net_leverage=4.0, min_interest_coverage=3.5)
+print("guidance 60-75:", ok.holds_for_all)
+# A weaker guidance low end: is a breach possible anywhere in the range?
+weak = check_covenants_over_ranges(total_debt=(200.0, 200.0), cash=(0.0, 10.0), ebitda=(45.0, 75.0),
+                                   interest_expense=(12.0, 14.0), max_net_leverage=4.0, min_interest_coverage=3.5)
+print("guidance 45-75:", weak.holds_for_all, weak.violated, weak.counterexample)
+```
+
+```text
+repay 75.0; binding: ['net leverage']; after: 4.00x leverage, 3.82x coverage
+guidance 60-75: True
+guidance 45-75: False ['net leverage'] {'total_debt': 200.0, 'cash': 0.0, 'ebitda': 45.0, 'interest_expense': 12.0}
+```
+
+The leverage test needs 275 − 4.0 × 50 = 75; coverage alone would need 275 × (1 − 50 / 63) = 56.7, so
+leverage binds. "Holds for the whole range" is a statement about every value in it, not a check of
+one point: a single EBITDA forecast inside the range would not have shown the breach at 45. (Tests:
+40 random cases against the closed form and 60 random ranges against the worst corner,
+[invariants validation](../validation/invariants.md).)
+
+### Step 4c: Several years, linked inputs, and the corners that lie
+
+Over several years the inputs are linked: interest is the rate times each year's **opening** debt, so
+it depends on how much debt earlier years repaid, and a cash sweep repays debt from excess cash at a
+rate that, in many credit agreements, steps down with leverage. `check_covenant_path` asks Z3 whether
+any EBITDA path within the yearly guidance ranges breaches a covenant in any year (the model is stated
+in the module docstring of `core/covenant_paths.py`).
+
+The usual shortcut is to test the corners: every year at the low end, every year at the high end, and
+the mixes. With a leverage-based sweep that shortcut can be wrong:
+
+```python
+import itertools
+
+from lilavati.core.covenant_paths import (
+    check_covenant_path,
+    minimum_upfront_repayment_for_path,
+    simulate_covenant_path,
+)
+
+# Two years, USD m. Interest is 6% of each year's opening debt; a cash sweep repays debt with 100% of
+# cash above the 10 minimum while net leverage is above 3.0x, 40% while it is above 1.5x.
+deal = dict(opening_debt=270.0, opening_cash=30.0, max_net_leverage=5.5, min_interest_coverage=3.5,
+            min_liquidity=10.0, other_outflows=[20.0, 10.0], sweep=[(3.0, 1.0), (1.5, 0.4)])
+guidance = [(60.0, 100.0), (50.0, 90.0)]  # EBITDA range for each year
+
+corners = [simulate_covenant_path(ebitda=list(c), interest_rate=0.06, **deal).compliant
+           for c in itertools.product(*guidance)]
+print("all four corners comply:", all(corners))
+
+res = check_covenant_path(ebitda=guidance, interest_rate=(0.06, 0.06), **deal)
+print(res.status, res.counterexample["ebitda"], "->", res.detail)
+for p in res.path.periods:
+    print(f"  year {p.period}: leverage {p.net_leverage:.2f}x, sweep {p.sweep:.2f}, debt {p.debt:.2f}, "
+          f"coverage {p.interest_coverage:.2f}x {p.breaches}")
+
+fix = minimum_upfront_repayment_for_path(ebitda=guidance, interest_rate=(0.06, 0.06), rel_tolerance=1e-6, **deal)
+print(fix.status, f"repay {fix.required_repayment:.4f} now (smallest is above {fix.lower_bound:.4f})")
+```
+
+```text
+all four corners comply: True
+breach [70.0, 51.0] -> breach in period 2: interest coverage
+  year 1: leverage 2.95x, sweep 21.52, debt 248.48, coverage 4.32x []
+  year 2: leverage 3.53x, sweep 58.37, debt 190.11, coverage 3.42x ['interest coverage']
+found_within_tolerance repay 11.7263 now (smallest is above 11.7261)
+```
+
+A **better** first year (70 rather than the low end of 60) brings leverage just under 3.0x, so the sweep
+falls from 100% to 40% of excess cash; more debt stays outstanding, and year-2 interest coverage
+breaches. At 60, leverage stays above 3.0x and the full sweep pays debt down; at 100, the higher EBITDA
+makes up for the smaller sweep. Only a search of the whole range finds the middle. Every breach Z3
+reports is replayed in plain arithmetic before it is returned. The repayment comes from a
+counterexample-guided search and, when the sweep cliff keeps moving, a bisection on a quantified
+formula ("some repayment up to b keeps every path compliant"); the answer is an interval this narrow.
+
 
 Save as `tests/test_credit_agent.py` (with `credit_agent.py` in the repository root):
 
@@ -278,6 +374,13 @@ uv run python examples/06_build_custom_agent_and_api.py
   leverage breach for the stressed borrower, which also fails interest coverage.
 - **Calling arithmetic "proof".** Covenant checks are arithmetic on the numbers given; they verify
   those numbers, not the borrower. Say "checked", not "proven".
+- **Trusting the corners.** With a leverage-based cash sweep, the worst year-1 EBITDA can be in the
+  middle of the guidance range (Step 4c): all four corners comply while a path between them breaches.
+  For a fixed sweep fraction the corners are enough (every covenant improves with EBITDA), which is how
+  the tests check the solver; the sweep grid is what breaks it.
+- **A "cure" that changes nothing.** Repaying debt from existing cash leaves net debt, and so net
+  leverage, where it was. `minimum_debt_repayment` assumes money from outside the cash balance and
+  says so; how a sponsor equity cure counts is set by each credit agreement.
 - **Mixed units.** EBITDA for a quarter against annual interest, or debt in INR crore against EBITDA
   in USD millions, produces a valid-looking ratio that means nothing. Keep units in the field names
   or comments, and check them at the boundary.
@@ -299,7 +402,11 @@ uv run python examples/06_build_custom_agent_and_api.py
 2. Change the Merton horizon from 1 to 5 years for both borrowers. How do the PDs change, and why?
 3. Add a third covenant (for example, minimum fixed-charge coverage) as its own node, with a test at
    exactly the limit.
-4. Replace the illustrative document hash with the SHA-256 of a real PDF (`hashlib.sha256`), and
+4. In Step 4b, raise the minimum coverage to 4.5x. Which covenant binds now, and how large is the
+   repayment? Check it against the closed form in the `minimum_debt_repayment` docstring.
+5. In Step 4c, replace the sweep grid with a fixed 40% sweep. Do the corners now decide the answer?
+   Explain why from the model, then confirm with `check_covenant_path`.
+6. Replace the illustrative document hash with the SHA-256 of a real PDF (`hashlib.sha256`), and
    cite real pages.
 
 ## For instructors

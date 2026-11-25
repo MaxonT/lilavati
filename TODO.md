@@ -15,7 +15,7 @@ researchers and AI engineers.
   | Layer | Guarantee |
   | :--- | :--- |
   | Financial calculation | Deterministic for fixed inputs, configuration and pinned dependencies, within stated tolerances |
-  | Formal invariants | Checked by Z3 on the given numbers (not proofs over ranges of inputs) |
+  | Formal invariants | Checked by Z3 on the given numbers; failed identities diagnosed (candidate figures); two covenants decided over input ranges |
   | Data provenance | Traceable to identified sources (document hash, page, tag) |
   | Point-in-time queries | No observation later than the requested cutoff |
   | Agent execution | Reproducible plan and tool trace |
@@ -193,10 +193,16 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [ ] Evidence ledger built from tool traces; replay of a recorded trace with tolerance comparison. Derived
       outputs carry their inputs' citations, the engine version and commit, and the checks run (a
       provenance graph; W3C PROV serialisation optional).
-- [ ] Z3 beyond point checks: tracked assertions so a failed identity returns its unsat core (the
-      conflicting line items), fed to the reflection prompt; symbolic covenant questions with
-      `z3.Optimize` (smallest debt paydown or equity cure meeting leverage and coverage together, or
-      proof that none exists within a guidance range). Reference tests with hand-solved cases.
+- [x] Z3 beyond point checks (2026-11-25): `diagnose_identities` (MaxSMT: smallest sets of figures that
+      explain every failed identity, with implied values; an unsat core for explanation), fed to the
+      reflection prompt by `SMTBalanceGate`; `minimum_debt_repayment` (exact optimum meeting leverage and
+      coverage together, `z3.Optimize`); `check_covenants_over_ranges` (no breach for any input in a box,
+      or a counterexample). MCP tools; reference tests against closed forms and hand-solved cases.
+- [x] Z3 multi-period covenant paths with linked inputs (2026-11-25): interest on each year's opening debt,
+      amortisation, cash sweep (fixed or leverage grid), leverage step-downs, coverage and minimum
+      liquidity over yearly EBITDA and rate ranges; smallest upfront repayment; corners can miss breaches.
+- [ ] Z3 next: trailing-twelve-month EBITDA for quarterly tests, revolver draws, dividends and fixed-charge
+      cover; equity-cure mechanics per a named credit agreement's definition.
 - [ ] Financial ML: purged and embargoed K-fold and combinatorial purged CV (7.4), with the Deflated
       Sharpe Ratio and the probability of backtest overfitting (verify Bailey and López de Prado's papers
       before citing).

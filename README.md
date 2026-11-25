@@ -184,7 +184,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | **Fixed income & credit** | Bond price, Macaulay/modified duration, convexity, DV01 | ✅ | `core/fixed_income.py` |
 | | Nelson-Siegel curve fit | ✅ | `core/fixed_income.py` |
 | | Merton structural default model | ✅ | `core/fixed_income.py` |
-| | Covenant checks (net leverage, interest coverage) | ✅ | `core/invariants.py` |
+| | Covenant checks (net leverage, interest coverage); smallest debt repayment meeting both, and checks over input ranges (Z3); multi-year covenant paths with linked interest and a cash sweep | ✅ | `core/invariants.py`, `core/covenant_paths.py` |
 | | Nelson-Siegel-Svensson, key-rate durations, CDS hazard rates, tranche waterfalls | 🗺️ | n/a |
 | **Econometrics** | ADF stationarity test | ✅ | `core/econometrics.py` |
 | | Engle-Granger cointegration + OU half-life | ✅ | `core/econometrics.py` |
@@ -202,7 +202,7 @@ Status legend: ✅ implemented and tested · 🟡 partial · 🗺️ planned (se
 | | VPIN, TWAP/VWAP/POV | 🗺️ | n/a |
 | **Sustainable finance** | WACI, carbon-tax stress test, SLB step-up covenant | ✅ | `core/sustainability.py` |
 | | Full NGFS scenario pathways | 🟡 enum only | `schemas/sustainability.py` |
-| **Verification & data** | Z3 three-statement invariants | ✅ | `core/invariants.py` |
+| **Verification & data** | Z3 three-statement invariants; diagnosis of which figures could be wrong when they fail | ✅ | `core/invariants.py` |
 | | Statement DAG with driver shocks | 🟡 not yet checked against a reference (balances by an equity plug) | `core/graph.py` |
 | | Bi-temporal DuckDB store, `CitationRef` provenance | ✅ | `core/temporal.py`, `core/provenance.py` |
 | | SEC EDGAR XBRL: filing-anchored extraction (5-company live pilot), 10-K PDF parser, Ind AS crosswalk (PDF parser and crosswalk each checked on one company) | ✅ | `connectors/` |

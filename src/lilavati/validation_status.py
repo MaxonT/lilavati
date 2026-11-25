@@ -63,10 +63,11 @@ class Engine:
 
 
 ENGINES: tuple[Engine, ...] = (
-    Engine("invariants", "Accounting identities and covenant checks (Z3)", "I", "core/invariants.py",
+    Engine("invariants", "Accounting identities, diagnosis and covenant checks (Z3)", "I", "core/invariants.py",
            "reference-checked", "validation/invariants.md",
-           open_items="checks the given numbers, not a model over ranges; no unsat cores yet",
-           readme_row="Covenant checks (net leverage, interest coverage)"),
+           ("diagnose_accounting_identities", "find_minimum_debt_repayment", "check_covenants_over_ranges"),
+           open_items="the debt-repayment model assumes interest proportional to debt; ranges are independent",
+           readme_row="Covenant checks (net leverage, interest coverage); smallest"),
     Engine("statement_graph", "Statement graph with driver shocks", "I", "core/graph.py",
            "not reference-checked", "validation/index.md",
            open_items="balances by an equity plug, so its balance flag holds by construction",
@@ -81,6 +82,11 @@ ENGINES: tuple[Engine, ...] = (
     Engine("merton", "Merton structural default model", "II", "core/fixed_income.py",
            "reference-checked", "validation/fixed_income.md", ("evaluate_credit_risk_merton",),
            readme_row="Merton structural default model"),
+    Engine("covenant_paths", "Multi-period covenant paths (linked interest, cash sweep), over ranges (Z3)", "II",
+           "core/covenant_paths.py", "reference-checked", "validation/invariants.md",
+           ("check_covenant_path", "find_minimum_upfront_repayment_for_path"),
+           open_items="annual periods; covenant EBITDA is the period's; a rate range can leave Z3 undecided",
+           readme_row="Covenant checks (net leverage, interest coverage); smallest"),
     Engine("econometrics", "ADF, Engle-Granger with OU half-life, GARCH(p, q)", "III", "core/econometrics.py",
            "reference-checked", "validation/econometrics.md",
            ("analyze_stationarity", "analyze_cointegration", "fit_garch_volatility"),

@@ -13,11 +13,12 @@ Every engine has one status, and every MCP tool returns its engine's status in a
 
 | Engine | Pillar | Status | MCP tools | Open items | Page |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Accounting identities and covenant checks (Z3) (`core/invariants.py`) | I | ✅ reference-checked | none | checks the given numbers, not a model over ranges; no unsat cores yet | [invariants](invariants.md) |
+| Accounting identities, diagnosis and covenant checks (Z3) (`core/invariants.py`) | I | ✅ reference-checked | `diagnose_accounting_identities`, `find_minimum_debt_repayment`, `check_covenants_over_ranges` | the debt-repayment model assumes interest proportional to debt; ranges are independent | [invariants](invariants.md) |
 | Statement graph with driver shocks (`core/graph.py`) | I | 🟡 not reference-checked | none | balances by an equity plug, so its balance flag holds by construction | [index](index.md) |
 | Bond price, durations, convexity, DV01 (`core/fixed_income.py`) | II | ✅ reference-checked | `analyze_bond` | maturities off the coupon grid are rounded (#27) | [fixed_income](fixed_income.md) |
 | Nelson-Siegel curve fit (`core/fixed_income.py`) | II | ✅ reference-checked | `fit_yield_curve` | clearer error for an out-of-bounds start guess (#8) | [fixed_income](fixed_income.md) |
 | Merton structural default model (`core/fixed_income.py`) | II | ✅ reference-checked | `evaluate_credit_risk_merton` | none | [fixed_income](fixed_income.md) |
+| Multi-period covenant paths (linked interest, cash sweep), over ranges (Z3) (`core/covenant_paths.py`) | II | ✅ reference-checked | `check_covenant_path`, `find_minimum_upfront_repayment_for_path` | annual periods; covenant EBITDA is the period's; a rate range can leave Z3 undecided | [invariants](invariants.md) |
 | ADF, Engle-Granger with OU half-life, GARCH(p, q) (`core/econometrics.py`) | III | ✅ reference-checked | `analyze_stationarity`, `analyze_cointegration`, `fit_garch_volatility` | none | [econometrics](econometrics.md) |
 | Fractional differencing, minimal-d search, triple barrier (`core/financial_ml.py`) | IV | ✅ reference-checked | `find_optimal_fractional_diff`, `apply_triple_barrier_labels` | purged and embargoed cross-validation not implemented (7.4) | [financial_ml](financial_ml.md) |
 | Black-Scholes-Merton, Greeks, CRR, implied vol, SABR, butterfly check (`core/derivatives.py`) | V | ✅ reference-checked | `price_european_option`, `price_american_option`, `calculate_option_greeks`, `calibrate_sabr_volatility_model`, `check_butterfly_arbitrage` | American Greeks are European BSM Greeks; calendar arbitrage not checked | [derivatives](derivatives.md) |

@@ -91,6 +91,22 @@ def test_smt_balance_gate_failure() -> None:
     # Ensure reflection prompt was injected
     assert len(res.messages) >= 1
     assert "CRITICAL FORMAL INVARIANT FAILURE" in res.messages[-1].content
+    # One identity fails: three equally small explanations, each with its implied value.
+    assert "cannot tell these apart" in res.messages[-1].content
+    assert "total_equity = 400" in res.messages[-1].content
+
+
+def test_smt_balance_gate_names_the_misread_figure() -> None:
+    # Total assets misread: it breaks A = L + E and A = total liabilities and equity, so the
+    # diagnosis singles it out and gives the value the other figures imply.
+    state = FinancialState()
+    for k, v in {"total_assets": 1000.0, "total_liabilities": 600.0, "total_equity": 300.0,
+                 "liabilities_and_equity": 900.0}.items():
+        state.record_fact(k, v)
+    res = SMTBalanceGate()(state)
+    prompt = res.messages[-1].content
+    assert "- total_assets; would need total_assets = 900" in prompt
+    assert "cannot tell these apart" not in prompt
 
 
 def test_covenant_gate() -> None:
