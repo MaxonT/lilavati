@@ -64,7 +64,7 @@ def test_every_tool_declares_all_four_hints_truthfully() -> None:
             assert a.read_only_hint and not a.destructive_hint and a.idempotent_hint, tool.name
             assert a.open_world_hint == (tool.name in network), tool.name
             seen += 1
-    assert seen == 30
+    assert seen == 32
 
 
 def test_every_tool_description_states_units() -> None:

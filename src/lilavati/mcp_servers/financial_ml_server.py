@@ -1,17 +1,25 @@
 """
 FastMCP Server for Financial Machine Learning.
 
-Exposes Marcos López de Prado's institutional financial ML primitives:
-1. Fractional Differentiation (finding optimal d* preserving memory)
-2. Triple-Barrier Method (path-dependent labeling)
+Exposes financial ML primitives from López de Prado (2018) and the backtest-overfitting statistics of
+Bailey and López de Prado:
+1. Fractional differentiation (the smallest d that makes a series stationary)
+2. Triple-barrier labelling
+3. The Deflated Sharpe Ratio (selection bias, non-normality, sample length)
+4. The probability of backtest overfitting (CSCV)
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 from fastmcp import FastMCP
 
+from lilavati.core.backtest_overfitting import (
+    deflated_sharpe_ratio,
+    probability_of_backtest_overfitting,
+)
 from lilavati.core.financial_ml import FinancialMLEngine
 from lilavati.validation_status import with_validation_status
 
@@ -80,6 +88,73 @@ def apply_triple_barrier_labels(
         stop_loss_pct=stop_loss_pct,
     )
     return [label.model_dump() for label in labels]
+
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
+@with_validation_status
+def compute_deflated_sharpe_ratio(
+    sharpe_ratio: float,
+    n_obs: int,
+    n_trials: float,
+    sharpe_ratio_variance: float,
+    skewness: float = 0.0,
+    kurtosis: float = 3.0,
+    periods_per_year: float | None = None,
+) -> dict[str, Any]:
+    """
+    Deflated Sharpe Ratio (Bailey and López de Prado 2014): the probability that the selected strategy's
+    true Sharpe ratio exceeds the Sharpe ratio expected from the best of n_trials independent unskilled
+    trials, given n_obs return observations, the returns' skewness and raw kurtosis (3 for normal, not
+    excess). sharpe_ratio and sharpe_ratio_variance (the variance of the Sharpe ratios across all trials)
+    are per observation period; or pass periods_per_year (e.g. 252 for daily) to give them annualised.
+    Returns the DSR (a probability, 0 to 1), the expected maximum Sharpe ratio SR0 and the tested Sharpe
+    ratio (both per period), and the z statistic. Correlated trials count as fewer independent trials.
+    """
+    return deflated_sharpe_ratio(sharpe_ratio=sharpe_ratio, n_obs=n_obs, n_trials=n_trials,
+                                 sharpe_ratio_variance=sharpe_ratio_variance, skewness=skewness,
+                                 kurtosis=kurtosis, periods_per_year=periods_per_year).model_dump()
+
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
+@with_validation_status
+def estimate_probability_of_backtest_overfitting(
+    performance: list[list[float]],
+    n_partitions: int = 16,
+    metric: str = "sharpe",
+) -> dict[str, Any]:
+    """
+    Probability of backtest overfitting by combinatorially symmetric cross-validation (Bailey, Borwein,
+    López de Prado and Zhu 2017). performance: one row per period (e.g. daily returns as decimals), one
+    column per strategy configuration tried; the number of rows must be a multiple of n_partitions (even).
+    Every half of the row blocks is used once as in-sample: the in-sample best configuration's
+    out-of-sample rank gives a logit. Returns pbo (share of combinations where the in-sample best is at or
+    below the out-of-sample median; 0 to 1), prob_oos_loss (share where it loses out of sample), the
+    degradation slope of its out-of-sample on in-sample statistic, and logit quantiles. metric: "sharpe"
+    (mean/std per period) or "mean".
+    """
+    if metric not in ("sharpe", "mean"):
+        raise ValueError("metric must be 'sharpe' or 'mean'.")
+    r = probability_of_backtest_overfitting(performance, n_partitions=n_partitions,
+                                            metric="sharpe" if metric == "sharpe" else "mean")
+    q = np.quantile(np.array(r.logits), [0.0, 0.05, 0.25, 0.5, 0.75, 0.95, 1.0])
+    out = r.model_dump(exclude={"logits", "is_statistic", "oos_statistic"})
+    out["logit_quantiles"] = dict(zip(["min", "p05", "p25", "median", "p75", "p95", "max"],
+                                      [float(x) for x in q], strict=True))
+    return out
 
 
 def main() -> None:

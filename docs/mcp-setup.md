@@ -61,7 +61,7 @@ Add to the client's MCP configuration (`mcpServers`), keeping only the servers y
 | `lilavati-mcp-corporate-filings` | `diagnose_accounting_identities`, `extract_single_line_item`, `get_company_filing_statements`, `get_filing_figures` |
 | `lilavati-mcp-derivatives` | `calculate_option_greeks`, `calibrate_sabr_volatility_model`, `check_butterfly_arbitrage`, `price_american_option`, `price_european_option` |
 | `lilavati-mcp-econometrics` | `analyze_cointegration`, `analyze_stationarity`, `fit_garch_volatility` |
-| `lilavati-mcp-financial-ml` | `apply_triple_barrier_labels`, `find_optimal_fractional_diff` |
+| `lilavati-mcp-financial-ml` | `apply_triple_barrier_labels`, `compute_deflated_sharpe_ratio`, `estimate_probability_of_backtest_overfitting`, `find_optimal_fractional_diff` |
 | `lilavati-mcp-fixed-income` | `analyze_bond`, `check_covenant_path`, `check_covenants_over_ranges`, `evaluate_credit_risk_merton`, `find_minimum_debt_repayment`, `find_minimum_upfront_repayment_for_path`, `fit_yield_curve` |
 | `lilavati-mcp-portfolio-exec` | `analyze_order_book_microstructure`, `compute_almgren_chriss_liquidation_schedule`, `optimize_portfolio_black_litterman`, `optimize_portfolio_hierarchical_risk_parity` |
 | `lilavati-mcp-sustainability` | `calculate_portfolio_carbon_intensity`, `evaluate_sustainability_linked_bond_covenant`, `stress_test_carbon_tax_impact` |
