@@ -78,3 +78,22 @@ def test_every_tool_description_states_units() -> None:
         for tool in asyncio.run(server.list_tools()):
             text = " ".join((tool.description or "").lower().split())
             assert any(w in text for w in unit_words), f"{tool.name}: no units in its description"
+
+
+def test_prompts_name_only_registered_tools() -> None:
+    # The role prompts once told models to call compute_beneish_m_score, compute_altman_z_score and
+    # calculate_waci, none of which exists; a model following them fails its calls.
+    import re
+
+    import lilavati.prompts.committee as committee
+    import lilavati.prompts.system as system
+
+    registered = set()
+    for module in SERVERS:
+        mod = importlib.import_module(f"lilavati.mcp_servers.{module}")
+        server = next(v for v in vars(mod).values() if isinstance(v, FastMCP))
+        registered |= {t.name for t in asyncio.run(server.list_tools())}
+    text = " ".join(v for m in (committee, system) for v in vars(m).values() if isinstance(v, str))
+    pattern = r"\b(?:compute|calculate|get|check|find|evaluate|analyze|optimize|fit|price|stress|apply|diagnose|extract)_[a-z_]+"
+    named = set(re.findall(pattern, text))
+    assert named and named <= registered, f"prompts name unknown tools: {sorted(named - registered)}"

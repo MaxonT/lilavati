@@ -1,8 +1,7 @@
 """
-Project Līlāvatī: The Open-Source Agentic Framework for Institutional Finance.
+Pipeline primitives: a small state graph with gates, and an agent wrapper.
 
-Core Developer SDK Primitives:
-- FinancialStateGraph: Graph orchestrator with conditional edges and SMT verification.
+- FinancialStateGraph: runs node functions in order or by conditional edges, with tracing.
 - FinancialState: Typed base state carrying messages, citations, facts, and verification flags.
 - FinancialAgent: Developer agent abstraction with plug-and-play LLMs and FastMCP tools.
 - Verification Gates: SMTBalanceGate, CovenantGate, ProvenanceGate, TemporalPurityGate.
