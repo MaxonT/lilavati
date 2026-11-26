@@ -23,10 +23,18 @@ uv run python scripts/check_claims.py        # no proof, guarantee or maturity l
 uv run python scripts/check_tutorials.py     # tutorial and guide code runs as written
 ```
 
+Or run everything at once, with a one-line result per check:
+
+```bash
+uv run python scripts/check_all.py           # add --fast to skip the docs build and the tutorials
+```
+
 ## 2. Pick a first contribution
 
 These are real open items from the [validation pages](validation/index.md) and the
 [roadmap](https://github.com/revendrat/lilavati/blob/main/ROADMAP.md), roughly in order of size.
+`uv run python scripts/next_goal.py` lists every open item in `TODO.md` that is not waiting on the
+maintainer, reviewers, budget or a download, ranked; comment on the issue (or open one) before you start.
 
 | Task | Where | What "done" means |
 | :--- | :--- | :--- |

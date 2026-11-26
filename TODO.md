@@ -98,7 +98,7 @@ checked against the repository. Adopted items are placed in the phases below; th
     - [x] Claims linter and sweep of README, docs, docstrings and examples (7.8, language part).
     - [x] Release workflow (Trusted Publishing, clean-install smoke test) and docs deploy workflow.
     - [x] GitHub Pages enabled (source: GitHub Actions) and `pypi` environment created, tag-restricted (7.10, 7.11).
-    - [ ] Maintainer: register the PyPI trusted publisher (7.10).
+    - [ ] Maintainer: register the PyPI trusted publisher (7.10). *Blocked: maintainer action (PyPI deferred).*
     - [x] Author name and ORCID in `pyproject.toml`, `CITATION.cff` and the papers (7.12).
     - [x] Framework paper sections 6–7 traced to scripts; Table 1 venues verified and corrected (7.8).
     - [x] All 27 unique reference entries verified against primary sources; 9 corrected or removed (7.8).
@@ -106,10 +106,10 @@ checked against the repository. Adopted items are placed in the phases below; th
 - [x] Paired tool/no-tool runs on four Groq models, recorded in the benchmark paper §5.3 (2026-11-22).
 - [x] Units in every MCP tool description (2026-11-24; `tests/test_mcp_registry.py` checks it).
 - [ ] Tool prompt t3: re-run the tool arm with 3+ samples on the new descriptions; analyse
-      `rejected_output` of malformed calls (vega per vol point caused a double division). *Needs API
+      `rejected_output` of malformed calls (vega per vol point caused a double division). *Blocked: needs API
       budget; after reviewer feedback, together with benchmark v2 (Phase 9).*
-- [ ] Zenodo DOI for the release (7.13b).
-- [ ] External review: one practitioner, one software reviewer (7.17).
+- [ ] Zenodo DOI for the release (7.13b). *Blocked: maintainer action (Zenodo deferred).*
+- [ ] External review: one practitioner, one software reviewer (7.17). *Blocked: waiting for the reviewers contacted on 2026-11-24.*
 - [x] One machine-readable validation-status manifest for every engine and MCP tool
       (`lilavati.validation_status`); the docs home pillar table and `docs/validation/status.md` are
       generated from it; tests check README rows agree (2026-11-25, review 2026-11-25).
@@ -129,9 +129,9 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 - [x] Author and ORCID (7.12); Pages enabled (7.11); `pypi` environment (7.10); commits on
       `release/v0.2.0`, PR #1 (2026-11-22).
 - [x] PR #1 merged with CI green on `main` (b899560); docs site live.
-- [ ] PyPI trusted publisher registered by the maintainer (7.10), then tag `v0.2.0`.
+- [ ] PyPI trusted publisher registered by the maintainer (7.10), then tag `v0.2.0`. *Blocked: maintainer action (PyPI deferred).*
 - [x] Release candidate artifacts built and verified locally (2026-11-22, `dist/`, see `dist/VERIFICATION-0.2.0.md`).
-- [ ] Maintainer go-ahead for the release.
+- [ ] Maintainer go-ahead for the release. *Blocked: maintainer decision.*
 
 ## Public announcement readiness (reviewed 2026-11-22)
 
@@ -140,52 +140,54 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       (checked in a clean Python 3.12 environment, 2026-11-23; README and getting-started updated).
 - [ ] PyPI release deferred by the maintainer (2026-11-23) until reviewer feedback and the LinkedIn
       announcement are in. Do not push a `v*` tag before the trusted publisher is registered: it
-      triggers `release.yml`, whose PyPI upload would fail (7.10, 7.18).
+      triggers `release.yml`, whose PyPI upload would fail (7.10, 7.18). *Blocked: deferred by the maintainer.*
 - [ ] External review by one practitioner and one software reviewer (7.17), or announce explicitly as
       "alpha, seeking review" and link the known limitations. Reviewer email and LinkedIn drafts written
-      2026-11-23 (maintainer sends them).
+      2026-11-23 (maintainer sends them). *Blocked: waiting for the reviewers contacted on 2026-11-24.*
 - [ ] Announcement text and channels (not drafted yet); link the docs site, getting-started page and
-      known limitations.
+      known limitations. *Blocked: after reviewer feedback (the release announcement).*
 - [x] First-contribution tasks opened as GitHub issues (2026-11-23): #6–#13 `good first issue`,
       #14–#16 `help wanted` (engine audits).
 - [x] First outside contributions merged (2026-11-24): #6 and #7 fixed in PRs #23 and #24; tasks
       removed from the contributing guide's list.
 
 **Recommended at or soon after the announcement**
-- [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot.
+- [ ] Zenodo DOI for the release (7.13b), so researchers can cite a fixed snapshot. *Blocked: maintainer action (Zenodo deferred).*
 - [x] Branch protection on `main` (2026-11-23): CI jobs test (3.11), test (3.12) and docs-and-evidence
       required, also for admins; no force pushes or deletion.
 - [x] GitHub repository description and topics (2026-11-23): description matches the docs site
       (no "audited" or "institutional"), homepage is the docs site, 20 topics.
-- [ ] Optionally enable GitHub Discussions for questions.
+- [ ] Optionally enable GitHub Discussions for questions. *Blocked: maintainer action (GitHub settings).*
 
 **Disclosed limitations (follow-up work, not blockers)**
 - [ ] Remaining engine audits: order book, Black-Litterman, HRP, statement graph, connectors (7.3). The
       statement graph plugs equity to balance, so each scenario branch's `smt_invariant_verified` holds by
-      construction (found 2026-11-24); its retained earnings are one year's net income.
-- [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on 5 companies; 10-Q, banks, the
-      10-K PDF parser (second issuer) and a second Ind AS company open. Purged cross-validation (7.4).
+      construction (found 2026-11-24); its retained earnings are one year's net income. *Due: 2026-12-01
+      for Black-Litterman and HRP: check issues #15 and #16 first; if unclaimed, audit both.*
+- [ ] Live-data validation of the connectors (7.5): SEC XBRL piloted on five companies. Open here: 10-Qs
+      (cash flows are year to date) and banks (their own statement template). The 10-K PDF parser's second
+      issuer and a second Ind AS company are separate items below, blocked on downloads.
 - [x] Fiscal-year three-statement path now filing-anchored, without placeholders (2026-11-23).
 - [x] Ind AS crosswalk and 10-K PDF parser: no zero-fill or substitutes; real cash and balance checks
       (2026-11-23).
 - [ ] Pluggable PDF parser connectors (roadmap 1.5): a backend interface so pypdf, pdfplumber, layout and
       OCR parsers share the statement mapping and checks; per-backend validation on the same filings; one
-      filing-connector interface across XBRL, HTML and PDF. *After reviewer feedback.*
+      filing-connector interface across XBRL, HTML and PDF. *Blocked: after reviewer feedback.*
 - [x] Ind AS crosswalk on real audited results, line by line against the printed statements (7.5;
       2026-11-24: Maruti Suzuki FY2025-26 consolidated; all checks hold; the exchange filing folds
       right-of-use assets into PP&E).
-- [ ] Ind AS: a standalone statement and a second company (the exchange's filing is now read directly,
-      `connectors/nse_integrated_filing.py`; plan under "India exchange XBRL" in Phase 10).
+- [ ] Ind AS (roadmap 1.3): a standalone statement and a second company (the exchange's filing is now read directly,
+      `connectors/nse_integrated_filing.py`; plan under "India exchange XBRL" in Phase 10). *Blocked: needs filings downloaded by hand by the maintainer.*
 - [ ] 10-K PDF parser on a second issuer (labels are Apple's today) (7.5); list prior-year items not found
       (only current-year items are in `missing_items`); footnote markers such as "(1)" after a label are
-      read as −1.
+      read as −1. *Blocked: needs a second issuer's 10-K PDF downloaded by hand (the second sample PDF is Apple's again).*
 - [x] `ProvenanceGate(store)` resolves citations against a `SourceStore` of the sources read (2026-11-23);
       without a store it still checks the form only.
 - [x] `FinancialResearchAgent` builds its dossier from one 10-K's reported figures (2026-11-24); live on
       Apple, Microsoft, Walmart and Nvidia (Nvidia rejected by the Beneish growth effect; see
       docs/validation/forensics.md).
 - [ ] Larger evidence base, real-document, look-ahead and multi-step tracks (7.13c, 7.14–7.16).
-- [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22).
+- [ ] Scheduled live-model CI job (7.21b); live Anthropic tool-calling run (7.22). *Blocked: needs a CI secret and an Anthropic API key.*
 
 ## Phase 9 (months 1–3): contracts and evidence
 
@@ -215,7 +217,7 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       minimum track record length.
 - [ ] Derivatives: static no-arbitrage across a surface: total implied variance non-decreasing in
       maturity (calendar) and the Durrleman density condition (verify Gatheral and Jacquier before citing).
-- [ ] Agent workflows ([docs/agent-workflows.md](docs/agent-workflows.md)): extraction with
+- [ ] Agent workflows (roadmap 4.10, [docs/agent-workflows.md](docs/agent-workflows.md)): extraction with
       diagnosis-driven repair evaluated on the pilot 10-Ks with four models (2026-11-25, x1 and x2:
       checker and label faults fixed, then 240 of 240 correct in one pass, nothing to repair). Next: the
       same arms on inputs where models misread (PDF page text, 10-Q columns, Ind AS reports in lakhs or
@@ -226,7 +228,7 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       unit drift), unit-trap and mixed-scale tables, instructions injected into filing text, and tokens,
       tool rounds and latency in the manifest (accuracy against cost).
 - [ ] Benchmark v2: all 7 tracks generated, 20+ cases per track, 3+ samples per model, private seed.
-      *The bigger benchmark run: needs API budget; after reviewer feedback.*
+      *Blocked: the bigger benchmark run needs API budget; after reviewer feedback.*
 - [ ] Abstention cases (missing or contradictory inputs, where the right answer is "cannot conclude").
 - [ ] Real-document cases: SEC EDGAR for 2 issuers and one Ind AS annual report (7.5, 7.14).
 - **Gate:** a paired tool/no-tool result whose CI excludes zero on non-saturated cases, written up
@@ -235,8 +237,8 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 ## Phase 10 (months 3–6): narrow data commons, driven by the benchmark
 
 - [ ] Licence review per source (see corrections); record the result in a dataset card.
-- [ ] Connectors: SEC EDGAR company facts (filing-anchored extraction done, 2026-11-23), ALFRED vintages,
-      World Bank, RBI DBIE and MOSPI release snapshots (licence check first). *After reviewer feedback.*
+- [ ] Connectors (roadmap 1.2): SEC EDGAR company facts (filing-anchored extraction done, 2026-11-23), ALFRED vintages,
+      World Bank, RBI DBIE and MOSPI release snapshots (licence check first). *Blocked: after reviewer feedback.*
 - [ ] **India exchange XBRL** (outside review, assessed 2026-11-26). Facts checked: SEBI's Integrated
       Filing circular of 31 Dec 2024 (Governance in XBRL only from the quarter ended March 2025;
       Financial within 45 days of a quarter, 60 after the year); BSE made XBRL results mandatory from
@@ -253,25 +255,25 @@ Do not tag, publish or announce until every item below is true; then ask the mai
   - [ ] Access: ask NSE and BSE for written consent or a research licence, including permission to keep
         one or two filings as test fixtures; read BSE's terms. Until then no fetcher: the reader takes a
         file the user supplies, real filings stay in git-ignored `data/raw/`, and committed tests use
-        synthetic pages.
+        synthetic pages. *Blocked: maintainer outreach to NSE and BSE.*
   - [x] Reader for NSE's rendered page (`connectors/nse_integrated_filing.py`, 2026-11-26): sections,
         columns, headings, Indian digit grouping; labels mapped to the crosswalk; nothing filled; every
         figure cited to the page's hash. Maruti FY2026 consolidated: 26 of 26 earlier manual readings
         and 26 of 28 printed items equal (two definitional differences reconciled); identities hold.
         Tutorial 10.
   - [ ] The XBRL instance itself (element names and contexts, no label table), if NSE publishes it
-        for download: ask the maintainer to look for an XML link on the filing's row.
+        for download: ask the maintainer to look for an XML link on the filing's row. *Blocked: maintainer to look for the XML.*
   - [ ] Maruti's standalone filing and a second company (another sector); a quarterly (non-Q4) filing,
-        whose balance sheet and cash flows are half-yearly.
-  - [ ] Banking, NBFC and insurance formats (their own taxonomies in NSE's archive).
+        whose balance sheet and cash flows are half-yearly. *Blocked: needs filings downloaded by hand by the maintainer.*
+  - [ ] Banking, NBFC and insurance formats (their own taxonomies in NSE's archive). *Blocked: needs filings downloaded by hand by the maintainer.*
   - [ ] Point in time: the submission time from NSE's file name as knowledge time (read, not yet used
         by the bi-temporal store); re-filed results become restatement cases (below).
   - [ ] BRSR XBRL reader for the sustainability engine: Scope 1 and 2 emissions, energy and water, with
         units and the reporting boundary; element names from the BRSR taxonomy (in NSE's archive,
         versions 2023-06-30 to 2025-05-31); BRSR Core assurance flag; validate two companies against
-        their BRSR PDFs.
+        their BRSR PDFs. *Blocked: needs BRSR filings downloaded by hand by the maintainer.*
   - [ ] MCA AOC-4 XBRL (full statements with notes): deferred. No free bulk access found (paid per
-        document on MCA V3); revisit if MCA grants research access.
+        document on MCA V3); revisit if MCA grants research access. *Blocked: no access to MCA filings.*
   - [ ] An MCP tool for the reader (it would need the page's content or a path under `data/raw/`).
 - [ ] Typed macro series (frequency, unit, nominal or real, base year, seasonal adjustment,
       transformation, stock or flow, release time) and conversion tools (rebasing, SAAR and year-on-year,
@@ -283,7 +285,7 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       filings published after the evaluated models' cutoffs.
 - [ ] Comparability adjustments between US GAAP and Ind AS where they differ (leases; classification of
       interest and dividends in the cash flow statement), checked against the standards' text first.
-- [ ] Curated India set (about 20 companies) with provenance and licence notes per source.
+- [ ] Curated India set (about 20 companies) with provenance and licence notes per source. *Blocked: needs NSE/BSE consent and filings downloaded by hand.*
 - [ ] Minimal ontology: about 30 canonical metrics used by the benchmark and tutorials, mapped
       across US GAAP, IFRS and Ind AS, with consolidated/standalone, audited/unaudited, reported/derived,
       restatement links.
@@ -300,7 +302,7 @@ Do not tag, publish or announce until every item below is true; then ask the mai
       bond prices, covenant headroom and Merton default probability; a tutorial from a central-bank
       shock to a covenant breach.
 - [ ] Benchmark track on vintages: questions whose answer changed between the first and a revised
-      estimate.
+      estimate. *Blocked: needs the vintage connectors (after reviewer feedback).*
 - **Gate:** a look-ahead leak measured on real ALFRED or RBI vintages; each engine checked against a
   reference.
 
@@ -316,20 +318,24 @@ Do not tag, publish or announce until every item below is true; then ask the mai
 
 - [ ] Three learning pathways (students, practitioners, researchers/AI engineers) built from the
       tutorials and course; executable lessons with a deliberately wrong AI answer to correct.
-- [ ] Pilot the course with one university; collect instructor feedback.
-- [ ] Student benchmark competition on a private seed.
+- [ ] Pilot the course with one university; collect instructor feedback. *Blocked: maintainer action.*
+- [ ] Student benchmark competition on a private seed. *Blocked: maintainer action.*
 - [ ] Static trace viewer (HTML from recorded tool traces) for grading student agents and for audit.
 - **Gate:** outside contributors landing validated engines through the skills and review process.
 
 ## Enterprise-quality track (runs alongside all phases)
 
+- [x] One goal per day (2026-11-26): `lilavati-daily` skill (open, pick, goal card, build, prove, close;
+      a "go" on the card approves the merge once checks and CI pass); `scripts/next_goal.py` ranks the
+      unblocked items here; `scripts/check_all.py` runs every check; `*Blocked:*` and `*Due:*` markers,
+      a test checks that waiting items are marked.
 - [ ] Semantic versioning; API stability and deprecation policy.
 - [ ] Coverage reporting; CI for docs, examples, tutorial code and `scripts/` lint.
 - [ ] Dependency vulnerability scanning, SBOM, signed releases.
 - [ ] Authentication option for the API server; threat model for agent tool use (prompt injection
       from retrieved documents, tool permission boundaries).
-- [ ] Maintainer team with CODEOWNERS per engine; response targets; release cadence.
-- [ ] Independent audit of the core engines before any "production" language.
+- [ ] Maintainer team with CODEOWNERS per engine; response targets; release cadence. *Blocked: maintainer action.*
+- [ ] Independent audit of the core engines before any "production" language. *Blocked: needs an outside auditor.*
 
 ## Decisions for the maintainer
 
