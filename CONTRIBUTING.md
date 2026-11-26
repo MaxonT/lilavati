@@ -42,6 +42,8 @@ source .venv/bin/activate  # On macOS/Linux
 
 # 4. Verify installation by running tests
 uv run pytest
+# Before a pull request: every check at once (lint, types, tests, docs, claims, tutorials, evidence)
+uv run python scripts/check_all.py
 # Optional, uses your API quota: live tool-calling tests against real models
 LILAVATI_LIVE_TESTS=1 GEMINI_API_KEY=... uv run pytest tests/integration -v
 LILAVATI_LIVE_TESTS=1 GROQ_API_KEY=... uv run pytest tests/integration -v   # LILAVATI_LIVE_GROQ_PRESET to pick a model

@@ -23,12 +23,15 @@ right and every claim being true. These rules come from real bugs found in this 
    If you touched docs: `uv run --extra docs --extra dev mkdocs build --strict`.
    If you touched docs, docstrings or printed text: `uv run python scripts/check_claims.py`.
    If you touched a tutorial or an API a tutorial uses: `uv run python scripts/check_tutorials.py`.
+   Or all at once: `uv run python scripts/check_all.py` (`--fast` skips the docs build and tutorials).
    CI (`.github/workflows/ci.yml`) runs all of these plus every example and the manifest check.
    If you touched an engine used by examples: run the affected `examples/*.py`.
 4. Grep docs, papers, tutorials and examples for numbers your change affects; refresh them by
    re-running code. Never edit a quoted number by hand-calculation.
-5. Do not commit, push, tag, publish or change GitHub settings unless the maintainer asks.
-   Conventional Commits; one logical change per commit.
+5. Do not commit, push, tag, publish or change GitHub settings unless the maintainer asks. A "go" on
+   the day's goal card (`lilavati-daily` skill) approves the commit, push, pull request and merge for
+   that goal once every check and CI pass; nothing outside the card. Conventional Commits; one
+   logical change per commit.
 6. When testing old code against a new test, note that `pyproject.toml` sets
    `pythonpath = ["src"]`, which overrides `PYTHONPATH`: run the old copy with its own config
    (`pytest -c`, `--rootdir`) and confirm which module loaded via `module.__file__`.
@@ -294,6 +297,9 @@ monthly):
 - Read the README use-case table and the course schedule as a newcomer: does each persona's row list
   what exists today, with its status and tutorial?
 - Recheck the open items on validation pages and move what is done from TODO to CHANGELOG.
+- Keep TODO.md's markers true: an item that waits on the maintainer, reviewers, budget, a key or a
+  download carries `*Blocked: <reason>.*`; a deadline carries `*Due: YYYY-MM-DD*`; remove a marker
+  when the wait is over. `scripts/next_goal.py` offers only unblocked items.
 
 `tests/test_docs_coverage.py`, `tests/test_validation_status.py` and `tests/test_mcp_registry.py`
 enforce the mechanical parts; the sweep is judgement and is part of review.
@@ -398,6 +404,7 @@ paper covers cases, tracks, metrics, runs, results and error analysis.
 | Agents | `agents/`, `runtime/`, `framework/` | extraction with repair, research dossier, rule-based committee, search, scenario tree; what each does: `docs/agents.md`; workflows: `docs/agent-workflows.md` |
 | MCP servers | `mcp_servers/*_server.py` | 8 servers, `lilavati-mcp-*` scripts, `docs/mcp-setup.md` |
 | Filing connectors | `connectors/sec_filing.py`, `connectors/edgar.py`, `connectors/pdf_10k.py`, `connectors/india_filings.py`, `connectors/nse_integrated_filing.py` | filing-anchored XBRL (`extract_filing`, `fetch_filing_extraction`, MCP `get_filing_figures`); `EdgarClient` (contact from `LILAVATI_SEC_USER_AGENT`, `resolve_cik(online=True)`); three-statement model `statement_model_from_filing` (reported / `derived` / `not_reported`, raises on missing required items); Ind AS crosswalk and NSE's Integrated Filing page reader (user-supplied page, pilot on one filing); validation `docs/validation/connectors.md` |
+| Workflow | `.claude/skills/lilavati-daily/`, `scripts/next_goal.py`, `scripts/check_all.py`, `scripts/check_papers_current.py` | one goal per day; `*Blocked: <reason>.*` and `*Due: YYYY-MM-DD*` markers in TODO.md (a test checks blocked items are marked) |
 | Integrations | `examples/integrations/` | LangGraph, ADK, A2A examples; `--check` verifies answers quote tool outputs; `adk` extra |
 | Benchmark | `bench/` | golden cases, seeded generator (`case_content_hash`, `legacy_case_id`), runner, evaluators. `lilavati-bench run` only runs the reference solver (`--model` is a label) |
 | LLM evaluation | `bench/llm_eval.py`, `bench/tool_eval.py`, `bench/analysis.py` | prompts (`PROMPT_VERSION`), parsing, outcome classes; tool arm with grounding; summaries, bootstrap CIs, paired differences. Scripts: `run_llm_baseline.py`, `run_tool_baseline.py`, `build_results_manifest.py`, `analyse_results.py` |
@@ -469,3 +476,4 @@ Keep rules short and concrete. Remove rules that no longer apply. Add an entry b
 - 2026-11-26: Documentation process (section 4b, enforced by `tests/test_docs_coverage.py`); NSE page reader rules (manual downloads found by hash; a rendered "iXBRL" page).
 - 2026-11-26: Papers revised; rule to re-derive paper numbers when an engine changes.
 - 2026-11-26: Section 4c (revise the papers at each milestone; `scripts/check_papers_current.py`).
+- 2026-11-26: `lilavati-daily` skill (one goal per day, approval model A); `next_goal.py`, `check_all.py`; TODO markers.

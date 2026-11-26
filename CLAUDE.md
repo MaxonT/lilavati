@@ -16,6 +16,8 @@ uv run pytest
 uv run --extra docs --extra dev mkdocs build --strict   # when docs change
 uv run python scripts/check_claims.py                   # when docs, docstrings or printed text change
 uv run python scripts/check_tutorials.py                # when tutorials or the APIs they use change
+uv run python scripts/check_all.py                      # every check at once (--fast skips docs and tutorials)
+uv run python scripts/next_goal.py                      # ranked, unblocked TODO items (lilavati-daily skill)
 ```
 
 ## Non-negotiables (details in the skill)
